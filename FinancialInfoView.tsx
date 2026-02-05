@@ -214,7 +214,7 @@ export const FinancialInfoView: React.FC<{
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <Card title={selectedMonth === 'all' ? `Monthly Comparison (${selectedYear})` : `Expense Distribution`} className="dark:bg-slate-900 dark:border-slate-800">
               {selectedMonth === 'all' ? (
-                 <div className="h-[300px] sm:h-[350px] w-full">
+                 <div className="h-[400px] sm:h-[450px] w-full">
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={yearlyMonthlyData}>
                       <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#334155" opacity={0.1} />
@@ -232,22 +232,22 @@ export const FinancialInfoView: React.FC<{
                 </div>
               ) : (
                 breakdownData.length > 0 ? (
-                  <div className="h-[300px] sm:h-[350px] w-full">
+                  <div className="h-[400px] sm:h-[450px] w-full">
                     <ResponsiveContainer width="100%" height="100%">
                       <PieChart>
-                        <Pie data={breakdownData} cx="50%" cy="50%" innerRadius={55} outerRadius={85} paddingAngle={1} dataKey="value" labelLine={false} label={renderCustomizedLabel}>
+                        <Pie data={breakdownData} cx="50%" cy="50%" innerRadius={70} outerRadius={110} paddingAngle={1} dataKey="value" labelLine={false} label={renderCustomizedLabel}>
                           {breakdownData.map((_, index) => <Cell key={`cell-${index}`} fill={CHART_COLORS[index % CHART_COLORS.length]} stroke="rgba(255,255,255,0.1)" strokeWidth={1} />)}
                         </Pie>
                         <Tooltip contentStyle={{ backgroundColor: '#0f172a', border: '1px solid #1e293b', borderRadius: '8px', color: '#fff' }} />
                       </PieChart>
                     </ResponsiveContainer>
                   </div>
-                ) : <div className="h-[300px] flex items-center justify-center text-slate-400 italic">No expenses recorded for this period.</div>
+                ) : <div className="h-[400px] flex items-center justify-center text-slate-400 italic">No expenses recorded for this period.</div>
               )}
             </Card>
 
             <Card title="Expense Breakdown" className="dark:bg-slate-900 dark:border-slate-800">
-              <div className="space-y-4 max-h-[300px] sm:max-h-[350px] overflow-y-auto custom-scrollbar pr-2">
+              <div className="space-y-4 max-h-[400px] sm:max-h-[450px] overflow-y-auto custom-scrollbar pr-2">
                 {breakdownData.length > 0 ? (
                   breakdownData.map((item, idx) => {
                     const catColor = CHART_COLORS[idx % CHART_COLORS.length];
