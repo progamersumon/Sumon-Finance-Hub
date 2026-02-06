@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo, useEffect } from 'react';
 import { Transaction } from './types';
 import { ICONS } from './constants';
@@ -396,9 +395,12 @@ export const PayrollView: React.FC<PayrollViewProps> = ({
             <Card title="Monthly Breakdown" className="h-auto sm:h-[420px] dark:bg-slate-900 dark:border-slate-800">
               <div className="space-y-2 h-full overflow-y-auto custom-scrollbar pr-1 pb-10">
                 {[{ label: 'BASIC SALARY', value: basicSalary }, { label: 'HOUSE RENT ALLOWANCE', value: houseRent }, { label: 'MEDICAL ALLOWANCE', value: salaryConfig.medical || 0 }, { label: 'CONVEYANCE ALLOWANCE', value: salaryConfig.conveyance || 0 }, { label: 'FOOD ALLOWANCE', value: salaryConfig.food || 0 }, { label: 'ATTENDANCE BONUS', value: salaryConfig.attendanceBonus || 0 }, { label: `TIFFIN BILL (${salaryConfig.tiffinDays || 0} DAYS)`, value: tiffinBillAmount }].map((item, idx) => (
-                  <div key={idx} className="flex justify-between items-center py-2 border-b border-slate-50 dark:border-slate-800 last:border-0"><span className="text-[10px] sm:text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-tight">{item.label}</span><span className="text-xs sm:text-sm font-black text-slate-800 dark:text-white">৳{(item.value || 0).toLocaleString()}</span></div>
+                  <div key={idx} className="flex justify-between items-center py-2 border-b border-slate-50 dark:border-slate-800 last:border-0">
+                    <span className="text-[10px] sm:text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-tight">{item.label}</span>
+                    <span className="text-xs sm:text-sm font-black text-slate-800 dark:text-white">৳{(item.value || 0).toLocaleString()}</span>
+                  </div>
                 ))}
-                <div className="pt-3 mt-2 mb-2 flex justify-between items-center border-t-2 border-slate-100 dark:border-slate-800">
+                <div className="pt-3 mt-2 mb-2 flex justify-between items-center border-t border-slate-100 dark:border-slate-800">
                   <span className="text-xs sm:text-sm font-black text-blue-600 dark:text-blue-400 uppercase tracking-wider">Total Monthly</span>
                   <span className="text-lg sm:text-xl font-black text-blue-700 dark:text-white">৳{totalMonthly.toLocaleString()}</span>
                 </div>
@@ -407,9 +409,12 @@ export const PayrollView: React.FC<PayrollViewProps> = ({
             <Card title="Bonuses & Festivals" className="h-auto sm:h-[420px] dark:bg-slate-900 dark:border-slate-800">
               <div className="space-y-2 h-full overflow-y-auto custom-scrollbar pr-1 pb-10">
                 {[{ label: 'YEARLY BONUS', value: yearlyBonus }, { label: 'EID-UL-FITR', value: eidFitr }, { label: 'EID-UL-ADHA', value: eidAdha }].map((item, idx) => (
-                  <div key={idx} className="flex justify-between items-center py-2 border-b border-slate-50 dark:border-slate-800 last:border-0"><span className="text-[10px] sm:text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-tight">{item.label}</span><span className="text-xs sm:text-sm font-black text-slate-800 dark:text-white">৳{(item.value || 0).toLocaleString()}</span></div>
+                  <div key={idx} className="flex justify-between items-center py-2 border-b border-slate-50 dark:border-slate-800 last:border-0">
+                    <span className="text-[10px] sm:text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-tight">{item.label}</span>
+                    <span className="text-xs sm:text-sm font-black text-slate-800 dark:text-white">৳{(item.value || 0).toLocaleString()}</span>
+                  </div>
                 ))}
-                <div className="pt-3 mt-2 mb-2 flex justify-between items-center border-t-2 border-slate-100 dark:border-slate-800">
+                <div className="pt-3 mt-2 mb-2 flex justify-between items-center border-t border-slate-100 dark:border-slate-800">
                   <span className="text-xs sm:text-sm font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">Payable (Yearly)</span>
                   <span className="text-lg sm:text-xl font-black text-emerald-700 dark:text-white">৳{totalYearlyBonus.toLocaleString()}</span>
                 </div>
