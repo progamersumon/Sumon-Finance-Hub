@@ -425,7 +425,7 @@ export const PayrollView: React.FC<PayrollViewProps> = ({
                   <Zap size={16} className="text-blue-500" /> Monthly Breakdown
                 </h3>
               </div>
-              <div className="p-4 sm:p-6 space-y-1">
+              <div className="p-4 sm:p-5 space-y-0.5">
                 {[
                   { label: 'Basic Salary', value: basicSalary, icon: <Briefcase size={14} />, color: 'blue' },
                   { label: 'House Rent', value: houseRent, icon: <Home size={14} />, color: 'emerald' },
@@ -435,7 +435,7 @@ export const PayrollView: React.FC<PayrollViewProps> = ({
                   { label: 'Attendance', value: salaryConfig.attendanceBonus || 0, icon: <Star size={14} />, color: 'amber' },
                   { label: 'Tiffin Bill', value: tiffinBillAmount, icon: <Coffee size={14} />, color: 'sky', subtitle: `${salaryConfig.tiffinDays || 0} Days` }
                 ].map((item, idx) => (
-                  <div key={idx} className="group flex items-center justify-between p-3 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-all">
+                  <div key={idx} className="group flex items-center justify-between p-2.5 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-all">
                     <div className="flex items-center gap-3">
                       <div className={`w-8 h-8 rounded-lg flex items-center justify-center bg-${item.color}-50 dark:bg-${item.color}-900/20 text-${item.color}-600 dark:text-${item.color}-400`}>
                         {item.icon}
@@ -451,7 +451,7 @@ export const PayrollView: React.FC<PayrollViewProps> = ({
                   </div>
                 ))}
 
-                <div className="mt-4 p-4 rounded-2xl bg-blue-600 text-white shadow-lg shadow-blue-200 dark:shadow-none flex justify-between items-center">
+                <div className="mt-3 p-4 rounded-2xl bg-blue-600 text-white shadow-lg shadow-blue-200 dark:shadow-none flex justify-between items-center">
                   <div>
                     <p className="text-[9px] font-black uppercase tracking-widest opacity-80">Total Monthly</p>
                     <h4 className="text-lg sm:text-2xl font-black">৳{totalMonthly.toLocaleString()}</h4>
@@ -470,13 +470,13 @@ export const PayrollView: React.FC<PayrollViewProps> = ({
                   <Trophy size={16} className="text-emerald-500" /> Bonuses & Festivals
                 </h3>
               </div>
-              <div className="p-4 sm:p-6 space-y-1">
+              <div className="p-4 sm:p-5 space-y-1">
                 {[
                   { label: 'Yearly Bonus', value: yearlyBonus, icon: <Trophy size={14} />, color: 'emerald', desc: 'Performance based' },
                   { label: 'Eid-Ul-Fitr', value: eidFitr, icon: <Moon size={14} />, color: 'indigo', desc: 'Religious Festival' },
                   { label: 'Eid-Ul-Adha', value: eidAdha, icon: <Star size={14} />, color: 'amber', desc: 'Religious Festival' }
                 ].map((item, idx) => (
-                  <div key={idx} className="group flex items-center justify-between p-4 rounded-2xl hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-all border border-transparent hover:border-slate-100 dark:hover:border-slate-800">
+                  <div key={idx} className="group flex items-center justify-between p-3 rounded-2xl hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-all border border-transparent hover:border-slate-100 dark:hover:border-slate-800">
                     <div className="flex items-center gap-4">
                       <div className={`w-10 h-10 rounded-2xl flex items-center justify-center bg-${item.color}-50 dark:bg-${item.color}-900/20 text-${item.color}-600 dark:text-${item.color}-400 shadow-sm`}>
                         {item.icon}
@@ -492,17 +492,17 @@ export const PayrollView: React.FC<PayrollViewProps> = ({
                   </div>
                 ))}
 
-                <div className="mt-8 p-5 rounded-2xl bg-emerald-600 text-white shadow-lg shadow-emerald-200 dark:shadow-none relative overflow-hidden">
+                <div className="mt-5 p-5 rounded-2xl bg-emerald-600 text-white shadow-lg shadow-emerald-200 dark:shadow-none relative overflow-hidden">
                   <div className="absolute -right-4 -bottom-4 opacity-10 rotate-12">
-                    <Trophy size={100} />
+                    <Trophy size={80} />
                   </div>
                   <div className="relative z-10 flex justify-between items-center">
                     <div>
                       <p className="text-[9px] font-black uppercase tracking-widest opacity-80">Payable (Yearly Bonus)</p>
                       <h4 className="text-lg sm:text-2xl font-black">৳{totalYearlyBonus.toLocaleString()}</h4>
                     </div>
-                    <div className="bg-white/20 p-2.5 rounded-2xl backdrop-blur-sm">
-                      <Zap size={24} className="animate-pulse" />
+                    <div className="bg-white/20 p-2 rounded-2xl backdrop-blur-sm">
+                      <Zap size={20} className="animate-pulse" />
                     </div>
                   </div>
                 </div>
@@ -614,7 +614,7 @@ export const PayrollView: React.FC<PayrollViewProps> = ({
                   {attendanceRecords.filter(r => { const yearMatch = r.date.startsWith(filterYear); if (selectedMonth === 'all') return yearMatch; return yearMatch && r.date.split('-')[1] === selectedMonth; }).sort((a, b) => b.date.localeCompare(a.date)).map(rec => (
                       <tr key={rec.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-colors group">
                         <td className="px-1 sm:px-6 py-4"><div className="flex flex-col"><span className="text-[10px] sm:text-sm font-black text-slate-800 dark:text-white tracking-tight">{formatDate(rec.date)}</span><span className="text-[7px] sm:text-[10px] text-slate-400 dark:text-slate-500 font-black uppercase">{new Date(rec.date).toLocaleDateString('default', { weekday: 'long' })}</span></div></td>
-                        <td className="px-1 sm:px-6 py-4"><div className="flex items-start gap-1 sm:gap-3"><div className="flex flex-col items-start gap-0.5"><span className="bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 px-1 sm:px-1.5 py-0.5 rounded text-[8px] sm:text-xs font-black whitespace-nowrap">{rec.inTime ? formatTo12Hr(rec.inTime) : '--:--'}</span>{rec.isLate && (<div className="flex items-center gap-0.5"><div className="w-1 h-1 rounded-full bg-orange-500"></div><span className="text-[6px] sm:text-[8px] font-black text-orange-600 uppercase">LATE</span></div>)}</div><span className="text-slate-300 dark:text-slate-700 font-bold mt-1">→</span><div className="flex flex-col items-start gap-0.5">{rec.outTime ? (<span className="bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 px-1 sm:px-1.5 py-0.5 rounded text-[8px] sm:text-xs font-black whitespace-nowrap">{formatTo12Hr(rec.outTime)}</span>) : (rec.type === 'Standard' && rec.inTime ? (<div className="flex items-center gap-1 bg-rose-50 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400 px-1 sm:px-1.5 py-0.5 rounded border border-rose-200 dark:border-rose-900/50 animate-pulse"><span className="text-[6px] sm:text-[8px] font-black uppercase whitespace-nowrap">Out Missing</span></div>) : (<span className="text-slate-300 dark:text-slate-700 text-[8px] sm:text-xs font-black">--:--</span>))}{rec.hasTiffin && (<div className="flex items-center gap-0.5"><div className="w-1 h-1 rounded-full bg-blue-600"></div><span className="text-[6px] sm:text-[8px] font-black text-blue-600 uppercase">TIFFIN</span></div>)}</div></div></td>
+                        <td className="px-1 sm:px-6 py-4"><div className="flex items-start gap-1 sm:gap-3"><div className="flex flex-col items-start gap-0.5"><span className="bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 px-1 sm:px-1.5 py-0.5 rounded text-[8px] sm:text-xs font-black whitespace-nowrap">{rec.inTime ? formatTo12Hr(rec.inTime) : '--:--'}</span>{rec.isLate && (<div className="flex items-center gap-0.5"><div className="w-1 h-1 rounded-full bg-orange-500"></div><span className="text-[6px] sm:text-[8px] font-black text-orange-600 uppercase">LATE</span></div>)}</div><span className="text-slate-300 dark:text-slate-700 font-bold mt-1">→</span><div className="flex flex-col items-start gap-0.5">{rec.outTime ? (<span className="bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 px-1 sm:px-1.5 py-0.5 rounded text-[8px] sm:text-xs font-black whitespace-nowrap">{formatTo12Hr(rec.outTime)}</span>) : (rec.type === 'Standard' && rec.inTime ? (<div className="flex items-center gap-1 bg-rose-50 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400 px-1 sm:px-1.5 py-0.5 rounded border border-rose-200 dark:border-rose-900/50 animate-pulse"><span className="text-[6px] sm:text-[8px] font-black uppercase whitespace-nowrap">Out Missing</span></div>) : (<span className="text-slate-300 dark:text-slate-700 text-[8px] sm:text-xs font-black">--:--</span>))}{rec.hasTiffin && (<div className="flex items-center gap-0.5"><div className="w-1 h-1 rounded-full bg-blue-600"></div><span className="text-[6px] sm:text-[8px] font-black text-blue-600 uppercase">TIFFIN</span></div>)}</div></div></td>
                         <td className="px-1 sm:px-6 py-4"><div className={`inline-flex items-center px-1.5 sm:px-3 py-0.5 sm:py-1 rounded-lg text-[7px] sm:text-[10px] font-black uppercase shadow-sm border ${rec.status === 'PRESENT' ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-900/50' : rec.status === 'ABSENT' ? 'bg-rose-100 dark:bg-rose-900/30 text-rose-700 dark:text-rose-400 border-rose-200 dark:border-rose-900/50' : rec.status === 'Holiday' ? 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-900/50' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700'}`}>{rec.status}</div></td>
                         <td className="px-1 sm:px-6 py-4 text-right">
                           <div className="flex justify-end gap-1.5 sm:gap-2 items-center">
