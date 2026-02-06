@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { ViewType, Transaction, Bill, SavingGoal, Bet, Reminder, Holiday, LanguageType, ThemeType, UserProfile } from './types';
 import { ICONS } from './constants';
@@ -101,208 +100,84 @@ const LoginView: React.FC<{
     setErrorMessage(null);
     setSuccessMessage(null);
     
-    // Step 1: Request Reset (Sends Email/OTP)
     if (mode === 'forgot-password-email') {
-      if (!formData.email.trim()) {
-        setErrorMessage(t('fillAllFields', language));
-        return;
-      }
+      if (!formData.email.trim()) { setErrorMessage(t('fillAllFields', language)); return; }
       setLoading(true);
       try {
         const { error } = await supabase.auth.resetPasswordForEmail(formData.email);
         if (error) throw error;
         setSuccessMessage(t('otpSent', language));
         setMode('forgot-password-otp');
-      } catch (err: any) {
-        setErrorMessage(err.message);
-      } finally {
-        setLoading(false);
-      }
+      } catch (err: any) { setErrorMessage(err.message); } finally { setLoading(false); }
       return;
     }
 
-    // Step 2: Verify OTP and Update Password
     if (mode === 'forgot-password-otp') {
-      if (!formData.otp.trim() || !formData.newPassword.trim()) {
-        setErrorMessage(t('fillAllFields', language));
-        return;
-      }
+      if (!formData.otp.trim() || !formData.newPassword.trim()) { setErrorMessage(t('fillAllFields', language)); return; }
       setLoading(true);
       try {
-        // 1. Verify the OTP (Recovery code)
-        const { data, error: verifyError } = await supabase.auth.verifyOtp({
-          email: formData.email,
-          token: formData.otp,
-          type: 'recovery'
-        });
+        const { error: verifyError } = await supabase.auth.verifyOtp({ email: formData.email, token: formData.otp, type: 'recovery' });
         if (verifyError) throw verifyError;
-
-        // 2. Set new password
-        const { error: updateError } = await supabase.auth.updateUser({
-          password: formData.newPassword
-        });
+        const { error: updateError } = await supabase.auth.updateUser({ password: formData.newPassword });
         if (updateError) throw updateError;
-
         setSuccessMessage(t('passwordResetSuccess', language));
         setTimeout(() => setMode('login'), 2000);
-      } catch (err: any) {
-        setErrorMessage(err.message);
-      } finally {
-        setLoading(false);
-      }
+      } catch (err: any) { setErrorMessage(err.message); } finally { setLoading(false); }
       return;
     }
 
-    // Standard Login/Signup flow
-    if (!formData.email.trim() || !formData.password.trim()) {
-      setErrorMessage(t('fillAllFields', language));
-      return;
-    }
-
+    if (!formData.email.trim() || !formData.password.trim()) { setErrorMessage(t('fillAllFields', language)); return; }
     setLoading(true);
     try {
       if (mode === 'signup') {
-        const { data, error } = await supabase.auth.signUp({
-          email: formData.email,
-          password: formData.password,
-          options: { data: { full_name: formData.name } }
-        });
+        const { error } = await supabase.auth.signUp({ email: formData.email, password: formData.password, options: { data: { full_name: formData.name } } });
         if (error) throw error;
         setSuccessMessage(language === 'bn' ? "অ্যাকাউন্ট তৈরি হয়েছে! ইমেইল চেক করুন।" : "Account created! Please check your email.");
         setMode('login');
       } else {
-        const { data, error } = await supabase.auth.signInWithPassword({
-          email: formData.email,
-          password: formData.password
-        });
-        if (error) {
-          if (error.message.includes('Email not confirmed')) {
-            throw new Error(language === 'bn' ? "আপনার ইমেইল ভেরিফাই করা হয়নি।" : "Email not confirmed.");
-          }
-          throw error;
-        }
+        const { data, error } = await supabase.auth.signInWithPassword({ email: formData.email, password: formData.password });
+        if (error) { if (error.message.includes('Email not confirmed')) { throw new Error(language === 'bn' ? "আপনার ইমেইল ভেরিফাই করা হয়নি।" : "Email not confirmed."); } throw error; }
         if (data.user) onLogin(data.user);
       }
-    } catch (err: any) {
-      setErrorMessage(err.message);
-    } finally {
-      setLoading(false);
-    }
+    } catch (err: any) { setErrorMessage(err.message); } finally { setLoading(false); }
   };
 
   return (
     <div className="h-screen w-full flex overflow-hidden font-sans">
       <div className="hidden md:flex flex-1 bg-gradient-to-br from-blue-500 to-blue-700 flex-col items-center justify-center p-10 text-center text-white">
-        <div className="mb-4">
-          <h2 className="text-6xl font-black uppercase tracking-tight mb-2">Welcome Back</h2>
-          <p className="text-blue-100 text-lg font-medium opacity-90 tracking-wide">Keep track of your financial journey.</p>
-        </div>
-        <div className="transform -translate-y-4">
-          <FinanceHubLogo />
-        </div>
+        <div className="mb-4"><h2 className="text-6xl font-black uppercase tracking-tight mb-2">Welcome Back</h2><p className="text-blue-100 text-lg font-medium opacity-90 tracking-wide">Keep track of your financial journey.</p></div>
+        <div className="transform -translate-y-4"><FinanceHubLogo /></div>
       </div>
-
       <div className="flex-1 bg-white flex flex-col items-center justify-center p-6 sm:p-12 relative">
         <div className="w-full max-sm:max-w-[320px] max-w-sm flex flex-col items-center">
           <div className="mb-4 flex flex-col items-center scale-[0.6] md:scale-75 origin-center">
-             <div className="md:hidden text-center mb-4">
-                <p className="text-blue-600 text-4xl font-black uppercase tracking-tight mb-1">Welcome Back</p>
-                <p className="text-blue-400 text-sm font-bold">Keep track of your financial journey.</p>
-             </div>
-             <div className="transform -translate-y-4 md:translate-y-0">
-               <FinanceHubLogo textColor="text-blue-600" />
-             </div>
+             <div className="md:hidden text-center mb-4"><p className="text-blue-600 text-4xl font-black uppercase tracking-tight mb-1">Welcome Back</p><p className="text-blue-400 text-sm font-bold">Keep track of your financial journey.</p></div>
+             <div className="transform -translate-y-4 md:translate-y-0"><FinanceHubLogo textColor="text-blue-600" /></div>
           </div>
-
           <div className="w-full animate-in fade-in slide-in-from-bottom-4 duration-500">
-            <h2 className="text-3xl font-black text-blue-600 mb-6 text-center uppercase tracking-tighter">
-              {mode === 'login' ? t('login', language) : mode === 'signup' ? t('signUp', language) : t('forgotPassword', language)}
-            </h2>
-
-            {errorMessage && (
-              <div className="mb-4 p-3 bg-rose-50 border border-rose-100 rounded-xl text-rose-600 text-[10px] font-bold flex flex-col gap-1">
-                <div className="flex items-center gap-2">
-                  {/* Fixed malformed SVG line attributes */}
-                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-                  <span>{errorMessage}</span>
-                </div>
-              </div>
-            )}
-
-            {successMessage && (
-              <div className="mb-4 p-3 bg-emerald-50 border border-emerald-100 rounded-xl text-emerald-600 text-[10px] font-bold flex flex-col gap-1">
-                <div className="flex items-center gap-2">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-                  <span>{successMessage}</span>
-                </div>
-              </div>
-            )}
-
+            <h2 className="text-3xl font-black text-blue-600 mb-6 text-center uppercase tracking-tighter">{mode === 'login' ? t('login', language) : mode === 'signup' ? t('signUp', language) : t('forgotPassword', language)}</h2>
+            {errorMessage && (<div className="mb-4 p-3 bg-rose-50 border border-rose-100 rounded-xl text-rose-600 text-[10px] font-bold flex items-center gap-2"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg><span>{errorMessage}</span></div>)}
+            {successMessage && (<div className="mb-4 p-3 bg-emerald-50 border border-emerald-100 rounded-xl text-emerald-600 text-[10px] font-bold flex items-center gap-2"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg><span>{successMessage}</span></div>)}
             <div className="space-y-4">
               {(mode === 'login' || mode === 'signup' || mode === 'forgot-password-email') && (
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-blue-600">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 7v5l3 3"/></svg>
-                  </div>
-                  <input type="email" placeholder="Email Address" value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} className="w-full bg-blue-50 border-2 border-transparent rounded-lg py-4 pl-12 pr-4 text-blue-900 placeholder-blue-400 outline-none focus:ring-2 focus:ring-blue-500 transition-all font-bold" />
-                </div>
+                <div className="relative"><div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-blue-600"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 7v5l3 3"/></svg></div><input type="email" placeholder="Email Address" value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} className="w-full bg-blue-50 border-2 border-transparent rounded-lg py-4 pl-12 pr-4 text-blue-900 placeholder-blue-400 outline-none focus:ring-2 focus:ring-blue-500 transition-all font-bold" /></div>
               )}
-
               {mode === 'signup' && (
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-blue-600">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-                  </div>
-                  <input type="text" placeholder={t('fullName', language)} value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} className="w-full bg-blue-50 border-2 border-transparent rounded-lg py-4 pl-12 pr-4 text-blue-900 placeholder-blue-400 outline-none focus:ring-2 focus:ring-blue-500 transition-all font-bold" />
-                </div>
+                <div className="relative"><div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-blue-600"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div><input type="text" placeholder={t('fullName', language)} value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} className="w-full bg-blue-50 border-2 border-transparent rounded-lg py-4 pl-12 pr-4 text-blue-900 placeholder-blue-400 outline-none focus:ring-2 focus:ring-blue-500 transition-all font-bold" /></div>
               )}
-
               {(mode === 'login' || mode === 'signup') && (
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-blue-600">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-                  </div>
-                  <input type="password" placeholder={t('password', language)} value={formData.password} onChange={e => setFormData({...formData, password: e.target.value})} className="w-full bg-blue-50 border-2 border-transparent rounded-lg py-4 pl-12 pr-4 text-blue-900 placeholder-blue-400 outline-none focus:ring-2 focus:ring-blue-500 transition-all font-bold" />
-                </div>
+                <div className="relative"><div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-blue-600"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div><input type="password" placeholder={t('password', language)} value={formData.password} onChange={e => setFormData({...formData, password: e.target.value})} className="w-full bg-blue-50 border-2 border-transparent rounded-lg py-4 pl-12 pr-4 text-blue-900 placeholder-blue-400 outline-none focus:ring-2 focus:ring-blue-500 transition-all font-bold" /></div>
               )}
-
               {mode === 'forgot-password-otp' && (
-                <>
-                  <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-blue-600">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10"/></svg>
-                    </div>
-                    <input type="text" placeholder={t('enterOTP', language)} value={formData.otp} onChange={e => setFormData({...formData, otp: e.target.value})} className="w-full bg-blue-50 border-2 border-transparent rounded-lg py-4 pl-12 pr-4 text-blue-900 placeholder-blue-400 outline-none focus:ring-2 focus:ring-blue-500 transition-all font-bold" />
-                  </div>
-                  <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-blue-600">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-                    </div>
-                    <input type="password" placeholder={t('enterNewPassword', language)} value={formData.newPassword} onChange={e => setFormData({...formData, newPassword: e.target.value})} className="w-full bg-blue-50 border-2 border-transparent rounded-lg py-4 pl-12 pr-4 text-blue-900 placeholder-blue-400 outline-none focus:ring-2 focus:ring-blue-500 transition-all font-bold" />
-                  </div>
-                </>
+                <><div className="relative"><div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-blue-600"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10"/></svg></div><input type="text" placeholder={t('enterOTP', language)} value={formData.otp} onChange={e => setFormData({...formData, otp: e.target.value})} className="w-full bg-blue-50 border-2 border-transparent rounded-lg py-4 pl-12 pr-4 text-blue-900 placeholder-blue-400 outline-none focus:ring-2 focus:ring-blue-500 transition-all font-bold" /></div><div className="relative"><div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-blue-600"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div><input type="password" placeholder={t('enterNewPassword', language)} value={formData.newPassword} onChange={e => setFormData({...formData, newPassword: e.target.value})} className="w-full bg-blue-50 border-2 border-transparent rounded-lg py-4 pl-12 pr-4 text-blue-900 placeholder-blue-400 outline-none focus:ring-2 focus:ring-blue-500 transition-all font-bold" /></div></>
               )}
-
-              <button onClick={handleAuthSubmit} disabled={loading} className="w-full bg-gradient-to-r from-blue-600 to-blue-800 text-white font-black py-4 rounded-lg shadow-lg hover:brightness-110 active:scale-[0.98] transition-all uppercase tracking-widest mt-4 disabled:opacity-70">
-                {loading ? 'SUBMITTING...' : (mode === 'forgot-password-email' ? t('sendOTP', language) : mode === 'forgot-password-otp' ? t('verifyAndReset', language) : 'SUBMIT')}
-              </button>
-              
+              <button onClick={handleAuthSubmit} disabled={loading} className="w-full bg-gradient-to-r from-blue-600 to-blue-800 text-white font-black py-4 rounded-lg shadow-lg hover:brightness-110 active:scale-[0.98] transition-all uppercase tracking-widest mt-4 disabled:opacity-70">{loading ? 'SUBMITTING...' : (mode === 'forgot-password-email' ? t('sendOTP', language) : mode === 'forgot-password-otp' ? t('verifyAndReset', language) : 'SUBMIT')}</button>
               <div className="flex flex-col gap-3 items-center pt-4">
                 <div className="flex justify-between w-full">
-                  <button onClick={() => { setMode(mode === 'login' ? 'signup' : 'login'); setErrorMessage(null); setSuccessMessage(null); }} className="text-[10px] font-black text-blue-600 uppercase tracking-widest hover:underline">
-                    {mode === 'login' ? t('signUp', language) : t('alreadyHaveAccount', language)}
-                  </button>
-                  {mode === 'login' && (
-                    <button onClick={() => setMode('forgot-password-email')} className="text-[10px] font-bold text-slate-500 hover:text-blue-600 transition-colors uppercase tracking-tight">
-                      {t('forgotPassword', language)}
-                    </button>
-                  )}
+                  <button onClick={() => { setMode(mode === 'login' ? 'signup' : 'login'); setErrorMessage(null); setSuccessMessage(null); }} className="text-[10px] font-black text-blue-600 uppercase tracking-widest hover:underline">{mode === 'login' ? t('signUp', language) : t('alreadyHaveAccount', language)}</button>
+                  {mode === 'login' && (<button onClick={() => setMode('forgot-password-email')} className="text-[10px] font-bold text-slate-500 hover:text-blue-600 transition-colors uppercase tracking-tight">{t('forgotPassword', language)}</button>)}
                 </div>
-                {(mode === 'forgot-password-email' || mode === 'forgot-password-otp') && (
-                  <button onClick={() => setMode('login')} className="text-[10px] font-black text-slate-400 uppercase tracking-widest hover:underline">
-                    {t('back', language)}
-                  </button>
-                )}
+                {(mode === 'forgot-password-email' || mode === 'forgot-password-otp') && (<button onClick={() => setMode('login')} className="text-[10px] font-black text-slate-400 uppercase tracking-widest hover:underline">{t('back', language)}</button>)}
               </div>
             </div>
           </div>
@@ -317,6 +192,7 @@ const AppContent: React.FC = () => {
   const [currentUser, setCurrentUser] = useState<any | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isDataLoaded, setIsDataLoaded] = useState(false);
+  const [syncStatus, setSyncStatus] = useState<'saved' | 'syncing' | 'error'>('saved');
   
   const [activeView, setActiveView] = useState<ViewType>('dashboard');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -337,20 +213,43 @@ const AppContent: React.FC = () => {
   const [attendanceRecords, setAttendanceRecords] = useState<AttendanceRecord[]>(INITIAL_ATTENDANCE);
   const [leaveQuotas, setLeaveQuotas] = useState({ cl: 10, ml: 14 });
 
+  const syncTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
   const syncToSupabase = async () => {
     if (!currentUser || !isDataLoaded) return;
+    setSyncStatus('syncing');
+    
     const content = {
       userProfile, transactions, bills, savings, bets, reminders, 
       holidays, metrics, savingsPlan, salaryConfig, 
       historyEntries, leaveRecords, attendanceRecords, leaveQuotas,
       language, theme
     };
-    await supabase.from('user_data').upsert({ id: currentUser.id, content, updated_at: new Date().toISOString() });
+
+    try {
+      const { error } = await supabase.from('user_data').upsert({ id: currentUser.id, content, updated_at: new Date().toISOString() });
+      if (error) throw error;
+      setSyncStatus('saved');
+    } catch (err) {
+      console.error("Sync Error:", err);
+      setSyncStatus('error');
+    }
   };
 
+  useEffect(() => {
+    if (!isDataLoaded) return;
+    if (syncTimeoutRef.current) clearTimeout(syncTimeoutRef.current);
+    syncTimeoutRef.current = setTimeout(() => { syncToSupabase(); }, 1500);
+    return () => { if (syncTimeoutRef.current) clearTimeout(syncTimeoutRef.current); };
+  }, [
+    userProfile, transactions, bills, savings, bets, reminders, 
+    holidays, metrics, savingsPlan, salaryConfig, 
+    historyEntries, leaveRecords, attendanceRecords, leaveQuotas,
+    language, theme
+  ]);
+
   const loadFromSupabase = async (user: any) => {
-    const { data, error } = await supabase.from('user_data').select('content').eq('id', user.id).single();
-    
+    const { data } = await supabase.from('user_data').select('content').eq('id', user.id).single();
     if (data?.content) {
       const c = data.content;
       setUserProfile(c.userProfile || { name: user.user_metadata?.full_name || '', email: user.email, avatar: `https://picsum.photos/200/200?seed=${user.id}` });
@@ -372,15 +271,7 @@ const AppContent: React.FC = () => {
     } else {
       const isAdmin = user.email.toLowerCase() === ADMIN_EMAIL.toLowerCase();
       setUserProfile({ name: user.user_metadata?.full_name || 'Finance User', email: user.email, avatar: `https://picsum.photos/200/200?seed=${user.id}` });
-      if (isAdmin) {
-        setTransactions(MOCK_TRANSACTIONS);
-        setBills(MOCK_BILLS);
-        setSavings(MOCK_SAVINGS);
-        setBets(MOCK_BETS);
-        setReminders(MOCK_REMINDERS);
-        setSalaryConfig(ADMIN_SALARY_CONFIG);
-        setHistoryEntries(ADMIN_HISTORY_ENTRIES);
-      }
+      if (isAdmin) { setTransactions(MOCK_TRANSACTIONS); setBills(MOCK_BILLS); setSavings(MOCK_SAVINGS); setBets(MOCK_BETS); setReminders(MOCK_REMINDERS); setSalaryConfig(ADMIN_SALARY_CONFIG); setHistoryEntries(ADMIN_HISTORY_ENTRIES); }
     }
     setIsDataLoaded(true);
   };
@@ -396,37 +287,13 @@ const AppContent: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    if (isDataLoaded) syncToSupabase();
-  }, [
-    userProfile, transactions, bills, savings, bets, reminders, 
-    holidays, metrics, savingsPlan, salaryConfig, 
-    historyEntries, leaveRecords, attendanceRecords, leaveQuotas,
-    language, theme
-  ]);
-
-  useEffect(() => {
     const root = window.document.documentElement;
     if (theme === 'dark') root.classList.add('dark'); else root.classList.remove('dark');
   }, [theme]);
 
-  const handleLogin = (user: any) => {
-    setCurrentUser(user);
-    setIsAuthenticated(true);
-    loadFromSupabase(user);
-  };
-
-  const handleLogout = async () => {
-    await supabase.auth.signOut();
-    setCurrentUser(null);
-    setIsAuthenticated(false);
-    setIsDataLoaded(false);
-    setActiveView('dashboard');
-  };
-
-  const updateNetWorth = (updatedTransactions: Transaction[]) => {
-    const totalBalance = updatedTransactions.reduce((acc, t) => t.type === 'income' ? acc + t.amount : acc - t.amount, 0);
-    setMetrics(prev => prev.map(m => m.label === 'Net Worth' ? { ...m, value: totalBalance } : m));
-  };
+  const handleLogin = (user: any) => { setCurrentUser(user); setIsAuthenticated(true); loadFromSupabase(user); };
+  const handleLogout = async () => { await supabase.auth.signOut(); setCurrentUser(null); setIsAuthenticated(false); setIsDataLoaded(false); setActiveView('dashboard'); };
+  const updateNetWorth = (updatedTransactions: Transaction[]) => { const totalBalance = updatedTransactions.reduce((acc, t) => t.type === 'income' ? acc + t.amount : acc - t.amount, 0); setMetrics(prev => prev.map(m => m.label === 'Net Worth' ? { ...m, value: totalBalance } : m)); };
   const handleAddTransaction = (newT: Transaction) => { const updated = [...transactions, newT]; setTransactions(updated); updateNetWorth(updated); };
   const handleUpdateTransaction = (updatedT: Transaction) => { const updated = transactions.map(t => t.id === updatedT.id ? updatedT : t); setTransactions(updated); updateNetWorth(updated); };
   const handleTransactionDelete = (id: string) => { const updated = transactions.filter(t => t.id !== id); setTransactions(updated); updateNetWorth(updated); };
@@ -455,15 +322,12 @@ const AppContent: React.FC = () => {
     { id: 'settings', label: t('settings', language), icon: <ICONS.Settings /> },
   ];
 
-  if (!isAuthenticated) { 
-    return <LoginView onLogin={handleLogin} language={language} />; 
-  }
+  if (!isAuthenticated) return <LoginView onLogin={handleLogin} language={language} />; 
 
   const renderView = () => {
     switch (activeView) {
       case 'dashboard': return ( <DashboardView metrics={metrics} bills={bills} savings={savings} transactions={transactions} savingsPlan={savingsPlan} reminders={reminders} holidays={holidays} onAddHoliday={handleAddHoliday} onDeleteHoliday={handleDeleteHoliday} /> );
       case 'financial': return ( <FinancialInfoView transactions={transactions} onAddTransaction={handleAddTransaction} onDeleteTransaction={handleTransactionDelete} onUpdateTransaction={handleUpdateTransaction} /> );
-      case 'history': return ( <FinancialInfoView transactions={transactions} onAddTransaction={handleAddTransaction} onDeleteTransaction={handleTransactionDelete} onUpdateTransaction={handleUpdateTransaction} isHistoryOnly={true} /> );
       case 'payroll': return ( <PayrollView salaryConfig={salaryConfig} setSalaryConfig={setSalaryConfig} historyEntries={historyEntries} setHistoryEntries={setHistoryEntries} leaveRecords={leaveRecords} setLeaveRecords={setLeaveRecords} attendanceRecords={attendanceRecords} setAttendanceRecords={setAttendanceRecords} leaveQuotas={leaveQuotas} setLeaveQuotas={setLeaveQuotas} /> );
       case 'savings': return ( <SavingsView savings={savings} transactions={transactions} savingsPlan={savingsPlan} onUpdatePlan={setSavingsPlan} onAddTransaction={handleAddTransaction} onDeleteTransaction={handleTransactionDelete} onDeleteTransactions={handleTransactionsBulkDelete} onUpdateTransaction={handleUpdateTransaction} /> );
       case 'bills': return ( <BillsView bills={bills} onAddBill={handleAddBill} onUpdateBill={handleUpdateBill} onDeleteBill={handleDeleteBill} /> );
@@ -484,9 +348,7 @@ const AppContent: React.FC = () => {
             <span className="text-2xl font-black text-slate-800 dark:text-white">Finance Hub</span>
           </div>
           <nav className="flex-1 space-y-1.5 overflow-y-auto no-scrollbar">
-            {navItems.map(item => (
-              <SidebarItem key={item.id} id={item.id as ViewType} label={item.label} icon={item.icon} active={activeView === item.id} onClick={() => { setActiveView(item.id as ViewType); setIsSidebarOpen(false); }} />
-            ))}
+            {navItems.map(item => ( <SidebarItem key={item.id} id={item.id as ViewType} label={item.label} icon={item.icon} active={activeView === item.id} onClick={() => { setActiveView(item.id as ViewType); setIsSidebarOpen(false); }} /> ))}
           </nav>
           <div className="mt-4 pt-4 border-t border-slate-100 dark:border-slate-800">
             <SidebarItem id="logout" label={t('logout', language)} icon={<ICONS.Logout />} active={false} onClick={handleLogout} />
@@ -498,6 +360,15 @@ const AppContent: React.FC = () => {
           <div className="flex items-center">
             <button onClick={() => setIsSidebarOpen(true)} className="p-2 mr-2 lg:hidden rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="18" y1="18" y2="18"/></svg></button>
             <h2 className="text-base sm:text-2xl font-extrabold text-slate-800 dark:text-white capitalize">{activeView.replace('-', ' ')}</h2>
+            <div className="ml-4 flex items-center gap-1.5 bg-slate-100 dark:bg-slate-800 px-3 py-1 rounded-full border border-slate-200 dark:border-slate-700 hidden sm:flex">
+              {syncStatus === 'syncing' ? (
+                <><div className="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></div><span className="text-[10px] font-black text-blue-600 dark:text-blue-400 uppercase tracking-widest">Syncing</span></>
+              ) : syncStatus === 'error' ? (
+                <><div className="w-2 h-2 rounded-full bg-rose-500"></div><span className="text-[10px] font-black text-rose-600 dark:text-rose-400 uppercase tracking-widest">Sync Error</span></>
+              ) : (
+                <><div className="w-2 h-2 rounded-full bg-emerald-500"></div><span className="text-[10px] font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-widest">Saved</span></>
+              )}
+            </div>
           </div>
           <div className="flex items-center space-x-2 sm:space-x-4">
             <button onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')} className="p-2 rounded-xl bg-slate-100 dark:bg-slate-800 transition-all border border-slate-200 dark:border-slate-700">
