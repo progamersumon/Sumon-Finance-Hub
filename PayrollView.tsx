@@ -35,7 +35,6 @@ export interface AttendanceRecord {
   hasTiffin: boolean;
 }
 
-// Fix: Removed duplicate declaration of DEFAULT_BASE_DEDUCTION
 export const DEFAULT_BASE_DEDUCTION = 2450;
 
 export const INITIAL_LEAVE_RECORDS: LeaveRecord[] = [
@@ -64,14 +63,6 @@ export const INITIAL_ATTENDANCE: AttendanceRecord[] = [
   { id: 'a5', date: '2026-01-05', inTime: '', outTime: '', type: 'Holiday', status: 'Holiday', isLate: false, hasTiffin: false },
   { id: 'a6', date: '2026-01-06', inTime: '', outTime: '', type: 'Standard', status: 'ABSENT', isLate: false, hasTiffin: false },
 ];
-
-/** Decorative Thick Bar matching user provided image */
-const ThickDecorativeLine = () => (
-  <div className="w-full h-4 sm:h-5 bg-slate-900 dark:bg-slate-950 rounded-lg flex flex-col justify-center gap-[2px] sm:gap-[3px] px-2 sm:px-4 overflow-hidden mt-3 shadow-inner border border-white/5">
-    <div className="h-[1px] w-full bg-blue-500/20"></div>
-    <div className="h-[1px] w-full bg-blue-500/20"></div>
-  </div>
-);
 
 interface PayrollViewProps {
   salaryConfig: any;
@@ -403,34 +394,24 @@ export const PayrollView: React.FC<PayrollViewProps> = ({
           </div>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <Card title="Monthly Breakdown" className="h-auto sm:h-[420px] dark:bg-slate-900 dark:border-slate-800">
-              <div className="space-y-2 h-full overflow-y-auto custom-scrollbar pr-1 pb-10 flex flex-col">
-                <div className="flex-1">
-                  {[{ label: 'BASIC SALARY', value: basicSalary }, { label: 'HOUSE RENT ALLOWANCE', value: houseRent }, { label: 'MEDICAL ALLOWANCE', value: salaryConfig.medical || 0 }, { label: 'CONVEYANCE ALLOWANCE', value: salaryConfig.conveyance || 0 }, { label: 'FOOD ALLOWANCE', value: salaryConfig.food || 0 }, { label: 'ATTENDANCE BONUS', value: salaryConfig.attendanceBonus || 0 }, { label: `TIFFIN BILL (${salaryConfig.tiffinDays || 0} DAYS)`, value: tiffinBillAmount }].map((item, idx) => (
-                    <div key={idx} className="flex justify-between items-center py-2 border-b border-slate-50 dark:border-slate-800 last:border-0"><span className="text-[10px] sm:text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-tight">{item.label}</span><span className="text-xs sm:text-sm font-black text-slate-800 dark:text-white">৳{(item.value || 0).toLocaleString()}</span></div>
-                  ))}
-                </div>
-                <div className="pt-3 mt-auto">
-                  <div className="flex justify-between items-center">
-                    <span className="text-xs sm:text-sm font-black text-blue-600 dark:text-blue-400 uppercase tracking-wider">Total Monthly</span>
-                    <span className="text-lg sm:text-xl font-black text-blue-700 dark:text-white">৳{totalMonthly.toLocaleString()}</span>
-                  </div>
-                  <ThickDecorativeLine />
+              <div className="space-y-2 h-full overflow-y-auto custom-scrollbar pr-1 pb-10">
+                {[{ label: 'BASIC SALARY', value: basicSalary }, { label: 'HOUSE RENT ALLOWANCE', value: houseRent }, { label: 'MEDICAL ALLOWANCE', value: salaryConfig.medical || 0 }, { label: 'CONVEYANCE ALLOWANCE', value: salaryConfig.conveyance || 0 }, { label: 'FOOD ALLOWANCE', value: salaryConfig.food || 0 }, { label: 'ATTENDANCE BONUS', value: salaryConfig.attendanceBonus || 0 }, { label: `TIFFIN BILL (${salaryConfig.tiffinDays || 0} DAYS)`, value: tiffinBillAmount }].map((item, idx) => (
+                  <div key={idx} className="flex justify-between items-center py-2 border-b border-slate-50 dark:border-slate-800 last:border-0"><span className="text-[10px] sm:text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-tight">{item.label}</span><span className="text-xs sm:text-sm font-black text-slate-800 dark:text-white">৳{(item.value || 0).toLocaleString()}</span></div>
+                ))}
+                <div className="pt-3 mt-2 mb-2 flex justify-between items-center border-t-2 border-slate-100 dark:border-slate-800">
+                  <span className="text-xs sm:text-sm font-black text-blue-600 dark:text-blue-400 uppercase tracking-wider">Total Monthly</span>
+                  <span className="text-lg sm:text-xl font-black text-blue-700 dark:text-white">৳{totalMonthly.toLocaleString()}</span>
                 </div>
               </div>
             </Card>
             <Card title="Bonuses & Festivals" className="h-auto sm:h-[420px] dark:bg-slate-900 dark:border-slate-800">
-              <div className="space-y-2 h-full overflow-y-auto custom-scrollbar pr-1 pb-10 flex flex-col">
-                <div className="flex-1">
-                  {[{ label: 'YEARLY BONUS', value: yearlyBonus }, { label: 'EID-UL-FITR', value: eidFitr }, { label: 'EID-UL-ADHA', value: eidAdha }].map((item, idx) => (
-                    <div key={idx} className="flex justify-between items-center py-2 border-b border-slate-50 dark:border-slate-800 last:border-0"><span className="text-[10px] sm:text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-tight">{item.label}</span><span className="text-xs sm:text-sm font-black text-slate-800 dark:text-white">৳{(item.value || 0).toLocaleString()}</span></div>
-                  ))}
-                </div>
-                <div className="pt-3 mt-auto">
-                  <div className="flex justify-between items-center">
-                    <span className="text-xs sm:text-sm font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">Payable (Yearly)</span>
-                    <span className="text-lg sm:text-xl font-black text-emerald-700 dark:text-white">৳{totalYearlyBonus.toLocaleString()}</span>
-                  </div>
-                  <ThickDecorativeLine />
+              <div className="space-y-2 h-full overflow-y-auto custom-scrollbar pr-1 pb-10">
+                {[{ label: 'YEARLY BONUS', value: yearlyBonus }, { label: 'EID-UL-FITR', value: eidFitr }, { label: 'EID-UL-ADHA', value: eidAdha }].map((item, idx) => (
+                  <div key={idx} className="flex justify-between items-center py-2 border-b border-slate-50 dark:border-slate-800 last:border-0"><span className="text-[10px] sm:text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-tight">{item.label}</span><span className="text-xs sm:text-sm font-black text-slate-800 dark:text-white">৳{(item.value || 0).toLocaleString()}</span></div>
+                ))}
+                <div className="pt-3 mt-2 mb-2 flex justify-between items-center border-t-2 border-slate-100 dark:border-slate-800">
+                  <span className="text-xs sm:text-sm font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">Payable (Yearly)</span>
+                  <span className="text-lg sm:text-xl font-black text-emerald-700 dark:text-white">৳{totalYearlyBonus.toLocaleString()}</span>
                 </div>
               </div>
             </Card>
@@ -475,7 +456,7 @@ export const PayrollView: React.FC<PayrollViewProps> = ({
                 {clLeaves.length > 0 ? (
                   clLeaves.sort((a,b) => b.startDate.localeCompare(a.startDate)).map(rec => (
                     <div key={rec.id} className="bg-white dark:bg-slate-900 p-4 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 flex items-center justify-between transition-all hover:shadow-md animate-in fade-in slide-in-from-left-2">
-                      <div className="flex items-center gap-4 min-0">
+                      <div className="flex items-center gap-4 min-w-0">
                         <div className="w-10 h-10 flex-none bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 font-black text-[10px] rounded-xl flex items-center justify-center">CL</div>
                         <div className="min-w-0"><h5 className="font-bold text-slate-800 dark:text-white text-sm truncate">{rec.reason}</h5><p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-tight">{formatDate(rec.startDate)} {rec.startDate !== rec.endDate ? ` TO ${formatDate(rec.endDate)}` : ''}</p><p className="text-[10px] font-black text-indigo-600 dark:text-indigo-400 uppercase mt-0.5">{rec.days} {rec.days > 1 ? 'DAYS' : 'DAY'}</p></div>
                       </div>
@@ -494,7 +475,7 @@ export const PayrollView: React.FC<PayrollViewProps> = ({
                 {mlLeaves.length > 0 ? (
                   mlLeaves.sort((a,b) => b.startDate.localeCompare(a.startDate)).map(rec => (
                     <div key={rec.id} className="bg-white dark:bg-slate-900 p-4 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 flex items-center justify-between transition-all hover:shadow-md animate-in fade-in slide-in-from-right-2">
-                      <div className="flex items-center gap-4 min-0">
+                      <div className="flex items-center gap-4 min-w-0">
                         <div className="w-10 h-10 flex-none bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 font-black text-[10px] rounded-xl flex items-center justify-center">ML</div>
                         <div className="min-w-0"><h5 className="font-bold text-slate-800 dark:text-white text-sm truncate">{rec.reason}</h5><p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-tight">{formatDate(rec.startDate)} {rec.startDate !== rec.endDate ? ` TO ${formatDate(rec.endDate)}` : ''}</p><p className="text-[10px] font-black text-indigo-600 dark:text-indigo-400 uppercase mt-0.5">{rec.days} {rec.days > 1 ? 'DAYS' : 'DAY'}</p></div>
                       </div>
