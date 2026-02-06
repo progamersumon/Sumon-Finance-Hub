@@ -393,7 +393,7 @@ export const PayrollView: React.FC<PayrollViewProps> = ({
              <button onClick={() => { setEditFormData(salaryConfig); setIsEditModalOpen(true); }} className="flex items-center space-x-1 px-3 py-1.5 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/50 transition-colors"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg><span className="text-[10px] sm:text-xs font-bold uppercase">Edit</span></button>
           </div>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <Card title="Monthly Breakdown" className="h-auto sm:h-[520px] dark:bg-slate-900 dark:border-slate-800">
+            <Card title="Monthly Breakdown" className="h-auto sm:h-[420px] dark:bg-slate-900 dark:border-slate-800">
               <div className="space-y-2 h-full overflow-y-auto custom-scrollbar pr-1 pb-10">
                 {[{ label: 'BASIC SALARY', value: basicSalary }, { label: 'HOUSE RENT ALLOWANCE', value: houseRent }, { label: 'MEDICAL ALLOWANCE', value: salaryConfig.medical || 0 }, { label: 'CONVEYANCE ALLOWANCE', value: salaryConfig.conveyance || 0 }, { label: 'FOOD ALLOWANCE', value: salaryConfig.food || 0 }, { label: 'ATTENDANCE BONUS', value: salaryConfig.attendanceBonus || 0 }, { label: `TIFFIN BILL (${salaryConfig.tiffinDays || 0} DAYS)`, value: tiffinBillAmount }].map((item, idx) => (
                   <div key={idx} className="flex justify-between items-center py-2 border-b border-slate-50 dark:border-slate-800 last:border-0"><span className="text-[10px] sm:text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-tight">{item.label}</span><span className="text-xs sm:text-sm font-black text-slate-800 dark:text-white">৳{(item.value || 0).toLocaleString()}</span></div>
@@ -404,7 +404,7 @@ export const PayrollView: React.FC<PayrollViewProps> = ({
                 </div>
               </div>
             </Card>
-            <Card title="Bonuses & Festivals" className="h-auto sm:h-[520px] dark:bg-slate-900 dark:border-slate-800">
+            <Card title="Bonuses & Festivals" className="h-auto sm:h-[420px] dark:bg-slate-900 dark:border-slate-800">
               <div className="space-y-2 h-full overflow-y-auto custom-scrollbar pr-1 pb-10">
                 {[{ label: 'YEARLY BONUS', value: yearlyBonus }, { label: 'EID-UL-FITR', value: eidFitr }, { label: 'EID-UL-ADHA', value: eidAdha }].map((item, idx) => (
                   <div key={idx} className="flex justify-between items-center py-2 border-b border-slate-50 dark:border-slate-800 last:border-0"><span className="text-[10px] sm:text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-tight">{item.label}</span><span className="text-xs sm:text-sm font-black text-slate-800 dark:text-white">৳{(item.value || 0).toLocaleString()}</span></div>
