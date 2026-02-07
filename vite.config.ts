@@ -4,12 +4,15 @@ import { fileURLToPath } from 'url';
 import { defineConfig, loadEnv } from 'vite';
 import react from '@vitejs/plugin-react';
 
-// Fix for __dirname in ES modules environment
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 export default defineConfig(({ mode }) => {
-    const env = loadEnv(mode, '.', '');
+    // Load env file based on `mode` in the current working directory.
+    // Set the third parameter to '' to load all env regardless of the `VITE_` prefix.
+    // Fix: Using path.resolve() instead of process.cwd() to avoid "Property 'cwd' does not exist on type 'Process'" error.
+    const env = loadEnv(mode, path.resolve(), '');
+    
     return {
       server: {
         port: 3000,
@@ -17,14 +20,18 @@ export default defineConfig(({ mode }) => {
       },
       plugins: [react()],
       define: {
-        'process.env.API_KEY': JSON.stringify(env.GEMINI_API_KEY),
+        // This ensures the API key is accessible via process.env.API_KEY in the app
+        'process.env.API_KEY': JSON.stringify(env.GEMINI_API_KEY || env.process_env_API_KEY),
         'process.env.GEMINI_API_KEY': JSON.stringify(env.GEMINI_API_KEY)
       },
       resolve: {
         alias: {
-          // Fix: Use the defined __dirname to resolve the '@' alias to the current directory
           '@': path.resolve(__dirname, '.'),
         }
+      },
+      build: {
+        outDir: 'dist',
+        sourcemap: false
       }
     };
 });

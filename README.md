@@ -3,33 +3,28 @@
 <img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
 </div>
 
-# Finance Hub 2.0 - Setup Guide
+# Finance Hub 2.0 - Deployment Guide
 
-This comprehensive personal finance dashboard requires Supabase for data synchronization and account management.
+এই অ্যাপ্লিকেশনটি Vercel-এ ডেপ্লয় করার জন্য নিচের ধাপগুলো অনুসরণ করুন।
 
-## Database Setup (Mandatory)
+## Vercel-এ ডেপ্লয় করার নিয়ম (Step-by-Step)
 
-To make the application fully functional, follow these steps:
+1. **প্রজেক্ট পুশ করুন**: আপনার কোডগুলো GitHub-এ আপলোড করুন।
+2. **Vercel Connect**: Vercel ড্যাশবোর্ড থেকে "Add New Project" ক্লিক করে আপনার GitHub রিপোজিটরি সিলেক্ট করুন।
+3. **Environment Variables (খুবই গুরুত্বপূর্ণ)**:
+   ডেপ্লয় করার আগে Vercel-এর **Environment Variables** সেকশনে নিচের ভেরিয়েবলটি সেট করুন:
+   - `GEMINI_API_KEY`: (আপনার Gemini API কী এখানে দিন)
+4. **Build & Deploy**: 'Deploy' বাটনে ক্লিক করুন। Vercel অটোমেটিক সব কনফিগার করে নেবে।
 
-1. Go to your [Supabase Dashboard](https://app.supabase.com/).
-2. Select your project and navigate to the **SQL Editor** from the left sidebar.
-3. Open a "New Query" and paste the contents of the `schema.sql` file.
-4. Click **Run**.
+## ডাটাবেস সেটআপ (Supabase)
 
-This will create:
-- The `user_data` table to store your transactions and settings.
-- Row Level Security policies to keep your data private.
-- The `delete_user_account` function for the account deletion feature.
+অ্যাপ্লিকেশনটি সচল করতে আপনার Supabase SQL Editor-এ `schema.sql` ফাইলের কোডগুলো রান করতে হবে। এটি না করলে ডাটা সেভ হবে না।
 
-## Run Locally
+## লোকাল রান করার নিয়ম
+1. `npm install`
+2. `.env.local` ফাইলে `GEMINI_API_KEY` যোগ করুন।
+3. `npm run dev`
 
-**Prerequisites:** Node.js
-
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key.
-3. Run the app:
-   `npm run dev`
-
-## Supabase Configuration
-Your app is pre-configured to connect to the Supabase instance. If you need to change it, check `supabaseClient.ts`.
+## বিশেষ সতর্কতা
+- Vercel-এ প্রজেক্ট রিফ্রেশ করলে যেন সমস্যা না হয় সেজন্য `vercel.json` ফাইলটি যোগ করা হয়েছে।
+- API Key সিকিউরিটির জন্য `vite.config.ts` আপডেট করা হয়েছে।
