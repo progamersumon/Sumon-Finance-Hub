@@ -332,6 +332,14 @@ const AppContent: React.FC = () => {
   const [leaveQuotas, setLeaveQuotas] = useState({ cl: 10, ml: 14 });
 
   const syncTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const mainContentRef = useRef<HTMLElement>(null);
+
+  // Effect to scroll to top whenever the view changes
+  useEffect(() => {
+    if (mainContentRef.current) {
+      mainContentRef.current.scrollTop = 0;
+    }
+  }, [activeView]);
 
   const syncToSupabase = useCallback(async () => {
     if (!currentUser || !isDataLoaded) return;
@@ -558,7 +566,7 @@ const AppContent: React.FC = () => {
             <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-slate-200 dark:bg-slate-800 border-2 border-white dark:border-slate-700 overflow-hidden cursor-pointer hover:scale-105 transition-transform" onClick={() => setActiveView('settings')}><img src={userProfile.avatar} alt="profile" className="object-cover w-full h-full" /></div>
           </div>
         </header>
-        <main className="flex-1 overflow-y-auto no-scrollbar p-3 sm:p-6 lg:p-10 bg-slate-50 dark:bg-slate-950">
+        <main ref={mainContentRef} className="flex-1 overflow-y-auto no-scrollbar p-3 sm:p-6 lg:p-10 bg-slate-50 dark:bg-slate-950">
           <div className="max-w-7xl mx-auto w-full">{renderView()}</div>
         </main>
       </div>

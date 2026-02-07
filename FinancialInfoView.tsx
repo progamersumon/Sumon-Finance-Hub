@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo, useEffect } from 'react';
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, 
@@ -16,9 +15,11 @@ export const FinancialInfoView: React.FC<{
   onUpdateTransaction: (t: Transaction) => void;
   isHistoryOnly?: boolean;
 }> = ({ transactions, onAddTransaction, onDeleteTransaction, onUpdateTransaction, isHistoryOnly = false }) => {
+  const currentYear = new Date().getFullYear().toString();
   const currentMonthValue = (new Date().getMonth() + 1).toString().padStart(2, '0');
+  
   const [selectedMonth, setSelectedMonth] = useState(currentMonthValue);
-  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear().toString());
+  const [selectedYear, setSelectedYear] = useState(currentYear);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
   const [transactionToDelete, setTransactionToDelete] = useState<Transaction | null>(null);
@@ -44,20 +45,23 @@ export const FinancialInfoView: React.FC<{
     { label: 'October', value: '10' }, { label: 'November', value: '11' }, { label: 'December', value: '12' }
   ];
 
+  // Logic to get ONLY years that have data
   const availableYears = useMemo(() => {
-    if (transactions.length === 0) {
-      return [new Date().getFullYear().toString()];
+    const yearsFromData = Array.from(new Set(transactions.map(t => t.date.split('-')[0])))
+      .filter(y => y && y.length === 4)
+      .sort((a, b) => b.localeCompare(a));
+    
+    // Fallback: If absolutely no transactions exist, only show current year
+    if (yearsFromData.length === 0) {
+      return [currentYear];
     }
-    const years = transactions.map(t => t.date.split('-')[0]);
-    const uniqueYears = Array.from(new Set(years)).sort((a, b) => b.localeCompare(a));
-    const currentYear = new Date().getFullYear().toString();
-    if (!uniqueYears.includes(currentYear)) uniqueYears.push(currentYear);
-    return uniqueYears.sort((a, b) => b.localeCompare(a));
-  }, [transactions]);
+    return yearsFromData;
+  }, [transactions, currentYear]);
 
+  // Sync selectedYear state if the current selection is no longer valid (e.g. data deleted)
   useEffect(() => {
     if (!availableYears.includes(selectedYear)) {
-      setSelectedYear(availableYears[0] || new Date().getFullYear().toString());
+      setSelectedYear(availableYears[0]);
     }
   }, [availableYears, selectedYear]);
 
@@ -178,6 +182,7 @@ export const FinancialInfoView: React.FC<{
 
   return (
     <div className="space-y-6 animate-in fade-in duration-500 pb-24 lg:pb-0">
+      {/* Year Filter section refined */}
       <div className="flex flex-wrap gap-4 items-center bg-white dark:bg-slate-900 p-4 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800">
         <div className="flex items-center space-x-2">
           <ICONS.Dashboard className="text-slate-400 w-5 h-5" />
@@ -189,7 +194,9 @@ export const FinancialInfoView: React.FC<{
             {months.map(m => <option key={m.value} value={m.value}>{m.label}</option>)}
           </select>
           <select value={selectedYear} onChange={(e) => setSelectedYear(e.target.value)} className="bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-1.5 text-sm font-medium focus:ring-2 focus:ring-blue-500 outline-none dark:text-white">
-            {availableYears.map(year => <option key={year} value={year}>{year}</option>)}
+            {availableYears.map(year => (
+              <option key={year} value={year}>{year}</option>
+            ))}
           </select>
         </div>
       </div>
