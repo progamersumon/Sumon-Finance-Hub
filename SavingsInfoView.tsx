@@ -16,7 +16,9 @@ import {
   TrendingUp,
   ArrowUpRight,
   Calculator,
-  Wallet
+  Wallet,
+  TrendingDown,
+  Filter
 } from 'lucide-react';
 import { SavingsGoal, SavingsRecord, Transaction } from './types';
 
@@ -50,11 +52,13 @@ const SavingsInfoView: React.FC<SavingsInfoViewProps> = ({
   const [editingGoal, setEditingGoal] = useState<SavingsGoal | null>(null);
   const [editingRecord, setEditingRecord] = useState<SavingsRecord | null>(null);
 
+  const [historyGoalFilter, setHistoryGoalFilter] = useState<string>('all');
+
   const [goalForm, setGoalForm] = useState({
     name: '',
     monthlyDeposit: '', 
     years: '10',
-    profitPercent: '8.5',
+    profitPercent: '9.48', 
     targetAmount: '', 
     maturityValue: '', 
     color: '#6366f1'
@@ -73,15 +77,23 @@ const SavingsInfoView: React.FC<SavingsInfoViewProps> = ({
     const yrs = parseFloat(goalForm.years);
     
     if (!isNaN(P) && !isNaN(annualRate) && !isNaN(yrs) && P > 0) {
-      const totalPrincipal = P * 12 * yrs;
-      const i = (annualRate / 100) / 12; 
-      const n = yrs * 12; 
-      const maturity = P * ((Math.pow(1 + i, n) - 1) / i) * (1 + i);
+      const totalMonths = yrs * 12;
+      const monthlyRate = (annualRate / 100) / 12;
+      
+      let runningBalance = 0;
+      let totalInvested = 0;
+
+      for (let month = 1; month <= totalMonths; month++) {
+        runningBalance += P;
+        totalInvested += P;
+        const monthlyInterest = runningBalance * monthlyRate;
+        runningBalance += monthlyInterest;
+      }
       
       setGoalForm(prev => ({ 
         ...prev, 
-        targetAmount: Math.round(totalPrincipal).toString(),
-        maturityValue: Math.round(maturity).toString() 
+        targetAmount: Math.round(totalInvested).toString(),
+        maturityValue: Math.round(runningBalance).toString() 
       }));
     } else {
       setGoalForm(prev => ({ 
@@ -92,33 +104,70 @@ const SavingsInfoView: React.FC<SavingsInfoViewProps> = ({
     }
   }, [goalForm.monthlyDeposit, goalForm.profitPercent, goalForm.years]);
 
+  // Enhanced logic to calculate running totals and profit per transaction entry
+  const processedHistory = useMemo(() => {
+    const sortedOldestFirst = [...records].sort((a, b) => a.date.localeCompare(b.date));
+    
+    const goalTrackers: Record<string, { balance: number }> = {};
+    goals.forEach(g => { goalTrackers[g.id] = { balance: 0 }; });
+
+    const results = sortedOldestFirst.map(record => {
+      const goal = goals.find(g => g.id === record.goalId);
+      if (!goal) return { ...record, stepProfit: 0, runningBalance: record.amount };
+
+      if (!goalTrackers[goal.id]) goalTrackers[goal.id] = { balance: 0 };
+      
+      const prevBalance = goalTrackers[goal.id].balance;
+      const monthlyRate = (goal.profitPercent / 100) / 12;
+      
+      // Based on provided chart logic: Interest calculated after adding deposit
+      const balanceAfterDeposit = prevBalance + record.amount;
+      const profitThisStep = balanceAfterDeposit * monthlyRate;
+      const endBalance = balanceAfterDeposit + profitThisStep;
+
+      goalTrackers[goal.id].balance = endBalance;
+
+      return {
+        ...record,
+        stepProfit: Math.round(profitThisStep),
+        runningBalance: Math.round(endBalance)
+      };
+    });
+
+    return results.sort((a, b) => b.date.localeCompare(a.date));
+  }, [records, goals]);
+
+  // Filtered version of the processed history for rendering
+  const filteredProcessedHistory = useMemo(() => {
+    if (historyGoalFilter === 'all') return processedHistory;
+    return processedHistory.filter(r => r.goalId === historyGoalFilter);
+  }, [processedHistory, historyGoalFilter]);
+
+  // Updated analytics to match the processed history exactly
   const analytics = useMemo(() => {
     let totalDeposit = 0;
-    let totalEstimatedProfit = 0;
+    let totalAccruedProfit = 0;
     let totalMaturityValue = 0;
 
-    goals.forEach(goal => {
-      totalDeposit += goal.currentAmount;
-      totalMaturityValue += goal.maturityValue;
+    records.forEach(r => totalDeposit += r.amount);
+    
+    processedHistory.forEach(h => {
+        totalAccruedProfit += (h as any).stepProfit;
+    });
 
-      if (goal.targetAmount > 0) {
-        const totalExpectedProfit = goal.maturityValue - goal.targetAmount;
-        const progress = goal.currentAmount / goal.targetAmount;
-        totalEstimatedProfit += totalExpectedProfit * progress;
-      }
+    const wealthPortfolio = totalDeposit + totalAccruedProfit;
+
+    goals.forEach(goal => {
+      totalMaturityValue += goal.maturityValue;
     });
 
     return {
       deposit: totalDeposit,
-      profit: totalEstimatedProfit,
-      total: totalDeposit + totalEstimatedProfit,
+      profit: totalAccruedProfit,
+      total: wealthPortfolio,
       projected: totalMaturityValue
     };
-  }, [records, goals]);
-
-  const sortedHistory = useMemo(() => {
-    return [...records].sort((a, b) => b.date.localeCompare(a.date));
-  }, [records]);
+  }, [processedHistory, goals, records]);
 
   const handleSaveGoal = () => {
     if (!goalForm.name || !goalForm.targetAmount || !goalForm.monthlyDeposit) return;
@@ -299,7 +348,7 @@ const SavingsInfoView: React.FC<SavingsInfoViewProps> = ({
                 <button 
                   onClick={() => { 
                     setEditingGoal(null); 
-                    setGoalForm({ name: '', monthlyDeposit: '', years: '10', targetAmount: '', profitPercent: '8.5', maturityValue: '', color: '#6366f1' }); 
+                    setGoalForm({ name: '', monthlyDeposit: '', years: '10', targetAmount: '', profitPercent: '9.48', maturityValue: '', color: '#6366f1' }); 
                     setIsGoalModalOpen(true); 
                   }}
                   className="flex items-center gap-1.5 px-3 py-1.5 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 rounded-lg text-[10px] font-black uppercase tracking-widest hover:bg-indigo-600 hover:text-white transition-all shadow-sm border border-indigo-100 dark:border-indigo-800"
@@ -340,7 +389,7 @@ const SavingsInfoView: React.FC<SavingsInfoViewProps> = ({
                               monthlyDeposit: goal.monthlyDeposit ? goal.monthlyDeposit.toString() : goal.plan.replace('৳', '').replace('/Mo', ''), 
                               years: goal.years ? goal.years.toString() : '10', 
                               targetAmount: goal.targetAmount.toString(), 
-                              profitPercent: goal.profitPercent ? goal.profitPercent.toString() : '8.5', 
+                              profitPercent: goal.profitPercent ? goal.profitPercent.toString() : '9.48', 
                               maturityValue: goal.maturityValue.toString(), 
                               color: goal.color 
                             }); 
@@ -434,40 +483,64 @@ const SavingsInfoView: React.FC<SavingsInfoViewProps> = ({
           </section>
 
           <section className="space-y-4">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between px-1">
               <h3 className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-wider flex items-center gap-2">
                 <div className="w-2 h-2 bg-emerald-600 rounded-full" /> Transaction History
               </h3>
+              <div className="flex items-center gap-2 bg-slate-100 dark:bg-slate-800 p-1.5 rounded-xl border border-slate-200 dark:border-slate-700">
+                <Filter size={14} className="text-slate-400 ml-1" />
+                <select 
+                  value={historyGoalFilter} 
+                  onChange={(e) => setHistoryGoalFilter(e.target.value)}
+                  className="bg-transparent outline-none text-[10px] font-black uppercase text-slate-600 dark:text-slate-300 cursor-pointer pr-1"
+                >
+                  <option value="all">All Accounts</option>
+                  {goals.map(g => (
+                    <option key={g.id} value={g.id}>{g.name}</option>
+                  ))}
+                </select>
+              </div>
             </div>
             <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-[24px] overflow-hidden shadow-sm">
               <div className="overflow-x-auto">
                 <table className="w-full text-left">
                   <thead>
                     <tr className="bg-emerald-50 dark:bg-emerald-900/20">
-                      <th className="px-6 py-2 text-[10px] font-black text-emerald-800 dark:text-emerald-400 uppercase tracking-wider">Date</th>
-                      <th className="px-6 py-2 text-[10px] font-black text-emerald-800 dark:text-emerald-400 uppercase tracking-wider">Asset Account</th>
-                      <th className="px-6 py-2 text-[10px] font-black text-emerald-800 dark:text-emerald-400 uppercase tracking-wider">Amount</th>
-                      <th className="px-6 py-2 text-[10px] font-black text-emerald-800 dark:text-emerald-400 uppercase tracking-wider text-right">Actions</th>
+                      <th className="px-5 py-2.5 text-[10px] font-black text-emerald-800 dark:text-emerald-400 uppercase tracking-wider">Date</th>
+                      <th className="px-5 py-2.5 text-[10px] font-black text-emerald-800 dark:text-emerald-400 uppercase tracking-wider">Asset Account</th>
+                      <th className="px-5 py-2.5 text-[10px] font-black text-emerald-800 dark:text-emerald-400 uppercase tracking-wider">Amount</th>
+                      <th className="px-5 py-2.5 text-[10px] font-black text-emerald-800 dark:text-emerald-400 uppercase tracking-wider">Profit (Est.)</th>
+                      <th className="px-5 py-2.5 text-[10px] font-black text-emerald-800 dark:text-emerald-400 uppercase tracking-wider">Total Money</th>
+                      <th className="px-5 py-2.5 text-[10px] font-black text-emerald-800 dark:text-emerald-400 uppercase tracking-wider text-right">Actions</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-                    {sortedHistory.length > 0 ? sortedHistory.slice(0, 15).map(record => {
+                    {filteredProcessedHistory.length > 0 ? filteredProcessedHistory.slice(0, 25).map(record => {
                       const goal = goals.find(g => g.id === record.goalId);
                       return (
                         <tr key={record.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/20 transition-colors group">
-                          <td className="px-6 py-2">
-                            <span className="text-[12px] font-black text-slate-800 dark:text-white uppercase leading-none tracking-tight">{formatDate(record.date)}</span>
+                          <td className="px-5 py-2.5">
+                            <span className="text-[11px] font-black text-slate-800 dark:text-white uppercase leading-none tracking-tight">{formatDate(record.date)}</span>
                           </td>
-                          <td className="px-6 py-2">
+                          <td className="px-5 py-2.5">
                             <div className="flex items-center gap-2">
                               <div className="w-2 h-2 rounded-full shadow-sm" style={{ backgroundColor: goal?.color || '#cbd5e1' }} />
-                              <span className="text-[12px] font-black text-slate-700 dark:text-slate-300 uppercase truncate max-w-[200px] tracking-tight">{goal?.name || 'Deleted Account'}</span>
+                              <span className="text-[11px] font-black text-slate-700 dark:text-slate-300 uppercase truncate max-w-[140px] tracking-tight">{goal?.name || 'Deleted Account'}</span>
                             </div>
                           </td>
-                          <td className="px-6 py-2">
-                            <span className="text-[13px] font-black text-emerald-600 dark:text-emerald-400 tracking-tighter">৳{record.amount.toLocaleString()}</span>
+                          <td className="px-5 py-2.5">
+                            <span className="text-[12px] font-black text-slate-900 dark:text-white tracking-tighter">৳{record.amount.toLocaleString()}</span>
                           </td>
-                          <td className="px-6 py-2 text-right">
+                          <td className="px-5 py-2.5">
+                            <div className="flex items-center gap-1.5">
+                              <TrendingUp size={12} className="text-emerald-500" />
+                              <span className="text-[12px] font-black text-emerald-600 dark:text-emerald-400 tracking-tighter">৳{(record as any).stepProfit.toLocaleString()}</span>
+                            </div>
+                          </td>
+                          <td className="px-5 py-2.5">
+                            <span className="text-[13px] font-black text-blue-600 dark:text-indigo-400 tracking-tighter">৳{(record as any).runningBalance.toLocaleString()}</span>
+                          </td>
+                          <td className="px-5 py-2.5 text-right">
                             <div className="flex items-center justify-end gap-2">
                               <button 
                                 onClick={() => { setEditingRecord(record); setRecordForm({ goalId: record.goalId, amount: record.amount.toString(), date: record.date, note: record.note }); setIsRecordModalOpen(true); }} 
@@ -487,10 +560,10 @@ const SavingsInfoView: React.FC<SavingsInfoViewProps> = ({
                       );
                     }) : (
                       <tr>
-                        <td colSpan={4} className="px-6 py-16 text-center">
+                        <td colSpan={6} className="px-6 py-16 text-center">
                           <div className="opacity-60 text-slate-400 dark:text-slate-500 flex flex-col items-center">
                             <History size={40} className="mb-3" />
-                            <p className="text-[11px] font-black uppercase tracking-widest">No Recent Activity</p>
+                            <p className="text-[11px] font-black uppercase tracking-widest">{historyGoalFilter === 'all' ? 'No Recent Activity' : 'No records for this account'}</p>
                           </div>
                         </td>
                       </tr>
@@ -634,10 +707,10 @@ const SavingsInfoView: React.FC<SavingsInfoViewProps> = ({
                   <div className="relative">
                     <input 
                       type="number" 
-                      step="0.1" 
+                      step="0.01" 
                       value={goalForm.profitPercent} 
                       onChange={(e) => setGoalForm({...goalForm, profitPercent: e.target.value})} 
-                      placeholder="8.5" 
+                      placeholder="9.48" 
                       className="w-full h-10 pl-4 pr-8 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl text-[13px] font-black text-slate-900 dark:text-white outline-none focus:border-indigo-500 transition-all shadow-sm" 
                     />
                     <div className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400"><Percent size={12} /></div>

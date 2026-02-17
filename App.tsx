@@ -387,7 +387,15 @@ const AppContent: React.FC = () => {
         </div>
       )}
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
-        <Header activeTab={activeView} onOpenMenu={() => setIsSidebarOpen(true)} language={language === 'bn' ? 'বাংলা' : 'English'} profile={{ name: userProfile.name, role: payrollProfile.role, imageUrl: userProfile.avatar }} isSyncing={isSyncing} />
+        <Header 
+          activeTab={activeView} 
+          onOpenMenu={() => setIsSidebarOpen(true)} 
+          language={language === 'bn' ? 'বাংলা' : 'English'} 
+          profile={{ name: userProfile.name, role: payrollProfile.role, imageUrl: userProfile.avatar }} 
+          isSyncing={isSyncing} 
+          theme={theme}
+          setTheme={setTheme}
+        />
         <main ref={mainContentRef} className="flex-1 overflow-y-auto p-4 md:p-6 custom-scrollbar">
           <div className="max-w-7xl mx-auto">
             {renderView()}

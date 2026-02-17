@@ -5,7 +5,8 @@ import {
   ArrowUpRight, 
   ArrowDownRight,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  AlertCircle
 } from 'lucide-react';
 import { Transaction, SavingsGoal, Reminder } from './types';
 import { ICONS } from './constants';
@@ -37,7 +38,11 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ language, profile,
       activeReminders: 'Active Reminders',
       today: 'TODAY',
       noActivity: 'No Activity',
-      noAlerts: 'No Alerts'
+      noAlerts: 'No Alerts',
+      overdue: 'OVERDUE',
+      upcoming: 'UPCOMING',
+      day: 'DAY',
+      days: 'DAYS'
     },
     'বাংলা': {
       welcome: 'স্বাগতম,',
@@ -50,7 +55,11 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ language, profile,
       activeReminders: 'সক্রিয় রিমাইন্ডার',
       today: 'আজ',
       noActivity: 'কোনো কার্যকলাপ নেই',
-      noAlerts: 'কোনো সতর্কবার্তা নেই'
+      noAlerts: 'কোনো সতর্কবার্তা নেই',
+      overdue: 'অতিক্রান্ত',
+      upcoming: 'আসন্ন',
+      day: 'দিন',
+      days: 'দিন'
     }
   };
 
@@ -60,6 +69,14 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ language, profile,
     const formatted = Math.abs(val).toLocaleString();
     const sign = val < 0 ? '-' : '';
     return language === 'English' ? `${sign}৳${formatted}` : `${sign}৳${toBnDigits(formatted)}`;
+  };
+
+  const getDayDiff = (dateStr: string) => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const target = new Date(dateStr);
+    target.setHours(0, 0, 0, 0);
+    return Math.ceil((target.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
   };
 
   const stats = useMemo(() => {
@@ -382,20 +399,38 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ language, profile,
 
         <div className="space-y-6">
           <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-sm overflow-hidden min-h-[300px] flex flex-col">
-             <h3 className="text-[11px] font-black text-emerald-600 dark:text-emerald-400 -mx-6 -mt-6 mb-6 px-6 py-3 bg-emerald-50/50 dark:bg-indigo-900/20 border-b border-emerald-100 dark:border-emerald-800/50 flex items-center gap-2 uppercase tracking-tight">
+             <h3 className="text-[11px] font-black text-emerald-600 dark:text-emerald-400 -mx-6 -mt-6 mb-6 px-6 py-3 bg-emerald-50/50 dark:bg-indigo-900/20 border-b border-emerald-100 dark:border-indigo-800/50 flex items-center gap-2 uppercase tracking-tight">
                <div className="w-1.5 h-1.5 rounded-full bg-emerald-600" /> {t.activeReminders}
              </h3>
              <div className="space-y-4 flex-1">
                {reminders.filter(r => !r.completed).length > 0 ? (
-                 reminders.filter(r => !r.completed).slice(0, 6).map(r => (
-                   <div key={r.id} className="flex items-start gap-4 group">
-                     <div className={`w-1.5 h-10 rounded-full shrink-0 ${r.priority === 'high' ? 'bg-rose-500' : r.priority === 'medium' ? 'bg-amber-500' : 'bg-blue-500'}`} />
-                     <div className="flex-1 min-w-0">
-                       <p className="text-[12px] font-black text-slate-800 dark:text-slate-200 uppercase tracking-tight truncate group-hover:text-indigo-600 transition-colors">{r.title}</p>
-                       <p className="text-[10px] font-bold text-slate-400 mt-1">{r.date}</p>
+                 reminders.filter(r => !r.completed).slice(0, 6).map(r => {
+                   const dayDiff = getDayDiff(r.date);
+                   const isOverdue = dayDiff < 0;
+                   const absDiff = Math.abs(dayDiff);
+                   
+                   return (
+                     <div key={r.id} className="flex items-start gap-4 group">
+                       <div className={`w-1.5 h-10 rounded-full shrink-0 ${isOverdue ? 'bg-rose-500 animate-pulse' : (r.priority === 'high' ? 'bg-rose-500' : r.priority === 'medium' ? 'bg-amber-500' : 'bg-blue-500')}`} />
+                       <div className="flex-1 min-w-0">
+                         <div className="flex items-center gap-2 flex-wrap">
+                           <p className="text-[12px] font-black text-slate-800 dark:text-slate-200 uppercase tracking-tight truncate group-hover:text-indigo-600 transition-colors">{r.title}</p>
+                           {dayDiff === 0 ? (
+                             <span className="px-1.5 py-0.5 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 text-[8px] font-black uppercase rounded border border-blue-100 dark:border-blue-800/50 flex items-center gap-0.5">
+                               {t.today}
+                             </span>
+                           ) : (
+                             <span className={`px-1.5 py-0.5 ${isOverdue ? 'bg-rose-50 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400 border-rose-100 dark:border-rose-800/50' : 'bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 border-emerald-100 dark:border-emerald-800/50'} text-[8px] font-black uppercase rounded border flex items-center gap-0.5`}>
+                               {isOverdue && <AlertCircle size={8} />}
+                               {language === 'English' ? absDiff : toBnDigits(absDiff)} {absDiff === 1 ? t.day : t.days} {isOverdue ? t.overdue : t.upcoming}
+                             </span>
+                           )}
+                         </div>
+                         <p className="text-[10px] font-bold text-slate-400 mt-1">{r.date}</p>
+                       </div>
                      </div>
-                   </div>
-                 ))
+                   );
+                 })
                ) : (
                  <div className="h-full flex flex-col items-center justify-center py-10 opacity-50">
                     <div className="w-10 h-10 bg-slate-100 dark:bg-slate-800 rounded-xl flex items-center justify-center mb-4">

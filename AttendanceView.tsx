@@ -346,6 +346,18 @@ const AttendanceView: React.FC<AttendanceViewProps> = ({ activitiesList, setActi
     });
   };
 
+  const getBorderColor = (color: string) => {
+    switch (color) {
+      case 'emerald': return 'border-emerald-100 dark:border-emerald-900/30';
+      case 'rose': return 'border-rose-100 dark:border-rose-900/30';
+      case 'indigo': return 'border-indigo-100 dark:border-indigo-900/30';
+      case 'slate': return 'border-slate-200 dark:border-slate-800';
+      case 'amber': return 'border-amber-100 dark:border-amber-900/30';
+      case 'orange': return 'border-orange-100 dark:border-orange-900/30';
+      default: return 'border-slate-200 dark:border-slate-800';
+    }
+  };
+
   return (
     <div className="space-y-4 animate-in fade-in duration-300 relative">
       {/* Data Period Filter */}
@@ -384,7 +396,7 @@ const AttendanceView: React.FC<AttendanceViewProps> = ({ activitiesList, setActi
           { label: 'Late', value: statsCount.late, icon: <AlertCircle size={18} />, color: 'amber' },
           { label: 'Tiffin', value: statsCount.tiffin, icon: <UtensilsCrossed size={18} />, color: 'orange' },
         ].map((stat, i) => (
-          <div key={i} className="bg-white dark:bg-slate-900 p-3 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm flex items-center gap-3 transition-all hover:shadow-md animate-in zoom-in-95 duration-200">
+          <div key={i} className={`bg-white dark:bg-slate-900 p-3 rounded-2xl border-2 ${getBorderColor(stat.color)} shadow-sm flex items-center gap-3 transition-all hover:shadow-md animate-in zoom-in-95 duration-200`}>
             <div className={`w-9 h-9 bg-${stat.color}-50 dark:bg-${stat.color}-900/20 text-${stat.color}-600 rounded-xl flex items-center justify-center shrink-0`}>
               {stat.icon}
             </div>

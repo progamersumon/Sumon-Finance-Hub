@@ -1,7 +1,7 @@
 
-import React, { useState } from 'react';
-import { Menu, Search, Sun, Moon, ChevronDown, RefreshCcw } from 'lucide-react';
-import { AppTab } from './types';
+import React from 'react';
+import { Menu, Search, Sun, Moon, ChevronDown } from 'lucide-react';
+import { AppTab, ThemeType } from './types';
 
 interface HeaderProps {
   activeTab: AppTab;
@@ -13,16 +13,23 @@ interface HeaderProps {
     imageUrl: string;
   };
   isSyncing?: boolean;
+  theme: ThemeType;
+  setTheme: (theme: ThemeType) => void;
 }
 
-const Header: React.FC<HeaderProps> = ({ activeTab, onOpenMenu, language = 'English', profile, isSyncing }) => {
-  const [isDarkMode, setIsDarkMode] = useState(document.documentElement.classList.contains('dark'));
+const Header: React.FC<HeaderProps> = ({ 
+  activeTab, 
+  onOpenMenu, 
+  language = 'English', 
+  profile, 
+  isSyncing,
+  theme,
+  setTheme
+}) => {
+  const isDarkMode = theme === 'dark';
 
   const toggleDarkMode = () => {
-    const newMode = !isDarkMode;
-    setIsDarkMode(newMode);
-    if (newMode) document.documentElement.classList.add('dark');
-    else document.documentElement.classList.remove('dark');
+    setTheme(isDarkMode ? 'light' : 'dark');
   };
 
   const translations = {
