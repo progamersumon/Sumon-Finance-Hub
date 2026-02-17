@@ -17,20 +17,7 @@ export const MOCK_TRANSACTIONS: Transaction[] = [];
 
 export const MOCK_PAYROLL: PayStub[] = [];
 
-export const MOCK_SAVINGS: SavingsGoal[] = [
-  { 
-    id: '1', 
-    name: 'DPS - Prime Bank', 
-    plan: '৳5000/Mo',
-    targetAmount: 500000, 
-    currentAmount: 0, 
-    maturityValue: 650000,
-    color: '#3b82f6', 
-    monthlyDeposit: 5000,
-    years: 10,
-    profitPercent: 7.5
-  }
-];
+export const MOCK_SAVINGS: SavingsGoal[] = [];
 
 export const MOCK_BILLS: Bill[] = [];
 

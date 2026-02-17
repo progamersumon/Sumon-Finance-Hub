@@ -14,13 +14,11 @@ import {
   Percent,
   AlertTriangle,
   TrendingUp,
-  Sparkles,
   ArrowUpRight,
   Calculator,
   Wallet
 } from 'lucide-react';
 import { SavingsGoal, SavingsRecord, Transaction } from './types';
-import { getSavingsStrategy } from './geminiService';
 
 interface SavingsInfoViewProps {
   goals: SavingsGoal[];
@@ -51,10 +49,6 @@ const SavingsInfoView: React.FC<SavingsInfoViewProps> = ({
 
   const [editingGoal, setEditingGoal] = useState<SavingsGoal | null>(null);
   const [editingRecord, setEditingRecord] = useState<SavingsRecord | null>(null);
-
-  const [isAIModalOpen, setIsAIModalOpen] = useState(false);
-  const [aiAdvice, setAiAdvice] = useState<string | null>(null);
-  const [isAiLoading, setIsAiLoading] = useState(false);
 
   const [goalForm, setGoalForm] = useState({
     name: '',
@@ -260,19 +254,6 @@ const SavingsInfoView: React.FC<SavingsInfoViewProps> = ({
     }
   };
 
-  const handleGetAIAdvice = async () => {
-    setIsAiLoading(true);
-    setIsAIModalOpen(true);
-    const context = {
-      goals,
-      analytics,
-      recentRecords: records.slice(0, 5)
-    };
-    const advice = await getSavingsStrategy(context);
-    setAiAdvice(advice);
-    setIsAiLoading(false);
-  };
-
   const formatDate = (dateStr: string) => {
     return new Date(dateStr).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
   };
@@ -315,12 +296,6 @@ const SavingsInfoView: React.FC<SavingsInfoViewProps> = ({
                 <div className="w-2 h-2 bg-indigo-600 rounded-full" /> Financial Assets
               </h3>
               <div className="flex gap-2">
-                <button 
-                  onClick={handleGetAIAdvice}
-                  className="flex items-center gap-1.5 px-3 py-1.5 bg-violet-50 dark:bg-violet-900/30 text-violet-600 dark:text-violet-400 rounded-lg text-[10px] font-black uppercase tracking-widest hover:bg-violet-600 hover:text-white transition-all shadow-sm border border-violet-100 dark:border-violet-800"
-                >
-                  <Sparkles size={14} /> AI Strategist
-                </button>
                 <button 
                   onClick={() => { 
                     setEditingGoal(null); 
@@ -372,8 +347,20 @@ const SavingsInfoView: React.FC<SavingsInfoViewProps> = ({
                             setIsGoalModalOpen(true); 
                           }}
                           className="w-8 h-8 flex items-center justify-center bg-white/10 hover:bg-white/20 text-white rounded-full transition-all border border-white/10 backdrop-blur-md"
+                          title="Edit Account"
                         >
                           <Pencil size={12} />
+                        </button>
+                        <button 
+                          onClick={(e) => { 
+                            e.stopPropagation(); 
+                            setGoalToDelete(goal.id); 
+                            setIsDeleteGoalConfirmOpen(true); 
+                          }}
+                          className="w-8 h-8 flex items-center justify-center bg-rose-500/20 hover:bg-rose-500/40 text-white rounded-full transition-all border border-white/10 backdrop-blur-md"
+                          title="Delete Account"
+                        >
+                          <Trash2 size={12} />
                         </button>
                       </div>
                     </div>
@@ -591,46 +578,6 @@ const SavingsInfoView: React.FC<SavingsInfoViewProps> = ({
         </div>
       </div>
 
-      {/* AI Strategy Modal */}
-      {isAIModalOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-950/40 backdrop-blur-md animate-in fade-in">
-          <div className="bg-white dark:bg-slate-900 w-full max-w-[500px] rounded-[32px] overflow-hidden shadow-2xl border border-slate-200 dark:border-slate-800 animate-in zoom-in-95">
-            <div className="flex items-center justify-between px-8 py-6 border-b border-violet-100 dark:border-violet-900/30 bg-violet-50/50 dark:bg-violet-900/10">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-violet-600 text-white rounded-2xl flex items-center justify-center shadow-lg shadow-violet-600/20">
-                  <Sparkles size={20} />
-                </div>
-                <div>
-                  <h2 className="text-[18px] font-black text-slate-900 dark:text-white uppercase tracking-tight leading-none">AI Wealth Strategist</h2>
-                  <p className="text-[10px] font-bold text-violet-500 uppercase tracking-widest mt-1.5">Smart advice powered by Gemini</p>
-                </div>
-              </div>
-              <button onClick={() => setIsAIModalOpen(false)} className="text-slate-400 hover:text-rose-500 transition-colors"><X size={20} /></button>
-            </div>
-            <div className="p-8">
-              {isAiLoading ? (
-                <div className="flex flex-col items-center justify-center py-12 gap-4">
-                  <div className="w-12 h-12 border-4 border-violet-200 border-t-violet-600 rounded-full animate-spin" />
-                  <p className="text-xs font-black text-violet-600 uppercase tracking-widest animate-pulse">Analyzing portfolio...</p>
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  <div className="prose prose-sm dark:prose-invert max-w-none text-slate-600 dark:text-slate-300 text-sm leading-relaxed whitespace-pre-wrap">
-                    {aiAdvice}
-                  </div>
-                  <button 
-                    onClick={() => setIsAIModalOpen(false)} 
-                    className="w-full h-12 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-2xl font-black text-[13px] uppercase tracking-widest transition-all mt-4"
-                  >
-                    Close Strategy
-                  </button>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* Goal Modal */}
       {isGoalModalOpen && (
         <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-slate-950/40 backdrop-blur-md animate-in fade-in">
@@ -721,11 +668,6 @@ const SavingsInfoView: React.FC<SavingsInfoViewProps> = ({
                 </div>
               </div>
 
-              {editingGoal && (
-                <button onClick={() => { setGoalToDelete(editingGoal.id); setIsDeleteGoalConfirmOpen(true); }} className="w-full flex items-center justify-center gap-2 py-2 text-rose-500 text-[10px] font-black uppercase hover:bg-rose-50 dark:hover:bg-rose-900/20 rounded-xl transition-colors">
-                  <Trash2 size={12} /> Delete Account
-                </button>
-              )}
               <button 
                 onClick={handleSaveGoal} 
                 className={`w-full h-12 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl font-black text-[14px] uppercase shadow-xl shadow-indigo-600/30 transition-all active:scale-[0.98] mt-4 flex items-center justify-center gap-2 ${(!goalForm.name || !goalForm.monthlyDeposit) ? 'opacity-50 cursor-not-allowed' : ''}`}

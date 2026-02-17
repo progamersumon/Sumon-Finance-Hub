@@ -35,7 +35,9 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ language, profile,
       attendance: 'Attendance Rate',
       latestActivity: 'Latest Activity',
       activeReminders: 'Active Reminders',
-      today: 'TODAY'
+      today: 'TODAY',
+      noActivity: 'No Activity',
+      noAlerts: 'No Alerts'
     },
     'বাংলা': {
       welcome: 'স্বাগতম,',
@@ -46,7 +48,9 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ language, profile,
       attendance: 'উপস্থিতির হার',
       latestActivity: 'সাম্প্রতিক কার্যকলাপ',
       activeReminders: 'সক্রিয় রিমাইন্ডার',
-      today: 'আজ'
+      today: 'আজ',
+      noActivity: 'কোনো কার্যকলাপ নেই',
+      noAlerts: 'কোনো সতর্কবার্তা নেই'
     }
   };
 
@@ -147,6 +151,17 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ language, profile,
     }
   };
 
+  // Helper for dynamic card styling
+  const getCardThemedClasses = (color: string) => {
+    switch (color) {
+      case 'emerald': return 'bg-emerald-50/50 border-emerald-100 dark:bg-emerald-900/10 dark:border-emerald-800/50 hover:border-emerald-500/50';
+      case 'rose': return 'bg-rose-50/50 border-rose-100 dark:bg-rose-900/10 dark:border-rose-800/50 hover:border-rose-500/50';
+      case 'indigo': return 'bg-indigo-50/50 border-indigo-100 dark:bg-indigo-900/10 dark:border-indigo-800/50 hover:border-indigo-500/50';
+      case 'blue': return 'bg-blue-50/50 border-blue-100 dark:bg-blue-900/10 dark:border-blue-800/50 hover:border-blue-500/50';
+      default: return 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:border-indigo-500/50';
+    }
+  };
+
   const mainStats = [
     { 
       label: t.monthlyIncome, 
@@ -196,7 +211,10 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ language, profile,
         {/* Left Column: Stats */}
         <div className="lg:col-span-6 grid grid-cols-2 gap-3 content-start">
           {mainStats.map((stat, i) => (
-            <div key={i} className="p-3 pt-3 pb-3 h-[112px] rounded-[24px] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col justify-between group hover:border-indigo-500/50 transition-all">
+            <div 
+              key={i} 
+              className={`p-3 pt-3 pb-3 h-[112px] rounded-xl border shadow-sm flex flex-col justify-between group transition-all ${getCardThemedClasses(stat.color)}`}
+            >
               <div className="flex items-start justify-between">
                 <div className="flex flex-col min-w-0">
                   <p className={`text-[10px] font-black uppercase tracking-widest mb-0.5 text-${stat.color}-600 dark:text-${stat.color}-400 truncate`}>
@@ -206,7 +224,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ language, profile,
                     {typeof stat.value === 'number' ? formatCurrency(stat.value) : stat.value}
                   </h3>
                 </div>
-                <div className={`w-8 h-8 rounded-xl bg-${stat.color}-500/10 text-${stat.color}-600 flex items-center justify-center group-hover:scale-110 transition-transform shrink-0`}>
+                <div className={`w-8 h-8 rounded-lg bg-${stat.color}-500/10 text-${stat.color}-600 flex items-center justify-center group-hover:scale-110 transition-transform shrink-0`}>
                   {stat.icon}
                 </div>
               </div>
@@ -229,7 +247,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ language, profile,
         {/* Right Column: Calendars */}
         <div className="lg:col-span-6 grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
           {/* English Calendar */}
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-[24px] shadow-sm overflow-hidden animate-in slide-in-from-right duration-700">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm overflow-hidden animate-in slide-in-from-right duration-700">
             <div className="bg-indigo-600 py-2.5 px-4 flex items-center justify-between text-white">
               <button onClick={() => navigateEnMonth(-1)} className="hover:bg-white/10 p-1 rounded-lg transition-colors"><ChevronLeft size={16} /></button>
               <h3 className="text-[10px] font-black uppercase tracking-[0.2em]">
@@ -246,14 +264,24 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ language, profile,
               <div className="grid grid-cols-7 gap-y-1 gap-x-1 text-center">
                 {enGrid.map((day, i) => {
                   const isToday = day === today.getDate() && enCalendarDate.getMonth() === today.getMonth() && enCalendarDate.getFullYear() === today.getFullYear();
+                  
+                  let bnEquivalent = "";
+                  if (day) {
+                    const dateObj = new Date(enCalendarDate.getFullYear(), enCalendarDate.getMonth(), day);
+                    const det = getBengaliMonthDetails(dateObj);
+                    bnEquivalent = `${toBnDigits(det.day)} ${det.monthName} ${toBnDigits(det.year)}`;
+                  }
+
                   return (
-                    <div key={i} className="relative flex items-center justify-center h-7 w-full">
+                    <div 
+                      key={i} 
+                      className="relative flex items-center justify-center h-7 w-full group/day cursor-help"
+                      title={bnEquivalent ? `বাংলা তারিখ: ${bnEquivalent}` : undefined}
+                    >
                       {day && (
                         <>
-                          {isToday && (
-                            <div className="absolute inset-0 m-auto w-6 h-6 bg-indigo-600 rounded-lg shadow-md shadow-indigo-600/40 z-0" />
-                          )}
-                          <span className={`text-[11px] font-black z-10 transition-colors ${isToday ? 'text-white' : 'text-slate-600 dark:text-slate-400'}`}>
+                          <div className={`absolute inset-0 m-auto w-7 h-7 rounded-lg transition-colors group-hover/day:bg-slate-100 dark:group-hover/day:bg-slate-800 ${isToday ? 'bg-indigo-600 shadow-md shadow-indigo-600/40' : ''}`} />
+                          <span className={`text-[11px] font-black z-10 transition-colors ${isToday ? 'text-white' : 'text-slate-600 dark:text-slate-400 group-hover/day:text-indigo-600'}`}>
                             {day}
                           </span>
                         </>
@@ -266,7 +294,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ language, profile,
           </div>
 
           {/* Bengali Calendar */}
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-[24px] shadow-sm overflow-hidden animate-in slide-in-from-right duration-700">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm overflow-hidden animate-in slide-in-from-right duration-700">
             <div className="bg-emerald-600 py-2.5 px-4 flex items-center justify-between text-white">
               <button onClick={() => navigateBnMonth(-1)} className="hover:bg-white/10 p-1 rounded-lg transition-colors"><ChevronLeft size={16} /></button>
               <h3 className="text-[10px] font-black uppercase tracking-widest">{bnInfo.monthName} {toBnDigits(bnInfo.year)}</h3>
@@ -281,14 +309,27 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ language, profile,
               <div className="grid grid-cols-7 gap-y-1 gap-x-1 text-center">
                 {bnGrid.map((day, i) => {
                   const isToday = day === todayDetails.day && bnInfo.month === todayDetails.month && bnInfo.year === todayDetails.year;
+                  
+                  let enEquivalent = "";
+                  if (day) {
+                    const firstOfBnMonth = new Date(bnCalendarDate);
+                    const currentDetails = getBengaliMonthDetails(bnCalendarDate);
+                    firstOfBnMonth.setDate(firstOfBnMonth.getDate() - (currentDetails.day - 1));
+                    const dateObj = new Date(firstOfBnMonth);
+                    dateObj.setDate(firstOfBnMonth.getDate() + (day - 1));
+                    enEquivalent = dateObj.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+                  }
+
                   return (
-                    <div key={i} className="relative flex items-center justify-center h-7 w-full">
+                    <div 
+                      key={i} 
+                      className="relative flex items-center justify-center h-7 w-full group/day cursor-help"
+                      title={enEquivalent ? `English Date: ${enEquivalent}` : undefined}
+                    >
                       {day && (
                         <>
-                          {isToday && (
-                            <div className="absolute inset-0 m-auto w-6 h-6 bg-emerald-600 rounded-lg shadow-md shadow-emerald-600/40 z-0" />
-                          )}
-                          <span className={`text-[12px] font-black z-10 transition-colors ${isToday ? 'text-white' : 'text-slate-600 dark:text-slate-400'}`}>
+                          <div className={`absolute inset-0 m-auto w-7 h-7 rounded-lg transition-colors group-hover/day:bg-slate-100 dark:group-hover/day:bg-slate-800 ${isToday ? 'bg-emerald-600 shadow-md shadow-emerald-600/40' : ''}`} />
+                          <span className={`text-[12px] font-black z-10 transition-colors ${isToday ? 'text-white' : 'text-slate-600 dark:text-slate-400 group-hover/day:text-emerald-600'}`}>
                             {toBnDigits(day)}
                           </span>
                         </>
@@ -305,43 +346,64 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ language, profile,
       {/* Activity and Details */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-6">
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-[32px] p-6 shadow-sm">
-            <h3 className="text-[11px] font-black text-slate-900 dark:text-white uppercase tracking-widest mb-6">{t.latestActivity}</h3>
-            <div className="space-y-3">
-              {transactions.slice(0, 8).map(tx => (
-                <div key={tx.id} className={`p-4 bg-slate-50 dark:bg-slate-950/40 rounded-2xl border border-slate-200/50 dark:border-slate-800 flex justify-between items-center border-l-4 ${tx.type === 'income' ? 'border-l-emerald-500' : 'border-l-rose-500'} hover:translate-x-1 transition-transform`}>
-                  <div className="flex items-center gap-3">
-                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${tx.type === 'income' ? 'bg-emerald-100 text-emerald-600' : 'bg-rose-100 text-rose-600'}`}>
-                      {tx.type === 'income' ? <ArrowUpRight size={14} /> : <ArrowDownRight size={14} />}
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-sm overflow-hidden min-h-[300px] flex flex-col">
+            <h3 className="text-[11px] font-black text-indigo-600 dark:text-indigo-400 -mx-6 -mt-6 mb-6 px-6 py-3 bg-indigo-50/50 dark:bg-indigo-900/20 border-b border-indigo-100 dark:border-indigo-800/50 flex items-center gap-2 uppercase tracking-tight">
+              <div className="w-1.5 h-1.5 rounded-full bg-indigo-600" /> {t.latestActivity}
+            </h3>
+            <div className="space-y-3 flex-1">
+              {transactions.length > 0 ? (
+                transactions.slice(0, 8).map(tx => (
+                  <div key={tx.id} className={`p-4 bg-slate-50 dark:bg-slate-950/40 rounded-xl border border-slate-200/50 dark:border-slate-800 flex justify-between items-center border-l-4 ${tx.type === 'income' ? 'border-l-emerald-500' : 'border-l-rose-500'} hover:translate-x-1 transition-transform`}>
+                    <div className="flex items-center gap-3">
+                      <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${tx.type === 'income' ? 'bg-emerald-100 text-emerald-600' : 'bg-rose-100 text-rose-600'}`}>
+                        {tx.type === 'income' ? <ArrowUpRight size={14} /> : <ArrowDownRight size={14} />}
+                      </div>
+                      <div>
+                        <p className="text-[12px] font-black text-slate-800 dark:text-slate-200 uppercase tracking-tight">{tx.category}</p>
+                        <p className="text-[9px] font-bold text-slate-400 uppercase mt-0.5">{tx.date}</p>
+                      </div>
                     </div>
-                    <div>
-                      <p className="text-[12px] font-black text-slate-800 dark:text-slate-200 uppercase tracking-tight">{tx.category}</p>
-                      <p className="text-[9px] font-bold text-slate-400 uppercase mt-0.5">{tx.date}</p>
-                    </div>
+                    <span className={`text-[13px] font-black ${tx.type === 'income' ? 'text-emerald-600' : 'text-rose-600'}`}>
+                      {tx.type === 'income' ? '+' : '-'}{formatCurrency(tx.amount)}
+                    </span>
                   </div>
-                  <span className={`text-[13px] font-black ${tx.type === 'income' ? 'text-emerald-600' : 'text-rose-600'}`}>
-                    {tx.type === 'income' ? '+' : '-'}{formatCurrency(tx.amount)}
-                  </span>
+                ))
+              ) : (
+                <div className="h-full flex flex-col items-center justify-center py-10 opacity-50">
+                  <div className="w-12 h-12 bg-slate-100 dark:bg-slate-800 rounded-xl flex items-center justify-center mb-4">
+                    <ArrowDownRight size={24} className="text-slate-400" />
+                  </div>
+                  <p className="text-[11px] font-black uppercase text-slate-400 tracking-widest">{t.noActivity}</p>
                 </div>
-              ))}
+              )}
             </div>
           </div>
         </div>
 
         <div className="space-y-6">
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-[32px] p-6 shadow-sm">
-             <h3 className="text-[11px] font-black text-slate-900 dark:text-white uppercase tracking-widest mb-6">{t.activeReminders}</h3>
-             <div className="space-y-4">
-               {reminders.filter(r => !r.completed).slice(0, 6).map(r => (
-                 <div key={r.id} className="flex items-start gap-4 group">
-                   <div className={`w-2 h-10 rounded-full shrink-0 ${r.priority === 'high' ? 'bg-rose-500' : r.priority === 'medium' ? 'bg-amber-500' : 'bg-blue-500'}`} />
-                   <div className="flex-1 min-w-0">
-                     <p className="text-[12px] font-black text-slate-800 dark:text-slate-200 uppercase tracking-tight truncate group-hover:text-indigo-600 transition-colors">{r.title}</p>
-                     <p className="text-[10px] font-bold text-slate-400 mt-1">{r.date}</p>
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-sm overflow-hidden min-h-[300px] flex flex-col">
+             <h3 className="text-[11px] font-black text-emerald-600 dark:text-emerald-400 -mx-6 -mt-6 mb-6 px-6 py-3 bg-emerald-50/50 dark:bg-indigo-900/20 border-b border-emerald-100 dark:border-emerald-800/50 flex items-center gap-2 uppercase tracking-tight">
+               <div className="w-1.5 h-1.5 rounded-full bg-emerald-600" /> {t.activeReminders}
+             </h3>
+             <div className="space-y-4 flex-1">
+               {reminders.filter(r => !r.completed).length > 0 ? (
+                 reminders.filter(r => !r.completed).slice(0, 6).map(r => (
+                   <div key={r.id} className="flex items-start gap-4 group">
+                     <div className={`w-1.5 h-10 rounded-full shrink-0 ${r.priority === 'high' ? 'bg-rose-500' : r.priority === 'medium' ? 'bg-amber-500' : 'bg-blue-500'}`} />
+                     <div className="flex-1 min-w-0">
+                       <p className="text-[12px] font-black text-slate-800 dark:text-slate-200 uppercase tracking-tight truncate group-hover:text-indigo-600 transition-colors">{r.title}</p>
+                       <p className="text-[10px] font-bold text-slate-400 mt-1">{r.date}</p>
+                     </div>
                    </div>
+                 ))
+               ) : (
+                 <div className="h-full flex flex-col items-center justify-center py-10 opacity-50">
+                    <div className="w-10 h-10 bg-slate-100 dark:bg-slate-800 rounded-xl flex items-center justify-center mb-4">
+                      <ICONS.Clock size={20} className="text-slate-400" />
+                    </div>
+                    <p className="text-[11px] font-black uppercase text-slate-400 tracking-widest">{t.noAlerts}</p>
                  </div>
-               ))}
-               {reminders.filter(r => !r.completed).length === 0 && <p className="text-center py-10 text-[11px] font-black uppercase text-slate-400 opacity-50">No alerts</p>}
+               )}
              </div>
           </div>
         </div>

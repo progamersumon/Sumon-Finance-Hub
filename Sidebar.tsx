@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { 
   BarChart3, 
@@ -90,7 +91,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, onSelectTab, isMobile, lan
             key={item.id}
             onClick={() => onSelectTab(item.id)}
             className={`
-              group w-full flex items-center gap-3 px-3 py-2 rounded-lg text-[11px] font-medium transition-all duration-200 border
+              group w-full flex items-center gap-3 px-3 py-2 rounded-lg text-[11px] font-bold transition-all duration-200 border
               ${activeTab === item.id 
                 ? 'bg-purple-600 text-white border-purple-700 shadow-md translate-x-1' 
                 : 'text-gray-600 dark:text-gray-400 border-purple-100 dark:border-purple-900/30 hover:border-purple-400 dark:hover:border-purple-500 hover:bg-purple-50/50 dark:hover:bg-purple-950/20 hover:translate-x-1'}
