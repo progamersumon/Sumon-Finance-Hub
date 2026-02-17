@@ -1,275 +1,185 @@
+import React, { useState, useMemo, useEffect } from 'react';
+import { 
+  Bell, 
+  Plus, 
+  Clock, 
+  Calendar, 
+  CheckCircle2, 
+  Trash2, 
+  Pencil, 
+  X,
+  Save,
+  BellRing,
+  AlertCircle,
+  AlertTriangle,
+  FileSpreadsheet,
+  Upload,
+  Eye
+} from 'lucide-react';
+import { Reminder, LanguageType } from './types';
+import { Modal, DeleteButton } from './components';
 
-import React, { useState, useMemo } from 'react';
-import { Reminder } from './types';
-import { Card, Modal, DeleteButton } from './components';
-import { formatDate } from './utils';
-
-export const RemindersView: React.FC<{
+interface RemindersViewProps {
+  language?: LanguageType;
   reminders: Reminder[];
   onAddReminder: (r: Reminder) => void;
   onUpdateReminder: (r: Reminder) => void;
   onDeleteReminder: (id: string) => void;
   onToggleReminder: (id: string) => void;
-}> = ({ reminders, onAddReminder, onUpdateReminder, onDeleteReminder, onToggleReminder }) => {
+}
+
+export const RemindersView: React.FC<RemindersViewProps> = ({ language = 'en', reminders, onAddReminder, onUpdateReminder, onDeleteReminder, onToggleReminder }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
-  const [editingReminder, setEditingReminder] = useState<Reminder | null>(null);
+  const [isBulkModalOpen, setIsBulkModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [reminderToDelete, setReminderToDelete] = useState<string | null>(null);
-
-  const todayStr = new Date().toISOString().split('T')[0];
-
+  const [editingReminder, setEditingReminder] = useState<Reminder | null>(null);
+  const [bulkInput, setBulkInput] = useState('');
+  const [bulkPreview, setBulkPreview] = useState<Omit<Reminder, 'id' | 'completed'>>([]);
+  
   const [formData, setFormData] = useState({
     title: '',
-    date: new Date().toISOString().split('T')[0]
+    date: new Date().toISOString().split('T')[0],
+    priority: 'medium' as 'high' | 'medium' | 'low'
   });
 
-  const stats = useMemo(() => {
-    const completed = reminders.filter(r => r.completed).length;
-    const remaining = reminders.length - completed;
-    return { remaining, completed };
-  }, [reminders]);
+  const t = {
+    en: { reminders: 'Active Reminders', add: 'Set Reminder', bulk: 'Bulk Add (Excel)', title: 'Title', date: 'Due Date', priority: 'Priority', save: 'Save Reminder', delConfirm: 'Delete Reminder?', delMsg: 'This action is permanent.', delete: 'Delete', cancel: 'Cancel', bulkTitle: 'Import from Excel', import: 'Import All', preview: 'Import Preview' },
+    bn: { reminders: 'সক্রিয় রিমাইন্ডার', add: 'নতুন রিমাইন্ডার', bulk: 'এক্সেলে এড করুন', title: 'শিরোনাম', date: 'শেষ তারিখ', priority: 'গুরুত্ব', save: 'সংরক্ষণ করুন', delConfirm: 'ডিলিট করবেন?', delMsg: 'এটি স্থায়ীভাবে মুছে যাবে।', delete: 'ডিলিট', cancel: 'বাতিল', bulkTitle: 'এক্সেল ইমপোর্ট', import: 'সব এড করুন', preview: 'প্রিভিউ' }
+  }[language === 'bn' ? 'bn' : 'en'];
 
-  // Sorted: Future items first (ascending), then past items (descending - recent overdue first)
-  const sortedPending = useMemo(() => 
-    reminders.filter(r => !r.completed).sort((a, b) => {
-      const isPastA = a.date < todayStr;
-      const isPastB = b.date < todayStr;
+  const toBengaliDigits = (num: string | number) => {
+    const bnDigits = ["০", "১", "২", "৩", "৪", "৫", "৬", "৭", "৮", "৯"];
+    return num.toString().replace(/\d/g, (d) => bnDigits[parseInt(d)]);
+  };
 
-      if (isPastA && !isPastB) return 1;  
-      if (!isPastA && isPastB) return -1; 
-      
-      if (!isPastA && !isPastB) {
-        return a.date.localeCompare(b.date);
-      } else {
-        return b.date.localeCompare(a.date);
-      }
-    }),
-    [reminders, todayStr]
-  );
+  const grouped = useMemo(() => ({
+    high: reminders.filter(r => r.priority === 'high'),
+    medium: reminders.filter(r => r.priority === 'medium'),
+    low: reminders.filter(r => r.priority === 'low'),
+  }), [reminders]);
 
-  const sortedHistory = useMemo(() => 
-    reminders.filter(r => r.completed).sort((a, b) => b.date.localeCompare(a.date)),
-    [reminders]
-  );
-
-  const getRelativeDateInfo = (dateStr: string) => {
-    const target = new Date(dateStr);
-    const now = new Date();
-    // Normalize to midnight for accurate day calculation
-    now.setHours(0, 0, 0, 0);
-    target.setHours(0, 0, 0, 0);
-
-    const diffTime = target.getTime() - now.getTime();
-    const diffDaysTotal = Math.round(diffTime / (1000 * 60 * 60 * 24));
-    
-    const isPast = diffDaysTotal < 0;
-    const absDays = Math.abs(diffDaysTotal);
-    
-    if (absDays === 0) return isPast ? "due today" : "due today";
-
-    const years = Math.floor(absDays / 365);
-    const remainingDaysAfterYears = absDays % 365;
-    const months = Math.floor(remainingDaysAfterYears / 30);
-    const days = remainingDaysAfterYears % 30;
-    
-    const parts = [];
-    if (years > 0) parts.push(`${years} ${years === 1 ? 'year' : 'years'}`);
-    if (months > 0) parts.push(`${months} ${months === 1 ? 'month' : 'months'}`);
-    if (days > 0 || (years === 0 && months === 0)) {
-      parts.push(`${days} ${days === 1 ? 'day' : 'days'}`);
-    }
-    
-    const label = isPast ? "overdue" : "remaining";
-    return `${parts.join(', ')} ${label}`;
+  const getDayDiff = (dateStr: string) => {
+    const today = new Date(); today.setHours(0,0,0,0);
+    const target = new Date(dateStr); target.setHours(0,0,0,0);
+    return Math.ceil((target.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
   };
 
   const handleSave = () => {
-    if (!formData.title.trim()) return alert("Please enter a task title.");
-
-    const reminderData: Reminder = {
-      id: editingReminder?.id || Math.random().toString(36).substr(2, 9),
-      title: formData.title,
-      date: formData.date,
-      priority: editingReminder?.priority || 'medium', // Default priority is medium
-      completed: editingReminder?.completed || false
-    };
-
-    if (editingReminder) onUpdateReminder(reminderData);
-    else onAddReminder(reminderData);
-
+    if (!formData.title) return;
+    const data: Reminder = { id: editingReminder?.id || Math.random().toString(36).substr(2, 9), ...formData, completed: editingReminder?.completed || false };
+    if (editingReminder) onUpdateReminder(data);
+    else onAddReminder(data);
     setIsModalOpen(false);
-    setEditingReminder(null);
   };
 
-  const startEdit = (reminder: Reminder) => {
-    setEditingReminder(reminder);
-    setFormData({
-      title: reminder.title,
-      date: reminder.date
+  const handleBulkImport = () => {
+    const lines = bulkInput.trim().split('\n');
+    lines.forEach(line => {
+      const [date, title, priority] = line.split('\t');
+      if (date && title) {
+        onAddReminder({
+          id: Math.random().toString(36).substr(2, 9),
+          title: title.trim(),
+          date: new Date(date.trim()).toISOString().split('T')[0],
+          priority: (priority?.trim().toLowerCase() as any) || 'medium',
+          completed: false
+        });
+      }
     });
-    setIsModalOpen(true);
+    setBulkInput(''); setIsBulkModalOpen(false);
   };
 
-  const startDelete = (id: string) => {
-    setReminderToDelete(id);
-    setIsDeleteConfirmOpen(true);
-  };
-
-  const confirmDelete = () => {
-    if (reminderToDelete) {
-      onDeleteReminder(reminderToDelete);
-      setReminderToDelete(null);
-      setIsDeleteConfirmOpen(false);
-    }
-  };
-
-  const ReminderItem = ({ reminder }: { reminder: Reminder }) => {
-    const relativeInfo = getRelativeDateInfo(reminder.date);
-    const isOverdue = !reminder.completed && relativeInfo.includes('overdue');
-
+  const ReminderCard: React.FC<{ reminder: Reminder }> = ({ reminder }) => {
+    const diff = getDayDiff(reminder.date), overdue = diff < 0, abs = Math.abs(diff);
     return (
-      <div className={`group flex items-center justify-between p-3 sm:p-4 rounded-2xl border transition-all ${reminder.completed ? 'bg-slate-50/50 dark:bg-slate-900/20 border-slate-100 dark:border-slate-800 opacity-80' : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:shadow-md'}`}>
-        <div className="flex items-center gap-3 sm:gap-4 flex-1 min-w-0">
-          <button 
-            onClick={() => onToggleReminder(reminder.id)}
-            className={`w-6 h-6 rounded-lg border-2 flex items-center justify-center transition-all flex-shrink-0 ${reminder.completed ? 'bg-emerald-500 border-emerald-500 text-white' : 'border-slate-300 dark:border-slate-600 hover:border-blue-500'}`}
-          >
-            {reminder.completed && <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>}
+      <div className={`bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 flex items-center justify-between shadow-sm hover:shadow-md transition-all ${reminder.completed ? 'opacity-60 grayscale' : ''}`}>
+        <div className="flex items-center gap-4">
+          <button onClick={() => onToggleReminder(reminder.id)} className={`w-9 h-9 rounded-xl border-2 flex items-center justify-center transition-all ${reminder.completed ? 'bg-indigo-600 border-indigo-600 text-white' : 'bg-white dark:bg-slate-900 border-slate-200'}`}>
+            {reminder.completed && <CheckCircle2 size={18} strokeWidth={3} />}
           </button>
-          <div className="min-w-0 flex-1">
-            <h5 className={`font-bold text-xs sm:text-sm truncate ${reminder.completed ? 'text-slate-400 line-through' : 'text-slate-800 dark:text-white'}`}>
-              {reminder.title}
-            </h5>
-            <div className="flex flex-col gap-0.5 mt-1">
-              <div className="flex items-center gap-2">
-                <span className="text-[9px] sm:text-[10px] font-bold text-slate-400 uppercase tracking-tighter">{formatDate(reminder.date)}</span>
-              </div>
-              <span className={`text-[9px] font-black uppercase tracking-widest ${isOverdue ? 'text-rose-500 animate-pulse' : reminder.completed ? 'text-emerald-500' : 'text-blue-500'}`}>
-                {relativeInfo}
-              </span>
+          <div className="flex flex-col min-w-0">
+            <h3 className={`text-[14px] font-black text-slate-800 dark:text-slate-200 uppercase truncate max-w-[150px] ${reminder.completed ? 'line-through' : ''}`}>{reminder.title}</h3>
+            <div className="flex items-center gap-2 mt-1">
+              <span className="text-[10px] font-bold text-slate-400">{reminder.date}</span>
+              {!reminder.completed && <span className={`text-[9px] font-black uppercase tracking-widest ${overdue ? 'text-rose-500 animate-pulse' : 'text-emerald-500'}`}>{language === 'bn' ? toBengaliDigits(abs) : abs} DAYS {overdue ? 'OVERDUE' : 'LEFT'}</span>}
             </div>
           </div>
         </div>
-        <div className="flex items-center gap-1 sm:gap-2 ml-4">
-          <button 
-            onClick={() => startEdit(reminder)} 
-            className="p-2 text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 hover:bg-blue-100 dark:hover:bg-blue-900/50 rounded-lg transition-colors border border-blue-100 dark:border-blue-900/20 shadow-sm active:scale-90"
-            title="Edit"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-          </button>
-          <DeleteButton onClick={() => startDelete(reminder.id)} />
+        <div className="flex gap-2">
+          {!reminder.completed && <button onClick={() => { setEditingReminder(reminder); setFormData({...formData, title: reminder.title, date: reminder.date, priority: reminder.priority}); setIsModalOpen(true); }} className="w-9 h-9 bg-slate-50 dark:bg-slate-800 text-slate-400 rounded-xl flex items-center justify-center border hover:border-indigo-500"><Pencil size={15} /></button>}
+          <button onClick={() => { setReminderToDelete(reminder.id); setIsDeleteModalOpen(true); }} className="w-9 h-9 bg-slate-50 dark:bg-slate-800 text-slate-400 rounded-xl flex items-center justify-center border hover:border-rose-500"><Trash2 size={15} /></button>
         </div>
       </div>
     );
   };
 
   return (
-    <div className="space-y-6 animate-in fade-in duration-500 pb-24 lg:pb-0">
-      {/* Stats Cards */}
-      <div className="grid grid-cols-2 gap-4">
-        <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm transition-transform hover:-translate-y-1">
-          <p className="text-[10px] font-black text-blue-500 uppercase tracking-widest mb-1">Remaining</p>
-          <div className="flex items-baseline gap-1.5">
-            <h3 className="text-3xl font-black text-slate-800 dark:text-white tracking-tighter">{stats.remaining}</h3>
-            <span className="text-xs font-bold text-slate-400 uppercase tracking-tight">Task</span>
-          </div>
+    <div className="space-y-8 pb-24 animate-in fade-in duration-500">
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div className="flex items-center gap-3 w-full sm:w-auto">
+          <div className="w-10 h-10 bg-indigo-600 text-white rounded-2xl flex items-center justify-center shadow-lg"><Bell size={20} /></div>
+          <div><h2 className="text-[16px] font-black text-slate-900 dark:text-white uppercase tracking-tight leading-none">{t.reminders}</h2><p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1.5">Manage your alerts</p></div>
         </div>
-        <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm transition-transform hover:-translate-y-1">
-          <p className="text-[10px] font-black text-emerald-500 uppercase tracking-widest mb-1">Completed</p>
-          <div className="flex items-baseline gap-1.5">
-            <h3 className="text-3xl font-black text-emerald-600 dark:text-emerald-400 tracking-tighter">{stats.completed}</h3>
-            <span className="text-xs font-bold text-slate-400 uppercase tracking-tight">Task</span>
-          </div>
+        <div className="flex gap-3 w-full sm:w-auto">
+          <button onClick={() => setIsBulkModalOpen(true)} className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-slate-100 dark:bg-slate-800 text-slate-600 rounded-2xl text-[11px] font-black uppercase border"><FileSpreadsheet size={16} /> {t.bulk}</button>
+          <button onClick={() => { setEditingReminder(null); setFormData({title: '', date: new Date().toISOString().split('T')[0], priority: 'medium'}); setIsModalOpen(true); }} className="flex-1 flex items-center justify-center gap-2 px-5 py-2.5 bg-indigo-600 text-white rounded-2xl text-[11px] font-black uppercase shadow-xl"><Plus size={16} /> {t.add}</button>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {/* Pending Section */}
-        <div className="space-y-4">
-          <h4 className="text-slate-800 dark:text-slate-200 font-black text-xs sm:text-sm uppercase tracking-[0.2em] px-1 border-l-4 border-blue-600 pl-3">Upcoming Reminders</h4>
-          <div className="space-y-3">
-            {sortedPending.length > 0 ? (
-              sortedPending.map(r => <ReminderItem key={r.id} reminder={r} />)
-            ) : (
-              <div className="py-20 text-center bg-white dark:bg-slate-900 rounded-3xl border border-slate-100 dark:border-slate-800">
-                <p className="text-slate-400 italic text-sm">No pending reminders.</p>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* History Section */}
-        <div className="space-y-4">
-          <h4 className="text-slate-800 dark:text-slate-200 font-black text-xs sm:text-sm uppercase tracking-[0.2em] px-1 border-l-4 border-emerald-500 pl-3">Recently Completed</h4>
-          <div className="space-y-3">
-            {sortedHistory.length > 0 ? (
-              sortedHistory.slice(0, 10).map(r => <ReminderItem key={r.id} reminder={r} />)
-            ) : (
-              <div className="py-20 text-center border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-3xl">
-                <p className="text-slate-400 italic text-sm">No completed tasks yet.</p>
-              </div>
-            )}
-          </div>
-        </div>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {(['high', 'medium', 'low'] as const).map(p => (
+          <section key={p} className="space-y-4">
+            <div className="flex items-center gap-3 px-3"><div className={`w-2 h-4 bg-${p === 'high' ? 'rose' : p === 'medium' ? 'amber' : 'blue'}-500 rounded-full`} /><h3 className={`text-[11px] font-black text-${p === 'high' ? 'rose' : p === 'medium' ? 'amber' : 'blue'}-600 uppercase tracking-widest`}>{p} priority</h3></div>
+            <div className="flex flex-col gap-3">
+              {grouped[p].length > 0 ? grouped[p].map(r => <ReminderCard key={r.id} reminder={r} />) : <div className="py-10 border-2 border-dashed border-slate-100 dark:border-slate-800 rounded-2xl text-center"><p className="text-[10px] font-bold text-slate-300 uppercase tracking-widest">No reminders</p></div>}
+            </div>
+          </section>
+        ))}
       </div>
 
-      {/* FAB */}
-      <button 
-        className="fixed bottom-24 right-6 lg:bottom-12 lg:right-12 w-14 h-14 sm:w-16 sm:h-16 bg-blue-600 text-white rounded-full shadow-2xl flex items-center justify-center text-3xl sm:text-4xl font-light hover:scale-110 active:scale-95 transition-all z-[60] group"
-        onClick={() => {
-          setEditingReminder(null);
-          setFormData({ title: '', date: new Date().toISOString().split('T')[0] });
-          setIsModalOpen(true);
-        }}
-      >
-        <span className="group-hover:rotate-90 transition-transform duration-300">+</span>
-      </button>
-
-      {/* Input Modal */}
-      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title={editingReminder ? "Edit Task" : "Add Task"}>
-        <div className="space-y-5">
-          <div>
-            <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 pl-1">Task Title</label>
-            <input 
-              type="text" 
-              value={formData.title} 
-              onChange={e => setFormData({...formData, title: e.target.value})}
-              className="w-full p-3.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl outline-none focus:ring-4 focus:ring-blue-100 dark:focus:ring-blue-900/20 font-bold text-sm dark:text-white"
-              placeholder="e.g. Call the bank"
-            />
-          </div>
-          <div>
-            <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 pl-1">Due Date</label>
-            <input 
-              type="date" 
-              value={formData.date} 
-              onChange={e => setFormData({...formData, date: e.target.value})}
-              className="w-full p-3.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl outline-none focus:ring-4 focus:ring-blue-100 dark:focus:ring-blue-900/20 font-bold text-sm dark:text-white"
-            />
-          </div>
-          <button 
-            onClick={handleSave}
-            className="w-full py-4 bg-blue-600 text-white font-black rounded-2xl shadow-xl hover:bg-blue-700 active:scale-95 transition-all uppercase tracking-widest text-[11px]"
-          >
-            {editingReminder ? "Update Task" : "Save Task"}
-          </button>
-        </div>
-      </Modal>
-
-      {/* Delete Modal */}
-      <Modal isOpen={isDeleteConfirmOpen} onClose={() => setIsDeleteConfirmOpen(false)} title="Confirm Delete">
-        <div className="text-center space-y-4">
-          <div className="w-16 h-16 bg-rose-50 dark:bg-rose-900/30 text-rose-500 rounded-full flex items-center justify-center mx-auto mb-2 animate-pulse">
-            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
-          </div>
-          <p className="font-bold text-slate-800 dark:text-white">Delete this task permanently?</p>
-          <div className="grid grid-cols-2 gap-3 mt-6">
-            <button onClick={() => setIsDeleteConfirmOpen(false)} className="py-3 px-4 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-bold rounded-xl hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">Cancel</button>
-            <button onClick={confirmDelete} className="py-3 px-4 bg-rose-600 text-white font-bold rounded-xl hover:bg-rose-700 transition-all active:scale-95 shadow-lg shadow-rose-100 dark:shadow-none">Delete</button>
+      {isModalOpen && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-950/40 backdrop-blur-md animate-in fade-in">
+          <div className="bg-white dark:bg-slate-900 w-full max-w-[400px] rounded-[40px] p-8 shadow-2xl border border-slate-200 dark:border-slate-800 animate-in zoom-in-95">
+            <div className="flex items-center justify-between mb-8"><div className="flex gap-3"><div className="w-10 h-10 bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 rounded-2xl flex items-center justify-center shadow-inner"><BellRing size={20} /></div><h2 className="text-[18px] font-black text-slate-900 dark:text-white uppercase">{editingReminder ? t.save : t.add}</h2></div><button onClick={() => setIsModalOpen(false)} className="w-11 h-11 bg-rose-500 text-white rounded-2xl flex items-center justify-center shadow-lg"><X size={24} strokeWidth={3} /></button></div>
+            <div className="space-y-5">
+              <div className="space-y-1.5"><label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">{t.title}</label><input type="text" value={formData.title} onChange={e => setFormData({...formData, title: e.target.value})} className="w-full h-12 px-5 bg-slate-50 dark:bg-slate-800 border rounded-2xl text-[13px] font-bold dark:text-white outline-none focus:border-purple-600 shadow-sm" /></div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-1.5"><label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">{t.date}</label><input type="date" value={formData.date} onChange={e => setFormData({...formData, date: e.target.value})} className="w-full h-12 px-4 bg-slate-50 dark:bg-slate-800 border rounded-2xl text-[12px] font-bold dark:text-white outline-none focus:border-purple-600 shadow-sm" /></div>
+                <div className="space-y-1.5"><label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">{t.priority}</label><select value={formData.priority} onChange={e => setFormData({...formData, priority: e.target.value as any})} className="w-full h-12 px-4 bg-slate-50 dark:bg-slate-800 border rounded-2xl text-[12px] font-bold dark:text-white outline-none focus:border-purple-600 shadow-sm cursor-pointer"><option value="high">High</option><option value="medium">Medium</option><option value="low">Low</option></select></div>
+              </div>
+              <button onClick={handleSave} className="w-full h-14 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl font-black text-[13px] uppercase shadow-2xl transition-all active:scale-[0.98] mt-4 flex items-center justify-center gap-3"><Save size={20} /> {t.save}</button>
+            </div>
           </div>
         </div>
-      </Modal>
+      )}
+
+      {isBulkModalOpen && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-md animate-in fade-in">
+          <div className="bg-white dark:bg-slate-900 w-full max-w-[550px] rounded-[40px] p-8 shadow-2xl animate-in zoom-in-95">
+            <div className="flex items-center justify-between mb-6"><div className="flex gap-3"><div className="w-10 h-10 bg-emerald-100 text-emerald-600 rounded-2xl flex items-center justify-center shadow-inner"><FileSpreadsheet size={20} /></div><h2 className="text-[18px] font-black text-slate-900 dark:text-white uppercase">{t.bulkTitle}</h2></div><button onClick={() => setIsBulkModalOpen(false)} className="w-11 h-11 bg-rose-500 text-white rounded-2xl flex items-center justify-center shadow-lg"><X size={24} strokeWidth={3} /></button></div>
+            <div className="space-y-6">
+              <div className="p-4 bg-indigo-50 dark:bg-indigo-950/20 border border-indigo-100 rounded-2xl flex items-start gap-3"><AlertCircle size={18} className="text-indigo-600 shrink-0 mt-0.5" /><p className="text-[11px] font-black text-indigo-700 dark:text-indigo-300 leading-tight uppercase">Format: Column A = Date, Column B = Title, Column C = Priority (optional)</p></div>
+              <textarea value={bulkInput} onChange={e => setBulkInput(e.target.value)} placeholder="Paste rows from Excel here..." className="w-full h-[140px] px-6 py-5 bg-slate-50 dark:bg-slate-800 border-2 rounded-[32px] text-[13px] font-bold dark:text-white outline-none focus:border-purple-600 transition-all shadow-inner resize-none" />
+              <button onClick={handleBulkImport} disabled={!bulkInput.trim()} className="w-full h-14 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white rounded-2xl font-black text-[13px] uppercase shadow-2xl transition-all active:scale-[0.98] flex items-center justify-center gap-3"><Upload size={20} /> {t.import}</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {isDeleteModalOpen && (
+        <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-md animate-in fade-in">
+          <div className="bg-white dark:bg-slate-900 w-full max-w-[320px] rounded-[32px] p-8 text-center shadow-2xl border animate-in zoom-in-95">
+            <div className="w-16 h-16 bg-rose-100 text-rose-600 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-inner"><AlertTriangle size={32} /></div>
+            <h2 className="text-[18px] font-black text-slate-900 dark:text-white mb-2 uppercase">{t.delConfirm}</h2>
+            <p className="text-[12px] text-slate-500 dark:text-slate-400 mb-8 font-bold leading-relaxed">{t.delMsg}</p>
+            <div className="flex gap-4">
+              <button onClick={() => { if (reminderToDelete) onDeleteReminder(reminderToDelete); setIsDeleteModalOpen(false); setReminderToDelete(null); }} className="flex-1 py-3.5 bg-rose-600 text-white rounded-xl text-[12px] font-black uppercase hover:bg-rose-700 transition-all">{t.delete}</button>
+              <button onClick={() => { setIsDeleteModalOpen(false); setReminderToDelete(null); }} className="flex-1 py-3.5 bg-slate-100 dark:bg-slate-800 text-slate-600 rounded-xl text-[12px] font-black uppercase hover:bg-slate-200 transition-all">{t.cancel}</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

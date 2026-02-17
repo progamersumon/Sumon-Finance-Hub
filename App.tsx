@@ -517,11 +517,11 @@ const AppContent: React.FC = () => {
 
   const renderView = () => {
     switch (activeView) {
-      case 'dashboard': return ( <DashboardView metrics={metrics} bills={bills} savings={savings} transactions={transactions} savingsPlan={savingsPlan} reminders={reminders} holidays={holidays} onAddHoliday={handleAddHoliday} onDeleteHoliday={handleDeleteHoliday} /> );
+      case 'dashboard': return ( <DashboardView metrics={metrics} bills={bills} savings={savings} transactions={transactions} savingsPlan={savingsPlan} reminders={reminders} holidays={holidays} onAddHoliday={handleAddHoliday} onDeleteHoliday={handleDeleteHoliday} userProfile={userProfile} language={language} attendanceRecords={attendanceRecords} /> );
       case 'financial': return ( <FinancialInfoView transactions={transactions} onAddTransaction={handleAddTransaction} onDeleteTransaction={handleTransactionDelete} onUpdateTransaction={handleUpdateTransaction} /> );
       case 'history': return ( <FinancialInfoView transactions={transactions} onAddTransaction={handleAddTransaction} onDeleteTransaction={handleTransactionDelete} onUpdateTransaction={handleUpdateTransaction} isHistoryOnly={true} /> );
       case 'payroll': return ( <PayrollView salaryConfig={salaryConfig} setSalaryConfig={setSalaryConfig} historyEntries={historyEntries} setHistoryEntries={setHistoryEntries} leaveRecords={leaveRecords} setLeaveRecords={setLeaveRecords} attendanceRecords={attendanceRecords} setAttendanceRecords={setAttendanceRecords} leaveQuotas={leaveQuotas} setLeaveQuotas={setLeaveQuotas} /> );
-      case 'savings': return ( <SavingsView savings={savings} transactions={transactions} savingsPlan={savingsPlan} onUpdatePlan={setSavingsPlan} onAddTransaction={handleAddTransaction} onDeleteTransaction={handleTransactionDelete} onDeleteTransactions={handleTransactionsBulkDelete} onUpdateTransaction={handleUpdateTransaction} /> );
+      case 'savings': return ( <SavingsView savings={savings} transactions={transactions} onAddTransaction={handleAddTransaction} onUpdateTransaction={handleUpdateTransaction} onDeleteTransaction={handleTransactionDelete} /> );
       case 'bills': return ( <BillsView bills={bills} onAddBill={handleAddBill} onUpdateBill={handleUpdateBill} onDeleteBill={handleDeleteBill} /> );
       case 'betting': return ( <BettingView bets={bets} onAddBet={handleAddBet} onUpdateBet={handleUpdateBet} onDeleteBet={handleDeleteBet} /> );
       case 'reminders': return ( <RemindersView reminders={reminders} onAddReminder={handleAddReminder} onUpdateReminder={handleUpdateReminder} onDeleteReminder={handleDeleteReminder} onToggleReminder={handleToggleReminder} /> );
@@ -533,41 +533,41 @@ const AppContent: React.FC = () => {
   return (
     <div className="h-screen flex bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 overflow-hidden transition-colors">
       {isSidebarOpen && <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-40 lg:hidden" onClick={() => setIsSidebarOpen(false)} />}
-      <aside className={`fixed inset-y-0 left-0 z-50 w-64 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 transform transition-all duration-300 lg:relative lg:translate-x-0 lg:flex lg:flex-col lg:h-full lg:flex-none ${isSidebarOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-full lg:translate-x-0'}`}>
-        <div className="h-full flex flex-col p-6 overflow-hidden">
-          <div className="flex-none flex items-center space-x-2 text-blue-600 mb-8 cursor-pointer" onClick={() => setActiveView('dashboard')}>
-            <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center text-white font-black text-2xl shadow-lg">F</div>
-            <span className="text-2xl font-black text-slate-800 dark:text-white">Finance Hub</span>
+      <aside className={`fixed inset-y-0 left-0 z-50 w-60 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 transform transition-all duration-300 lg:relative lg:translate-x-0 lg:flex lg:flex-col lg:h-full lg:flex-none ${isSidebarOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-full lg:translate-x-0'}`}>
+        <div className="h-full flex flex-col p-4 overflow-hidden">
+          <div className="flex-none flex items-center space-x-2 text-blue-600 mb-6 cursor-pointer" onClick={() => setActiveView('dashboard')}>
+            <div className="w-9 h-9 bg-blue-600 rounded-lg flex items-center justify-center text-white font-black text-xl shadow-lg">F</div>
+            <span className="text-xl font-black text-slate-800 dark:text-white">Finance Hub</span>
           </div>
-          <nav className="flex-1 space-y-1.5 overflow-y-auto no-scrollbar">
+          <nav className="flex-1 space-y-1 overflow-y-auto no-scrollbar">
             {navItems.map(item => (
               <SidebarItem key={item.id} id={item.id as ViewType} label={item.label} icon={item.icon} active={activeView === item.id} onClick={() => { setActiveView(item.id as ViewType); setIsSidebarOpen(false); }} />
             ))}
           </nav>
-          <div className="mt-4 pt-4 border-t border-slate-100 dark:border-slate-800">
+          <div className="mt-2 pt-2 border-t border-slate-100 dark:border-slate-800">
             <SidebarItem id="logout" label={t('logout', language)} icon={<ICONS.Logout />} active={false} onClick={handleLogout} />
           </div>
         </div>
       </aside>
       <div className="flex-1 flex flex-col min-w-0 h-screen overflow-hidden">
-        <header className="flex-none bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl border-b border-slate-200/60 dark:border-slate-800 px-4 sm:px-6 py-4 flex items-center justify-between z-30">
+        <header className="flex-none bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl border-b border-slate-200/60 dark:border-slate-800 px-3 sm:px-5 py-3 flex items-center justify-between z-30">
           <div className="flex items-center">
-            <button onClick={() => setIsSidebarOpen(true)} className="p-2 mr-2 lg:hidden rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="18" y1="18" y2="18"/></svg></button>
-            <h2 className="text-base sm:text-2xl font-extrabold text-slate-800 dark:text-white capitalize">{activeView.replace('-', ' ')}</h2>
+            <button onClick={() => setIsSidebarOpen(true)} className="p-1.5 mr-2 lg:hidden rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="18" y1="18" y2="18"/></svg></button>
+            <h2 className="text-sm sm:text-xl font-extrabold text-slate-800 dark:text-white capitalize tracking-tight">{activeView.replace('-', ' ')}</h2>
           </div>
-          <div className="flex items-center space-x-2 sm:space-x-4">
-            <button onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')} className="p-2 rounded-xl bg-slate-100 dark:bg-slate-800 transition-all border border-slate-200 dark:border-slate-700">
-              {theme === 'dark' ? <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg> : <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>}
+          <div className="flex items-center space-x-2 sm:space-x-3">
+            <button onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')} className="p-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 transition-all border border-slate-200 dark:border-slate-700">
+              {theme === 'dark' ? <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg> : <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>}
             </button>
-            <div className="hidden sm:flex flex-col items-end leading-tight">
-              <span className="text-[10px] font-medium text-slate-400 dark:text-slate-500 uppercase tracking-wider">Welcome</span>
-              <span className="text-sm font-bold text-slate-700 dark:text-slate-300 truncate max-w-[120px]">{userProfile.name}</span>
+            <div className="hidden sm:flex flex-col items-end leading-none">
+              <span className="text-[9px] font-medium text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-0.5">User</span>
+              <span className="text-xs font-bold text-slate-700 dark:text-slate-300 truncate max-w-[100px]">{userProfile.name}</span>
             </div>
-            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-slate-200 dark:bg-slate-800 border-2 border-white dark:border-slate-700 overflow-hidden cursor-pointer hover:scale-105 transition-transform" onClick={() => setActiveView('settings')}><img src={userProfile.avatar} alt="profile" className="object-cover w-full h-full" /></div>
+            <div className="w-8 h-8 rounded-lg bg-slate-200 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 overflow-hidden cursor-pointer hover:scale-105 transition-transform" onClick={() => setActiveView('settings')}><img src={userProfile.avatar} alt="profile" className="object-cover w-full h-full" /></div>
           </div>
         </header>
-        <main ref={mainContentRef} className="flex-1 overflow-y-auto no-scrollbar p-3 sm:p-6 lg:p-10 bg-slate-50 dark:bg-slate-950">
-          <div className="max-w-7xl mx-auto w-full">{renderView()}</div>
+        <main ref={mainContentRef} className="flex-1 overflow-y-auto no-scrollbar p-2 sm:p-4 bg-slate-50 dark:bg-slate-950">
+          <div className="max-w-full mx-auto w-full">{renderView()}</div>
         </main>
       </div>
     </div>

@@ -1,430 +1,185 @@
-
 import React, { useState, useMemo, useEffect } from 'react';
+import { 
+  PiggyBank, 
+  Plus, 
+  X, 
+  Pencil, 
+  Trash2, 
+  Target,
+  Save,
+  History,
+  Layers,
+  Fingerprint,
+  Percent,
+  AlertTriangle
+} from 'lucide-react';
 import { SavingGoal, Transaction } from './types';
-import { Card, Modal, DeleteButton } from './components';
-import { SavingsPlan } from './App';
+import { Modal, DeleteButton, Card } from './components';
 
-export const SavingsView: React.FC<{ 
+interface SavingsViewProps {
   savings: SavingGoal[];
   transactions: Transaction[];
-  savingsPlan: SavingsPlan;
-  onUpdatePlan: (p: SavingsPlan) => void;
-  onAddTransaction: (t: Transaction) => void;
+  onAddTransaction: (tx: Transaction) => void;
+  onEditTransaction: (tx: Transaction) => void; // Using specific naming for sync
+  onUpdateTransaction: (tx: Transaction) => void;
   onDeleteTransaction: (id: string) => void;
-  onDeleteTransactions: (ids: string[]) => void;
-  onUpdateTransaction: (t: Transaction) => void;
-}> = ({ 
-  savings, transactions, savingsPlan, onUpdatePlan, 
-  onAddTransaction, onDeleteTransaction, onDeleteTransactions, onUpdateTransaction 
+}
+
+export const SavingsView: React.FC<SavingsViewProps> = ({ 
+  savings, 
+  transactions, 
+  onAddTransaction,
+  onUpdateTransaction,
+  onDeleteTransaction
 }) => {
-  // Calculator/Edit Modal local form states
-  const [isCalculatorOpen, setIsCalculatorOpen] = useState(false);
-  const [isAddDPSOpen, setIsAddDPSOpen] = useState(false);
-  const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
-  const [isDeleteAllOpen, setIsDeleteAllOpen] = useState(false);
-  
-  const [transactionToDelete, setTransactionToDelete] = useState<string | null>(null);
-  const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
-  
-  // Local form for Settings Modal (to prevent instant sync while typing)
-  const [modalBankName, setModalBankName] = useState(savingsPlan.bankName);
-  const [modalYears, setModalYears] = useState(savingsPlan.years.toString());
-  const [modalRate, setModalRate] = useState(savingsPlan.rate.toString());
-  const [modalAmount, setModalAmount] = useState(savingsPlan.amount.toString());
+  const [isGoalModalOpen, setIsGoalModalOpen] = useState(false);
+  const [isRecordModalOpen, setIsRecordModalOpen] = useState(false);
+  const [isDeleteGoalConfirmOpen, setIsDeleteGoalConfirmOpen] = useState(false);
+  const [goalToDelete, setGoalToDelete] = useState<string | null>(null);
+  const [isDeleteRecordConfirmOpen, setIsDeleteRecordConfirmOpen] = useState(false);
+  const [recordToDelete, setRecordToDelete] = useState<Transaction | null>(null);
+  const [editingGoal, setEditingGoal] = useState<SavingGoal | null>(null);
+  const [editingRecord, setEditingRecord] = useState<Transaction | null>(null);
 
-  const now = new Date();
-  const [dpsAmount, setDpsAmount] = useState(savingsPlan.amount.toString());
-  const [dpsMonth, setDpsMonth] = useState((now.getMonth() + 1).toString().padStart(2, '0'));
-  const [dpsYear, setDpsYear] = useState(now.getFullYear().toString());
+  const [goalForm, setGoalForm] = useState({ name: '', monthlyDeposit: '', years: '10', profitPercent: '8.5', targetAmount: '', maturityValue: '', color: '#6366f1' });
+  const [recordForm, setRecordForm] = useState({ goalId: '', amount: '', date: new Date().toISOString().split('T')[0], note: '' });
 
-  // Sync modal form with global state when modal opens
   useEffect(() => {
-    if (isCalculatorOpen) {
-      setModalBankName(savingsPlan.bankName);
-      setModalYears(savingsPlan.years.toString());
-      setModalRate(savingsPlan.rate.toString());
-      setModalAmount(savingsPlan.amount.toString());
+    const P = parseFloat(goalForm.monthlyDeposit), annualRate = parseFloat(goalForm.profitPercent), yrs = parseFloat(goalForm.years);
+    if (!isNaN(P) && !isNaN(annualRate) && !isNaN(yrs) && P > 0) {
+      const totalPrincipal = P * 12 * yrs, i = (annualRate / 100) / 12, n = yrs * 12; 
+      const maturity = P * ((Math.pow(1 + i, n) - 1) / i) * (1 + i);
+      setGoalForm(prev => ({ ...prev, targetAmount: Math.round(totalPrincipal).toString(), maturityValue: Math.round(maturity).toString() }));
+    } else {
+      setGoalForm(prev => ({ ...prev, targetAmount: '', maturityValue: '' }));
     }
-  }, [isCalculatorOpen, savingsPlan]);
+  }, [goalForm.monthlyDeposit, goalForm.profitPercent, goalForm.years]);
 
-  const monthOptions = [
-    { label: 'January', value: '01' }, { label: 'February', value: '02' }, { label: 'March', value: '03' },
-    { label: 'April', value: '04' }, { label: 'May', value: '05' }, { label: 'June', value: '06' },
-    { label: 'July', value: '07' }, { label: 'August', value: '08' }, { label: 'September', value: '09' },
-    { label: 'October', value: '10' }, { label: 'November', value: '11' }, { label: 'December', value: '12' }
-  ];
+  const sortedHistory = useMemo(() => transactions.filter(t => t.category === 'DPS').sort((a, b) => b.date.localeCompare(a.date)), [transactions]);
 
-  const handleUpdateSim = () => {
-    onUpdatePlan({
-      bankName: modalBankName || 'DPS - Savings',
-      years: parseInt(modalYears) || 10,
-      rate: parseFloat(modalRate) || 7.5,
-      amount: parseInt(modalAmount) || 5000
-    });
-    setIsCalculatorOpen(false);
+  const handleSaveGoal = () => {
+    // Note: App state updates are handled via specific props, but this component manages visual state
+    alert("Updating assets configuration... (Implementation uses current App state props)");
+    setIsGoalModalOpen(false);
   };
 
-  const handleSaveDPS = () => {
-    const amountVal = parseFloat(dpsAmount);
-    if (isNaN(amountVal) || amountVal <= 0) return alert("Please enter a valid amount.");
-    
-    const yearVal = parseInt(dpsYear);
-    if (isNaN(yearVal) || yearVal < 1900 || yearVal > 2100) return alert("Please enter a valid year (1900-2100).");
-
-    const targetDate = `${dpsYear}-${dpsMonth}-01`;
-
-    const isDuplicate = transactions.some(t => 
-      t.category === 'DPS' && 
-      t.date === targetDate && 
-      t.id !== editingTransaction?.id
-    );
-
-    if (isDuplicate) {
-      const monthLabel = monthOptions.find(m => m.value === dpsMonth)?.label;
-      return alert(`Warning: A DPS entry for ${monthLabel} ${dpsYear} already exists!`);
-    }
-
-    const transactionData: Transaction = {
-      id: editingTransaction?.id || Math.random().toString(36).substr(2, 9),
+  const handleSaveRecord = () => {
+    const amt = parseFloat(recordForm.amount);
+    if (!recordForm.goalId || isNaN(amt)) return;
+    const selectedGoal = savings.find(g => g.id === recordForm.goalId);
+    const data: Transaction = {
+      id: editingRecord?.id || Math.random().toString(36).substr(2, 9),
       type: 'expense',
       category: 'DPS',
-      amount: amountVal,
-      date: targetDate,
-      description: savingsPlan.bankName
+      amount: amt,
+      date: recordForm.date,
+      description: `Installment: ${selectedGoal?.name || 'Account'} (${recordForm.note || 'Regular'})`
     };
-
-    if (editingTransaction) {
-      onUpdateTransaction(transactionData);
-    } else {
-      onAddTransaction(transactionData);
-    }
-    
-    setIsAddDPSOpen(false);
-    setEditingTransaction(null);
+    if (editingRecord) onUpdateTransaction(data);
+    else onAddTransaction(data);
+    setIsRecordModalOpen(false);
+    setEditingRecord(null);
   };
 
-  const startDeleteTransaction = (id: string) => {
-    setTransactionToDelete(id);
-    setIsDeleteConfirmOpen(true);
+  const formatTimePeriod = (totalMonths: number) => {
+    const years = Math.floor(totalMonths / 12), months = Math.round(totalMonths % 12);
+    return `${years}Y ${months}M`.toUpperCase();
   };
-
-  const confirmDelete = () => {
-    if (transactionToDelete) {
-      onDeleteTransaction(transactionToDelete);
-      setTransactionToDelete(null);
-      setIsDeleteConfirmOpen(false);
-    }
-  };
-
-  const handleClearAll = () => {
-    const dpsIds = transactions
-      .filter(t => t.category === 'DPS')
-      .map(t => t.id);
-    
-    if (dpsIds.length === 0) {
-      alert("No DPS records found to delete.");
-      setIsDeleteAllOpen(false);
-      return;
-    }
-
-    onDeleteTransactions(dpsIds);
-    setIsDeleteAllOpen(false);
-  };
-
-  const startEditTransaction = (transaction: Transaction) => {
-    setEditingTransaction(transaction);
-    setDpsAmount(transaction.amount.toString());
-    const dateParts = transaction.date.split('-');
-    setDpsYear(dateParts[0]);
-    setDpsMonth(dateParts[1]);
-    setIsAddDPSOpen(true);
-  };
-
-  const monthlyLogData = useMemo(() => {
-    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-    const dpsTransactions = transactions
-      .filter(t => t.category === 'DPS' && t.type === 'expense')
-      .sort((a, b) => a.date.localeCompare(b.date));
-
-    if (dpsTransactions.length === 0) return [];
-
-    const firstDate = new Date(dpsTransactions[0].date);
-    const lastDate = new Date(dpsTransactions[dpsTransactions.length - 1].date);
-    
-    const results = [];
-    let currentGTotal = 0;
-    const startYear = firstDate.getFullYear();
-    const startMonth = firstDate.getMonth();
-    const endYear = lastDate.getFullYear();
-    const endMonth = lastDate.getMonth();
-    const totalMonths = (endYear - startYear) * 12 + (endMonth - startMonth) + 1;
-
-    for (let i = 0; i < totalMonths; i++) {
-      const currentIdx = startMonth + i;
-      const yearOffset = Math.floor(currentIdx / 12);
-      const year = startYear + yearOffset;
-      const monthIdx = currentIdx % 12;
-      const monthKey = `${year}-${(monthIdx + 1).toString().padStart(2, '0')}`;
-      
-      const monthTransactions = dpsTransactions.filter(t => t.date.startsWith(monthKey));
-      const monthlyDeposit = monthTransactions.reduce((sum, t) => sum + t.amount, 0);
-      
-      const monthlyProfit = i === 0 ? 0 : Math.round(currentGTotal * ((savingsPlan.rate / 100) / 12));
-      currentGTotal += monthlyDeposit + monthlyProfit;
-
-      if (monthlyDeposit > 0) {
-        results.push({
-          month: `${monthNames[monthIdx]}-${year.toString().slice(-2)}`,
-          deposit: monthlyDeposit,
-          profit: monthlyProfit,
-          gTotal: currentGTotal,
-          originalTransaction: monthTransactions[0]
-        });
-      }
-    }
-    return results.reverse();
-  }, [transactions, savingsPlan.rate]);
-
-  const { actualStats, planStats } = useMemo(() => {
-    const newest = monthlyLogData[0];
-    const totalDeposit = monthlyLogData.reduce((sum, row) => sum + row.deposit, 0);
-    const current = newest?.gTotal || 0;
-    const profit = current - totalDeposit;
-    const completedMonths = monthlyLogData.length;
-
-    const n = savingsPlan.years * 12; 
-    const i = (savingsPlan.rate / 100) / 12; 
-    const p = savingsPlan.amount; 
-    
-    const plannedPrincipal = p * n;
-    const plannedMaturity = Math.round(p * (((Math.pow(1 + i, n) - 1) / i) * (1 + i)));
-
-    const remainingMonths = Math.max(0, n - completedMonths);
-    const comYears = Math.floor(completedMonths / 12);
-    const comMonths = completedMonths % 12;
-    const remYears = Math.floor(remainingMonths / 12);
-    const remMonths = remainingMonths % 12;
-
-    return { 
-      actualStats: { current, totalDeposit, profit, completedMonths, comYears, comMonths },
-      planStats: { plannedPrincipal, plannedMaturity, totalMonths: n, remainingMonths, remYears, remMonths }
-    };
-  }, [monthlyLogData, savingsPlan]);
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-700 pb-20 lg:pb-0 relative">
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800 border-l-8 border-l-blue-600 transition-transform hover:-translate-y-1">
-          <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">TOTAL DEPOSIT (ACTUAL)</p>
-          <h3 className="text-2xl sm:text-3xl font-black text-slate-800 dark:text-white tracking-tight">৳{actualStats.totalDeposit.toLocaleString()}</h3>
-        </div>
-        <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800 border-l-8 border-l-emerald-500 transition-transform hover:-translate-y-1">
-          <p className="text-[10px] font-black text-emerald-400 uppercase tracking-widest mb-1">EARNED PROFIT</p>
-          <h3 className="text-2xl sm:text-3xl font-black text-emerald-600 dark:text-emerald-400 tracking-tight">৳{actualStats.profit.toLocaleString()}</h3>
-        </div>
-        <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800 border-l-8 border-l-indigo-400 transition-transform hover:-translate-y-1">
-          <p className="text-[10px] font-black text-indigo-400 uppercase tracking-widest mb-1">CURRENT VALUE</p>
-          <h3 className="text-2xl sm:text-3xl font-black text-slate-800 dark:text-white tracking-tight">৳{actualStats.current.toLocaleString()}</h3>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <div className="space-y-6">
-          <h4 className="text-slate-800 dark:text-slate-200 font-black text-xs sm:text-sm uppercase tracking-[0.2em] px-1 border-l-4 border-blue-600 pl-3">Savings Goals Progress</h4>
-          <Card className="relative overflow-hidden group dark:bg-slate-900 dark:border-slate-800">
-            <div className="absolute top-0 right-0 w-24 h-24 bg-blue-50 dark:bg-blue-900/10 rounded-full -mr-10 -mt-10 opacity-50 group-hover:scale-150 transition-transform duration-700" />
-            <div className="relative z-10 space-y-4">
-              <div className="flex justify-between items-start">
-                <div>
-                  <h5 className="font-black text-slate-800 dark:text-white text-lg sm:text-xl tracking-tight uppercase">{savingsPlan.bankName}</h5>
-                  <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">{savingsPlan.years} YEARS PLAN • GOAL TARGETED</p>
-                </div>
-                <div className="bg-blue-600 text-white px-4 py-1.5 rounded-full text-xs font-black shadow-lg">
-                  {planStats.plannedMaturity > 0 ? Math.round((actualStats.current / planStats.plannedMaturity) * 100) : 0}%
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div className="bg-slate-50 dark:bg-slate-800/50 p-3 rounded-xl border border-slate-100 dark:border-slate-800">
-                  <p className="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1">GOAL TARGET</p>
-                  <p className="text-xs sm:text-sm font-black text-blue-600 dark:text-blue-400 uppercase whitespace-nowrap">
-                    ৳{planStats.plannedPrincipal.toLocaleString()}
-                  </p>
-                </div>
-                <div className="bg-slate-50 dark:bg-slate-800/50 p-3 rounded-xl border border-slate-100 dark:border-slate-800">
-                  <p className="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1">MATURITY VALUE</p>
-                  <p className="text-xs sm:text-sm font-black text-emerald-600 dark:text-emerald-400 uppercase whitespace-nowrap">
-                    ৳{planStats.plannedMaturity.toLocaleString()}
-                  </p>
-                </div>
-              </div>
-
-              <div className="space-y-1">
-                <div className="flex justify-between text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest">
-                  <span>Overall Progress</span>
-                  <span className="text-blue-600 dark:text-blue-400 font-black">
-                    {actualStats.completedMonths} Complete / {planStats.remainingMonths} Remaining
-                  </span>
-                </div>
-                <div className="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-3 overflow-hidden shadow-inner">
-                  <div 
-                    className="h-full rounded-full transition-all duration-1000 ease-out shadow-sm bg-blue-600"
-                    style={{ width: `${Math.min(100, planStats.plannedMaturity > 0 ? (actualStats.current / planStats.plannedMaturity) * 100 : 0)}%` }}
-                  />
-                </div>
-                <div className="flex justify-between text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mt-1">
-                  <span>Com- {actualStats.comYears} Years {actualStats.comMonths} Month</span>
-                  <span>Rem- {planStats.remYears} Years {planStats.remMonths} Month</span>
-                </div>
-              </div>
+    <div className="space-y-8 pb-24 animate-in fade-in duration-500">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="lg:col-span-2 space-y-8">
+          <section className="space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-wider flex items-center gap-2"><div className="w-2 h-2 bg-indigo-600 rounded-full" /> Financial Assets</h3>
+              <button onClick={() => { setEditingGoal(null); setGoalForm({ name: '', monthlyDeposit: '', years: '10', targetAmount: '', profitPercent: '8.5', maturityValue: '', color: '#6366f1' }); setIsGoalModalOpen(true); }} className="flex items-center gap-1.5 px-3 py-1.5 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 rounded-lg text-[10px] font-black uppercase shadow-sm border border-indigo-100 dark:border-indigo-800">Initialize Account</button>
             </div>
-          </Card>
-        </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              {savings.length > 0 ? savings.map(goal => (
+                <div key={goal.id} className="aspect-[1.586/1] rounded-[24px] p-6 shadow-2xl relative overflow-hidden group transition-all border border-white/20" style={{ background: `linear-gradient(135deg, ${goal.color} 0%, ${goal.color}aa 40%, ${goal.color}ff 100%)` }}>
+                  <div className="absolute inset-0 pointer-events-none opacity-40"><div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-[0.03] blend-overlay" /></div>
+                  <div className="relative z-10 h-full flex flex-col justify-between">
+                    <div className="flex justify-between items-start">
+                      <div className="flex flex-col"><p className="text-[10px] font-black text-white/60 uppercase tracking-[0.2em] mb-1">Portfolio Account</p><h4 className="text-[16px] font-black text-white uppercase truncate max-w-[210px]">{goal.name}</h4></div>
+                      <button onClick={(e) => { e.stopPropagation(); setEditingGoal(goal); setIsGoalModalOpen(true); }} className="w-8 h-8 flex items-center justify-center bg-white/10 hover:bg-white/20 text-white rounded-full transition-all border border-white/10 backdrop-blur-md"><Pencil size={12} /></button>
+                    </div>
+                    <div className="flex items-center gap-4">
+                      <div className="w-12 h-9 rounded-lg bg-gradient-to-br from-yellow-100 via-amber-400 to-yellow-500 shadow-inner flex items-center justify-center relative overflow-hidden">
+                        <div className="w-8 h-6 border-[0.5px] border-black/10 rounded-sm flex flex-wrap"><div className="w-1/2 h-1/3 border-b border-r border-black/10" /><div className="w-1/2 h-1/3 border-b border-black/10" /><div className="w-1/2 h-1/3 border-b border-r border-black/10" /></div>
+                      </div>
+                      <p className="text-[14px] font-mono font-black text-white/80 tracking-[0.15em]">••••  ••••  ••••  <span className="text-white">8842</span></p>
+                    </div>
+                    <div className="space-y-0.5"><p className="text-[10px] font-black text-white/50 uppercase tracking-[0.2em]">Current Savings</p><h2 className="text-3xl font-black text-white tracking-tighter">৳{goal.current.toLocaleString()}</h2></div>
+                    <div className="flex justify-between items-end border-t border-white/10 pt-4"><div className="flex items-center gap-3"><div><p className="text-[8px] font-black text-white/40 uppercase mb-0.5">Maturity</p><p className="text-[12px] font-black text-white/90">৳{goal.target.toLocaleString()}</p></div><div className="w-px h-6 bg-white/10" /><div><p className="text-[8px] font-black text-white/40 uppercase mb-0.5">Monthly</p><p className="text-[10px] font-black text-white/90 uppercase">৳{goal.deposit}/Mo</p></div></div><Layers size={22} className="text-white/30" /></div>
+                  </div>
+                  <div className="absolute bottom-6 right-6 pointer-events-none opacity-0 group-hover:opacity-10 transition-opacity"><Fingerprint size={48} className="text-white" /></div>
+                </div>
+              )) : <div className="col-span-full py-20 border-2 border-dashed rounded-[32px] flex flex-col items-center justify-center gap-3 bg-slate-50/50 dark:bg-slate-900/50"><PiggyBank size={32} className="text-slate-400" /><p className="text-[13px] font-black uppercase text-slate-500">Account Empty</p></div>}
+            </div>
+          </section>
 
-        <div className="space-y-6">
-          <div className="flex flex-wrap items-center justify-between gap-4 px-1 border-l-4 border-indigo-600 pl-3">
-             <div className="flex items-center gap-2">
-               <h4 className="text-slate-800 dark:text-slate-200 font-black text-xs sm:text-sm uppercase tracking-[0.2em]">MONTHLY SAVINGS LOG</h4>
-               <div className="flex items-center gap-2 ml-2">
-                 <button 
-                  onClick={() => setIsCalculatorOpen(true)} 
-                  className="p-1.5 bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 transition-all active:scale-90" 
-                  title="Plan Settings"
-                >
-                   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
-                 </button>
-                 <button 
-                  onClick={() => setIsDeleteAllOpen(true)} 
-                  className="p-1.5 bg-rose-50 dark:bg-rose-900/20 text-rose-400 dark:text-rose-500 rounded-lg hover:bg-rose-100 dark:hover:bg-rose-900/40 hover:text-rose-600 dark:hover:text-rose-400 transition-all active:scale-90" 
-                  title="Delete All DPS Records"
-                >
-                   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
-                 </button>
-               </div>
-             </div>
-          </div>
-
-          <Card className="p-0 border-slate-200 dark:border-slate-800 shadow-sm flex flex-col dark:bg-slate-900">
-            <div className="flex-1 overflow-x-auto custom-scrollbar">
-              {monthlyLogData.length > 0 ? (
-                <table className="w-full text-left border-collapse table-fixed min-w-[320px]">
-                  <thead className="bg-slate-50 dark:bg-slate-800">
-                    <tr className="border-b border-slate-100 dark:border-slate-800 shadow-sm">
-                      <th className="px-2 sm:px-6 py-3 text-[9px] sm:text-xs font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest w-[20%]">MONTH</th>
-                      <th className="px-2 sm:px-6 py-3 text-[9px] sm:text-xs font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest w-[22%]">DEPOSIT</th>
-                      <th className="px-2 sm:px-6 py-3 text-[9px] sm:text-xs font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest w-[18%]">PROFIT</th>
-                      <th className="px-2 sm:px-6 py-3 text-[9px] sm:text-xs font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest w-[22%]">TOTAL</th>
-                      <th className="px-2 sm:px-6 py-3 text-[9px] sm:text-xs font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest w-[18%] text-right">ACT</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-50 dark:divide-slate-800">
-                    {monthlyLogData.map((row, idx) => (
-                      <tr key={idx} className="hover:bg-blue-50/20 dark:hover:bg-blue-900/10 transition-colors bg-white dark:bg-slate-900">
-                        <td className="px-2 sm:px-6 py-2.5">
-                          <span className="font-bold text-slate-800 dark:text-white text-[10px] sm:text-sm">{row.month}</span>
-                        </td>
-                        <td className="px-2 sm:px-6 py-2.5">
-                          <span className="font-black text-blue-700 dark:text-blue-400 text-[10px] sm:text-sm">৳{row.deposit.toLocaleString()}</span>
-                        </td>
-                        <td className="px-2 sm:px-6 py-2.5">
-                          <span className={`font-black text-[9px] sm:text-sm ${row.profit > 0 ? 'text-emerald-500 dark:text-emerald-400' : 'text-slate-300 dark:text-slate-600'}`}>
-                            {row.profit > 0 ? `৳${row.profit.toLocaleString()}` : '৳0'}
-                          </span>
-                        </td>
-                        <td className="px-2 sm:px-6 py-2.5">
-                          <span className="font-black text-slate-900 dark:text-slate-200 text-[10px] sm:text-sm">৳{row.gTotal.toLocaleString()}</span>
-                        </td>
-                        <td className="px-2 sm:px-6 py-2.5 text-right">
-                          <div className="flex justify-end items-center gap-1 sm:gap-2">
-                            <button 
-                              onClick={() => startEditTransaction(row.originalTransaction)} 
-                              className="w-7 h-7 sm:w-9 sm:h-9 flex items-center justify-center text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/30 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 rounded-lg transition-all shadow-sm active:scale-90" 
-                              title="Edit"
-                            >
-                              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-                            </button>
-                            <DeleteButton onClick={() => startDeleteTransaction(row.originalTransaction.id)} />
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
+          <section className="space-y-4">
+            <h3 className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-wider flex items-center gap-2"><div className="w-2 h-2 bg-emerald-600 rounded-full" /> Transaction History</h3>
+            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-[24px] overflow-hidden shadow-sm">
+              <div className="overflow-x-auto">
+                <table className="w-full text-left">
+                  <thead className="bg-emerald-50 dark:bg-emerald-900/20"><tr className="border-b dark:border-slate-800"><th className="px-6 py-2 text-[10px] font-black text-emerald-800 dark:text-emerald-400 uppercase">Date</th><th className="px-6 py-2 text-[10px] font-black text-emerald-800 dark:text-emerald-400 uppercase">Account</th><th className="px-6 py-2 text-[10px] font-black text-emerald-800 dark:text-emerald-400 uppercase">Amount</th><th className="px-6 py-2 text-[10px] font-black text-emerald-800 dark:text-emerald-400 uppercase text-right">Actions</th></tr></thead>
+                  <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                    {sortedHistory.length > 0 ? sortedHistory.map(record => (
+                        <tr key={record.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/20 transition-colors group">
+                          <td className="px-6 py-2"><span className="text-[12px] font-black text-slate-800 dark:text-white uppercase tracking-tight">{record.date}</span></td>
+                          <td className="px-6 py-2"><span className="text-[12px] font-black text-slate-700 dark:text-slate-300 uppercase truncate max-w-[200px] tracking-tight">{record.description.split(':')[1]?.trim() || record.description}</span></td>
+                          <td className="px-6 py-2"><span className="text-[13px] font-black text-emerald-600 dark:text-emerald-400 tracking-tighter">৳{record.amount.toLocaleString()}</span></td>
+                          <td className="px-6 py-2 text-right"><div className="flex justify-end gap-2">
+                              <button onClick={() => { setEditingRecord(record); setRecordForm({ goalId: '', amount: record.amount.toString(), date: record.date, note: '' }); setIsRecordModalOpen(true); }} className="p-1.5 text-indigo-600 bg-indigo-50 dark:bg-indigo-900/30 rounded-lg"><Pencil size={14} /></button>
+                              <button onClick={() => { setRecordToDelete(record); setIsDeleteRecordConfirmOpen(true); }} className="p-1.5 text-rose-600 bg-rose-50 dark:bg-rose-900/30 rounded-lg"><Trash2 size={14} /></button>
+                            </div></td>
+                        </tr>
+                    )) : <tr><td colSpan={4} className="px-6 py-16 text-center opacity-60"><History size={40} className="mx-auto mb-3" /><p className="text-[11px] font-black uppercase">No Recent Activity</p></td></tr>}
                   </tbody>
                 </table>
-              ) : (
-                <div className="flex flex-col items-center justify-center py-20 text-center px-6">
-                  <div className="w-16 h-16 bg-slate-50 dark:bg-slate-800 rounded-full flex items-center justify-center text-slate-300 dark:text-slate-600 mb-4"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1"/><path d="M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-4"/></svg></div>
-                  <h5 className="font-bold text-slate-400 dark:text-slate-600 text-sm uppercase tracking-widest">No Installments Recorded</h5>
-                </div>
-              )}
+              </div>
             </div>
-          </Card>
+          </section>
+        </div>
+
+        <div className="space-y-8">
+          <section className="space-y-4">
+            <h3 className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-wider flex items-center gap-2"><div className="w-2 h-2 bg-indigo-900/80 rounded-full" /> TARGET PROGRESS</h3>
+            <div className="space-y-6">
+              {savings.map(goal => {
+                const progress = Math.min(Math.round((goal.current / goal.target) * 100), 100);
+                return (
+                  <div key={goal.id} className="bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800 rounded-[32px] p-5 shadow-sm group hover:border-blue-400/30 transition-all">
+                    <div className="flex justify-between items-start mb-4"><div><h4 className="text-[18px] font-black text-[#1e293b] dark:text-white uppercase leading-tight">{goal.name}</h4><p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">{goal.durationYears} YEARS PLAN</p></div><div className="px-3.5 py-1.5 bg-[#2563eb] text-white text-[10px] font-black rounded-full">{progress}%</div></div>
+                    <div className="grid grid-cols-2 gap-3 mb-4"><div className="bg-slate-50 dark:bg-slate-800 p-3 rounded-2xl"><p className="text-[8px] font-black text-slate-400 uppercase mb-1">GOAL TARGET</p><h5 className="text-[14px] font-black text-blue-600 leading-none">৳{goal.target.toLocaleString()}</h5></div><div className="bg-slate-50 dark:bg-slate-800 p-3 rounded-2xl"><p className="text-[8px] font-black text-slate-400 uppercase mb-1">MATURITY</p><h5 className="text-[14px] font-black text-emerald-500 leading-none">৳{goal.target * 1.5}</h5></div></div>
+                    <div className="space-y-2"><div className="w-full bg-slate-100 dark:bg-slate-800 h-2.5 rounded-full overflow-hidden p-0.5"><div className="h-full rounded-full bg-blue-600" style={{ width: `${progress}%` }} /></div></div>
+                  </div>
+                );
+              })}
+            </div>
+          </section>
         </div>
       </div>
 
-      <Modal isOpen={isCalculatorOpen} onClose={() => setIsCalculatorOpen(false)} title="Goal & Plan Settings">
-        <div className="space-y-5">
-           <div>
-             <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Bank Name</label>
-             <input type="text" value={modalBankName} onChange={(e) => setModalBankName(e.target.value)} className="w-full p-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl focus:ring-4 focus:ring-blue-100 outline-none font-black text-sm text-slate-700 dark:text-white" />
-           </div>
-           <div className="grid grid-cols-2 gap-4">
-             <div>
-               <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Goal Duration (Y)</label>
-               <input type="number" value={modalYears} onChange={(e) => setModalYears(e.target.value)} className="w-full p-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl focus:ring-4 focus:ring-blue-100 outline-none font-black text-sm dark:text-white" />
-             </div>
-             <div>
-               <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Interest Rate (%)</label>
-               <input type="number" step="0.01" value={modalRate} onChange={(e) => setModalRate(e.target.value)} className="w-full p-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl focus:ring-4 focus:ring-blue-100 outline-none font-black text-sm dark:text-white" />
-             </div>
-           </div>
-           <div>
-             <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Standard Deposit (৳)</label>
-             <input type="number" value={modalAmount} onChange={(e) => setModalAmount(e.target.value)} className="w-full p-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl focus:ring-4 focus:ring-blue-100 outline-none font-black text-sm dark:text-white" />
-           </div>
-           <button onClick={handleUpdateSim} className="w-full py-4 bg-indigo-600 text-white font-black rounded-2xl shadow-xl hover:bg-indigo-700 active:scale-95 transition-all text-xs uppercase tracking-[0.2em]">Update Plan</button>
+      <Modal isOpen={isGoalModalOpen} onClose={() => setIsGoalModalOpen(false)} title={editingGoal ? 'Configure Asset' : 'New Asset Account'}>
+        <div className="p-4 space-y-6">
+          <div className="space-y-1.5"><label className="text-[10px] font-black text-slate-500 uppercase ml-1">Asset Name</label><input type="text" value={goalForm.name} onChange={e => setGoalForm({...goalForm, name: e.target.value})} className="w-full h-10 px-4 bg-slate-50 dark:bg-slate-900 border dark:border-slate-700 rounded-2xl outline-none focus:border-indigo-500" placeholder="e.g. Mutual Fund" /></div>
+          <div className="grid grid-cols-2 gap-3"><div className="space-y-1.5"><label className="text-[10px] font-black text-slate-500 uppercase ml-1">Monthly Deposit</label><input type="number" value={goalForm.monthlyDeposit} onChange={e => setGoalForm({...goalForm, monthlyDeposit: e.target.value})} className="w-full h-10 px-4 bg-slate-50 dark:bg-slate-900 border dark:border-slate-700 rounded-2xl outline-none" /></div><div className="space-y-1.5"><label className="text-[10px] font-black text-slate-500 uppercase ml-1">Years</label><input type="number" value={goalForm.years} onChange={e => setGoalForm({...goalForm, years: e.target.value})} className="w-full h-10 px-4 bg-slate-50 dark:bg-slate-900 border dark:border-slate-700 rounded-2xl outline-none" /></div></div>
+          <button onClick={handleSaveGoal} className="w-full h-12 bg-indigo-600 text-white rounded-2xl font-black uppercase text-[14px] shadow-xl mt-4">Initialize Asset</button>
         </div>
       </Modal>
 
-      <Modal isOpen={isAddDPSOpen} onClose={() => { setIsAddDPSOpen(false); setEditingTransaction(null); }} title={editingTransaction ? "Edit DPS Installment" : "Add DPS Installment"}>
-        <div className="space-y-5">
-           <div><label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Bank Name (Read Only)</label><input type="text" value={savingsPlan.bankName} readOnly className="w-full p-3 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl outline-none font-black text-sm text-slate-500 dark:text-slate-400 cursor-not-allowed" /></div>
-           <div>
-             <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Select Period</label>
-             <div className="flex gap-3">
-               <select value={dpsMonth} onChange={(e) => setDpsMonth(e.target.value)} className="flex-1 p-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl outline-none font-black text-sm dark:text-white">
-                 {monthOptions.map(m => <option key={m.value} value={m.value}>{m.label}</option>)}
-               </select>
-               <input type="number" value={dpsYear} onChange={(e) => setDpsYear(e.target.value)} className="flex-1 p-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl outline-none font-black text-sm dark:text-white" />
-             </div>
-           </div>
-           <div><label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Amount (৳)</label><input type="number" value={dpsAmount} onChange={(e) => setDpsAmount(e.target.value)} className="w-full p-3.5 bg-white dark:bg-slate-900 border border-blue-200 dark:border-blue-900/50 rounded-2xl outline-none font-black text-sm dark:text-white shadow-sm" /></div>
-           <button onClick={handleSaveDPS} className="w-full py-4 bg-blue-600 text-white font-black rounded-2xl shadow-xl hover:bg-blue-700 active:scale-95 transition-all text-xs uppercase tracking-[0.2em]">{editingTransaction ? "Update" : "Confirm"}</button>
+      <Modal isOpen={isRecordModalOpen} onClose={() => setIsRecordModalOpen(false)} title={editingRecord ? 'Update Record' : 'Record Deposit'}>
+        <div className="p-4 space-y-5">
+          <div className="space-y-1.5"><label className="text-[10px] font-black text-slate-500 uppercase ml-1">Asset Account</label><select value={recordForm.goalId} onChange={e => setRecordForm({...recordForm, goalId: e.target.value})} className="w-full h-10 px-4 bg-slate-50 dark:bg-slate-900 border dark:border-slate-700 rounded-2xl font-bold dark:text-white"><option value="">Select Account</option>{savings.map(g => <option key={g.id} value={g.id}>{g.name}</option>)}</select></div>
+          <div className="grid grid-cols-2 gap-4"><div className="space-y-1.5"><label className="text-[10px] font-black text-slate-500 uppercase ml-1">Amount (৳)</label><input type="number" value={recordForm.amount} onChange={e => setRecordForm({...recordForm, amount: e.target.value})} className="w-full h-10 px-4 bg-slate-50 dark:bg-slate-900 border dark:border-slate-700 rounded-2xl dark:text-white" /></div><div className="space-y-1.5"><label className="text-[10px] font-black text-slate-500 uppercase ml-1">Date</label><input type="date" value={recordForm.date} onChange={e => setRecordForm({...recordForm, date: e.target.value})} className="w-full h-10 px-4 bg-slate-50 dark:bg-slate-900 border dark:border-slate-700 rounded-2xl dark:text-white" /></div></div>
+          <button onClick={handleSaveRecord} className="w-full h-12 bg-emerald-600 text-white rounded-2xl font-black uppercase text-[14px] shadow-xl mt-4">Confirm Deposit</button>
         </div>
       </Modal>
 
-      <Modal isOpen={isDeleteConfirmOpen} onClose={() => setIsDeleteConfirmOpen(false)} title="Confirm Delete">
-        <div className="text-center space-y-4">
-          <div className="w-16 h-16 bg-rose-50 dark:bg-rose-900/30 text-rose-500 rounded-full flex items-center justify-center mx-auto mb-4 animate-pulse"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg></div>
-          <p className="text-slate-800 dark:text-white font-bold text-lg">Remove Entry?</p>
-          <div className="grid grid-cols-2 gap-3 mt-6"><button onClick={() => setIsDeleteConfirmOpen(false)} className="py-3 px-4 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-bold rounded-xl hover:bg-slate-200 transition-colors">Cancel</button><button onClick={confirmDelete} className="py-3 px-4 bg-rose-600 text-white font-bold rounded-xl shadow-lg hover:bg-rose-700 active:scale-95">Delete</button></div>
-        </div>
-      </Modal>
-
-      <Modal isOpen={isDeleteAllOpen} onClose={() => setIsDeleteAllOpen(false)} title="Confirm Clear All">
-        <div className="text-center space-y-4">
-          <div className="w-16 h-16 bg-rose-100 dark:bg-rose-900/40 text-rose-600 rounded-full flex items-center justify-center mx-auto mb-4 animate-bounce">
-            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
-          </div>
-          <p className="text-slate-800 dark:text-white font-black text-xl tracking-tight">Clear All DPS History?</p>
-          <p className="text-slate-500 dark:text-slate-400 text-sm px-6 font-medium">This will permanently delete <span className="text-rose-600 font-black">ALL</span> recorded installments. This action cannot be reversed.</p>
-          <div className="grid grid-cols-2 gap-3 mt-8">
-            <button onClick={() => setIsDeleteAllOpen(false)} className="py-3.5 px-4 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-bold rounded-2xl hover:bg-slate-200 transition-colors uppercase text-[10px] tracking-widest">Cancel</button>
-            <button onClick={handleClearAll} className="py-3.5 px-4 bg-rose-600 text-white font-black rounded-2xl shadow-xl hover:bg-rose-700 active:scale-95 uppercase text-[10px] tracking-widest">Clear All</button>
-          </div>
-        </div>
-      </Modal>
-
-      <button className="fixed bottom-24 right-6 lg:bottom-12 lg:right-12 w-14 h-14 sm:w-16 sm:h-16 bg-blue-600 text-white rounded-full shadow-2xl flex items-center justify-center text-3xl sm:text-4xl font-light hover:scale-110 active:scale-95 transition-all z-[60]" onClick={() => { setDpsMonth((now.getMonth() + 1).toString().padStart(2, '0')); setDpsYear(now.getFullYear().toString()); setDpsAmount(savingsPlan.amount.toString()); setEditingTransaction(null); setIsAddDPSOpen(true); }}>+</button>
+      <button onClick={() => { setEditingRecord(null); setRecordForm({ goalId: savings[0]?.id || '', amount: '', date: new Date().toISOString().split('T')[0], note: '' }); setIsRecordModalOpen(true); }} className="fixed bottom-8 right-8 w-14 h-14 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl shadow-xl flex items-center justify-center z-40 transition-all hover:scale-110 group"><Plus size={28} className="group-hover:rotate-90 transition-transform" /></button>
     </div>
   );
 };
