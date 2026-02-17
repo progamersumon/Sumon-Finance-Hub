@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { ViewType, Transaction, SavingsGoal, SavingsRecord, Reminder, LanguageType, ThemeType, UserProfile, AppTab, LeaveType, LeaveRecord, PayrollProfile, SalaryHistoryItem, BillRecord, BettingRecord } from './types';
 import { ICONS } from './constants';
 import { 
@@ -132,6 +132,9 @@ const AppContent: React.FC = () => {
   const [theme, setTheme] = useState<ThemeType>('light');
   const [isSyncing, setIsSyncing] = useState(false);
 
+  // Ref for the main scrollable container to handle scroll-to-top
+  const mainContentRef = useRef<HTMLDivElement>(null);
+
   // Core Data States
   const [userProfile, setUserProfile] = useState<UserProfile>({ name: 'User', email: '', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Sumon' });
   const [transactions, setTransactions] = useState<Transaction[]>(MOCK_TRANSACTIONS);
@@ -148,30 +151,38 @@ const AppContent: React.FC = () => {
     role: 'Product Designer',
     department: 'UI/UX Team',
     employeeId: 'D-8842',
-    grossSalary: 35000,
-    basicSalary: 21700,
-    houseRent: 10850,
-    medical: 500,
-    conveyance: 500,
-    food: 500,
-    attendanceBonus: 1000,
-    tiffinBillDays: 22,
+    grossSalary: 31083,
+    basicSalary: 19089,
+    houseRent: 9545,
+    medical: 750,
+    conveyance: 450,
+    food: 1250,
+    attendanceBonus: 925,
+    tiffinBillDays: 25,
     tiffinRate: 50,
-    yearlyBonus: 23333,
-    eidBonus: 21700,
+    yearlyBonus: 20722,
+    eidBonus: 19089,
     baseDeduction: 2450,
     imageUrl: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Sumon'
   });
   const [salaryHistory, setSalaryHistory] = useState<SalaryHistoryItem[]>([
-    { id: '1', year: 2024, inc: 10, amt: 3000, total: 33000 },
-    { id: '2', year: 2023, inc: 0, amt: 0, total: 30000 }
+    { id: '1', year: 2024, inc: 7, amt: 886, total: 15386 },
+    { id: '2', year: 2023, inc: 0, amt: 0, total: 14500 }
   ]);
+
+  // Scroll to top effect when activeView changes
+  useEffect(() => {
+    if (mainContentRef.current) {
+      mainContentRef.current.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }, [activeView]);
 
   const loadDataFromCache = useCallback(() => {
     const cached = localStorage.getItem(CACHE_KEY);
     if (cached) {
       try {
         const c = JSON.parse(cached);
+        if (c.userProfile) setUserProfile(c.userProfile);
         if (c.transactions) setTransactions(c.transactions);
         if (c.reminders) setReminders(c.reminders);
         if (c.savingsGoals) setSavingsGoals(c.savingsGoals);
@@ -224,9 +235,11 @@ const AppContent: React.FC = () => {
           .eq('id', session.user.id)
           .single();
 
+        let loadedUserProfile = null;
+
         if (data && data.content) {
           const c = data.content;
-          // Only update if data is different or more fresh
+          if (c.userProfile) loadedUserProfile = c.userProfile;
           setTransactions(c.transactions || []);
           setReminders(c.reminders || []);
           setSavingsGoals(c.savingsGoals || []);
@@ -244,8 +257,18 @@ const AppContent: React.FC = () => {
           localStorage.setItem(CACHE_KEY, JSON.stringify(c));
         }
         
-        const name = session.user.user_metadata?.full_name || 'Finance User';
-        setUserProfile({ name, email: session.user.email || '', avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${session.user.id}` });
+        // Finalize userProfile: DB data takes priority over Auth metadata
+        if (loadedUserProfile) {
+          setUserProfile(loadedUserProfile);
+        } else {
+          const name = session.user.user_metadata?.full_name || 'Finance User';
+          setUserProfile({ 
+            name, 
+            email: session.user.email || '', 
+            avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${session.user.id}` 
+          });
+        }
+
         setIsSyncing(false);
       }
     };
@@ -270,6 +293,7 @@ const AppContent: React.FC = () => {
     
     const timeout = setTimeout(() => {
       syncToSupabase({
+        userProfile, 
         transactions, reminders, savingsGoals, savingsRecords, billRecords, bettingRecords,
         attendanceList, leaveQuotas, leaveHistory, payrollProfile, salaryHistory, theme, language
       });
@@ -277,6 +301,7 @@ const AppContent: React.FC = () => {
 
     return () => clearTimeout(timeout);
   }, [
+    userProfile, 
     transactions, reminders, savingsGoals, savingsRecords, billRecords, bettingRecords,
     attendanceList, leaveQuotas, leaveHistory, payrollProfile, salaryHistory, theme, language, 
     isAuthenticated, syncToSupabase
@@ -363,7 +388,7 @@ const AppContent: React.FC = () => {
       )}
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
         <Header activeTab={activeView} onOpenMenu={() => setIsSidebarOpen(true)} language={language === 'bn' ? 'বাংলা' : 'English'} profile={{ name: userProfile.name, role: payrollProfile.role, imageUrl: userProfile.avatar }} isSyncing={isSyncing} />
-        <main className="flex-1 overflow-y-auto p-4 md:p-6 custom-scrollbar">
+        <main ref={mainContentRef} className="flex-1 overflow-y-auto p-4 md:p-6 custom-scrollbar">
           <div className="max-w-7xl mx-auto">
             {renderView()}
           </div>

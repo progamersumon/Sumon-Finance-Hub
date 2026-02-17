@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { 
   User, 
@@ -229,20 +230,36 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ language, setLanguag
 
         <section className="space-y-6">
           <div className="flex flex-col gap-6">
+            {/* Language Section (Moved from Column 3) */}
             <div className="space-y-4">
               <div className="flex items-center gap-2 ml-4">
-                <div className="w-1 h-4 bg-indigo-600 rounded-full" />
-                <h2 className="text-[11px] font-black text-slate-500 uppercase tracking-[0.2em]">Backend Info</h2>
+                <div className="w-1 h-4 bg-emerald-600 rounded-full" />
+                <h2 className="text-[11px] font-black text-slate-500 uppercase tracking-[0.2em]">{t.languageLabel}</h2>
               </div>
-              <div className="bg-indigo-50/40 dark:bg-indigo-900/10 border border-indigo-200 dark:border-indigo-800 rounded-[32px] p-6 shadow-sm group">
-                <div className="flex items-center gap-4">
-                   <div className="w-10 h-10 bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 rounded-xl flex items-center justify-center shadow-inner">
-                      <Cloud size={20} />
-                   </div>
-                   <div>
-                      <h3 className="text-[14px] font-black text-indigo-800 dark:text-indigo-400 uppercase tracking-tight">{t.cloudStatus}</h3>
-                      <p className="text-[9px] font-bold text-indigo-400 uppercase tracking-widest">{t.backendUrl}</p>
-                   </div>
+              <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-[32px] p-6 shadow-sm group">
+                <div className="flex items-center gap-4 mb-5">
+                  <div className="w-9 h-9 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 rounded-lg flex items-center justify-center shadow-inner group-hover:scale-110 transition-transform">
+                    <Globe size={18} />
+                  </div>
+                  <div>
+                    <h3 className="text-[13px] font-black text-slate-800 dark:text-white uppercase tracking-tight">{t.languageLabel}</h3>
+                    <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest">{t.regionalLocalization}</p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 gap-3">
+                  {[
+                    { id: 'en', name: 'English', flag: '🇺🇸' },
+                    { id: 'bn', name: 'বাংলা', flag: '🇧🇩' }
+                  ].map((lang) => (
+                    <button key={lang.id} onClick={() => setLanguage(lang.id as LanguageType)} className={`p-3 rounded-2xl border-2 flex items-center justify-between px-5 transition-all ${language === lang.id ? 'border-emerald-500 bg-emerald-50/50 dark:bg-emerald-900/10' : 'border-slate-100 dark:border-slate-800 hover:border-emerald-200'}`}>
+                      <div className="flex items-center gap-3">
+                        <span className="text-xl">{lang.flag}</span>
+                        <span className={`text-[11px] font-black uppercase tracking-tight ${language === lang.id ? 'text-emerald-700 dark:text-emerald-400' : 'text-slate-700 dark:text-slate-200'}`}>{lang.name}</span>
+                      </div>
+                      {language === lang.id && <div className="w-2 h-2 bg-emerald-500 rounded-full" />}
+                    </button>
+                  ))}
                 </div>
               </div>
             </div>
@@ -286,35 +303,21 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ language, setLanguag
 
         <section className="space-y-6">
           <div className="flex flex-col gap-6">
+            {/* Backend Info Section (Moved from Column 2) */}
             <div className="space-y-4">
               <div className="flex items-center gap-2 ml-4">
-                <div className="w-1 h-4 bg-emerald-600 rounded-full" />
-                <h2 className="text-[11px] font-black text-slate-500 uppercase tracking-[0.2em]">{t.languageLabel}</h2>
+                <div className="w-1 h-4 bg-indigo-600 rounded-full" />
+                <h2 className="text-[11px] font-black text-slate-500 uppercase tracking-[0.2em]">Backend Info</h2>
               </div>
-              <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-[32px] p-6 shadow-sm group">
-                <div className="flex items-center gap-4 mb-5">
-                  <div className="w-9 h-9 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 rounded-lg flex items-center justify-center shadow-inner group-hover:scale-110 transition-transform">
-                    <Globe size={18} />
-                  </div>
-                  <div>
-                    <h3 className="text-[13px] font-black text-slate-800 dark:text-white uppercase tracking-tight">{t.languageLabel}</h3>
-                    <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest">{t.regionalLocalization}</p>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 gap-3">
-                  {[
-                    { id: 'en', name: 'English', flag: '🇺🇸' },
-                    { id: 'bn', name: 'বাংলা', flag: '🇧🇩' }
-                  ].map((lang) => (
-                    <button key={lang.id} onClick={() => setLanguage(lang.id as LanguageType)} className={`p-3 rounded-2xl border-2 flex items-center justify-between px-5 transition-all ${language === lang.id ? 'border-emerald-500 bg-emerald-50/50 dark:bg-emerald-900/10' : 'border-slate-100 dark:border-slate-800 hover:border-emerald-200'}`}>
-                      <div className="flex items-center gap-3">
-                        <span className="text-xl">{lang.flag}</span>
-                        <span className={`text-[11px] font-black uppercase tracking-tight ${language === lang.id ? 'text-emerald-700 dark:text-emerald-400' : 'text-slate-700 dark:text-slate-200'}`}>{lang.name}</span>
-                      </div>
-                      {language === lang.id && <div className="w-2 h-2 bg-emerald-500 rounded-full" />}
-                    </button>
-                  ))}
+              <div className="bg-indigo-50/40 dark:bg-indigo-900/10 border border-indigo-200 dark:border-indigo-800 rounded-[32px] p-6 shadow-sm group">
+                <div className="flex items-center gap-4">
+                   <div className="w-10 h-10 bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 rounded-xl flex items-center justify-center shadow-inner">
+                      <Cloud size={20} />
+                   </div>
+                   <div>
+                      <h3 className="text-[14px] font-black text-indigo-800 dark:text-indigo-400 uppercase tracking-tight">{t.cloudStatus}</h3>
+                      <p className="text-[9px] font-bold text-indigo-400 uppercase tracking-widest">{t.backendUrl}</p>
+                   </div>
                 </div>
               </div>
             </div>

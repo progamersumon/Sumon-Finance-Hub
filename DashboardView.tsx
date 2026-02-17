@@ -1,7 +1,6 @@
 
 import React, { useMemo, useState } from 'react';
 import { 
-  TrendingUp, 
   DollarSign, 
   ArrowUpRight, 
   ArrowDownRight,
@@ -21,7 +20,7 @@ interface DashboardViewProps {
   reminders: Reminder[];
 }
 
-export const DashboardView: React.FC<DashboardViewProps> = ({ language, profile, transactions, savingsGoals, reminders }) => {
+export const DashboardView: React.FC<DashboardViewProps> = ({ language, profile, transactions, savingsGoals, attendanceList, reminders }) => {
   // Calendar States
   const [enCalendarDate, setEnCalendarDate] = useState(new Date());
   const [bnCalendarDate, setBnCalendarDate] = useState(new Date());
@@ -36,7 +35,6 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ language, profile,
       attendance: 'Attendance Rate',
       latestActivity: 'Latest Activity',
       activeReminders: 'Active Reminders',
-      netWorth: 'Estimated Net Worth',
       today: 'TODAY'
     },
     'বাংলা': {
@@ -48,7 +46,6 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ language, profile,
       attendance: 'উপস্থিতির হার',
       latestActivity: 'সাম্প্রতিক কার্যকলাপ',
       activeReminders: 'সক্রিয় রিমাইন্ডার',
-      netWorth: 'আনুমানিক নিট সম্পদ',
       today: 'আজ'
     }
   };
@@ -56,8 +53,9 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ language, profile,
   const t = translations[language];
 
   const formatCurrency = (val: number) => {
-    const formatted = val.toLocaleString();
-    return language === 'English' ? `৳${formatted}` : `৳${toBnDigits(formatted)}`;
+    const formatted = Math.abs(val).toLocaleString();
+    const sign = val < 0 ? '-' : '';
+    return language === 'English' ? `${sign}৳${formatted}` : `${sign}৳${toBnDigits(formatted)}`;
   };
 
   const stats = useMemo(() => {
@@ -67,10 +65,30 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ language, profile,
     const income = monthTxs.filter(t => t.type === 'income').reduce((s, t) => s + t.amount, 0);
     const expense = monthTxs.filter(t => t.type === 'expense').reduce((s, t) => s + t.amount, 0);
     const totalSavings = (savingsGoals || []).reduce((s, g) => s + g.currentAmount, 0);
-    const netWorth = transactions.reduce((s, t) => t.type === 'income' ? s + t.amount : s - t.amount, 0);
+    
+    // Calculate dynamic Attendance Rate
+    const relevantAttendance = (attendanceList || []).filter(a => 
+      ['On Time', 'Late', 'Absent', 'Out Missing'].includes(a.status)
+    );
+    const presentDays = (attendanceList || []).filter(a => ['On Time', 'Late'].includes(a.status)).length;
+    const attendanceRate = relevantAttendance.length > 0 
+      ? Math.round((presentDays / relevantAttendance.length) * 100) 
+      : 0;
 
-    return { income, expense, totalSavings, netWorth };
-  }, [transactions, savingsGoals]);
+    // Calculate overall savings progress
+    const totalTarget = (savingsGoals || []).reduce((s, g) => s + g.targetAmount, 0);
+    const savingsProgress = totalTarget > 0 
+      ? Math.round((totalSavings / totalTarget) * 100) 
+      : 0;
+
+    return { 
+      income, 
+      expense, 
+      totalSavings, 
+      attendanceRate,
+      savingsProgress 
+    };
+  }, [transactions, savingsGoals, attendanceList]);
 
   // English Calendar logic
   const englishDays = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
@@ -118,6 +136,17 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ language, profile,
   const today = new Date();
   const todayDetails = getBengaliMonthDetails(today);
 
+  // Helper for progress bar classes to avoid JIT issues with dynamic strings
+  const getProgressColor = (color: string) => {
+    switch (color) {
+      case 'emerald': return 'bg-emerald-500';
+      case 'rose': return 'bg-rose-500';
+      case 'indigo': return 'bg-indigo-600';
+      case 'blue': return 'bg-blue-500';
+      default: return 'bg-slate-400';
+    }
+  };
+
   const mainStats = [
     { 
       label: t.monthlyIncome, 
@@ -138,14 +167,14 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ language, profile,
       value: stats.totalSavings, 
       icon: <DollarSign size={18} />, 
       color: 'indigo',
-      progress: 65 
+      progress: stats.savingsProgress 
     },
     { 
       label: t.attendance, 
-      value: '94%', 
+      value: `${stats.attendanceRate}%`, 
       icon: <ICONS.Clock size={18} />, 
       color: 'blue',
-      progress: 94 
+      progress: stats.attendanceRate 
     }
   ];
 
@@ -159,21 +188,12 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ language, profile,
           </h2>
           <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mt-1">{t.overview}</p>
         </div>
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl px-4 py-3 shadow-sm flex items-center gap-3 shrink-0">
-          <div className="w-10 h-10 bg-emerald-500/10 text-emerald-600 rounded-xl flex items-center justify-center">
-            <TrendingUp size={20} />
-          </div>
-          <div>
-            <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest leading-none">{t.netWorth}</p>
-            <p className="text-lg font-black text-slate-800 dark:text-white leading-none mt-1.5">{formatCurrency(stats.netWorth)}</p>
-          </div>
-        </div>
       </div>
 
       {/* Main Layout Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         
-        {/* Left Column: Stats - Increased span to lg:col-span-6 for wider cards */}
+        {/* Left Column: Stats */}
         <div className="lg:col-span-6 grid grid-cols-2 gap-3 content-start">
           {mainStats.map((stat, i) => (
             <div key={i} className="p-3 pt-3 pb-3 h-[112px] rounded-[24px] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col justify-between group hover:border-indigo-500/50 transition-all">
@@ -197,7 +217,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ language, profile,
                 </div>
                 <div className="w-full h-1.5 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
                   <div 
-                    className={`h-full bg-${stat.color}-50 transition-all duration-1000 ease-out rounded-full`}
+                    className={`h-full ${getProgressColor(stat.color)} transition-all duration-1000 ease-out rounded-full`}
                     style={{ width: `${stat.progress}%` }}
                   />
                 </div>
@@ -206,7 +226,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ language, profile,
           ))}
         </div>
 
-        {/* Right Column: Calendars - Adjusted span to lg:col-span-6 */}
+        {/* Right Column: Calendars */}
         <div className="lg:col-span-6 grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
           {/* English Calendar */}
           <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-[24px] shadow-sm overflow-hidden animate-in slide-in-from-right duration-700">
@@ -321,27 +341,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ language, profile,
                    </div>
                  </div>
                ))}
-               {reminders.length === 0 && <p className="text-center py-10 text-[11px] font-black uppercase text-slate-400 opacity-50">No alerts</p>}
-             </div>
-          </div>
-
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-[32px] p-6 shadow-sm h-[320px] overflow-hidden flex flex-col">
-             <h3 className="text-[11px] font-black text-slate-900 dark:text-white uppercase tracking-widest mb-6">Savings Progress</h3>
-             <div className="space-y-5 overflow-y-auto flex-1 custom-scrollbar pr-2">
-               {savingsGoals.map(goal => {
-                 const progress = Math.min((goal.currentAmount / goal.targetAmount) * 100, 100);
-                 return (
-                   <div key={goal.id} className="space-y-2">
-                     <div className="flex justify-between items-end">
-                       <span className="text-[11px] font-black text-slate-700 dark:text-slate-300 uppercase tracking-tight">{goal.name}</span>
-                       <span className="text-[10px] font-black text-indigo-600">{progress.toFixed(0)}%</span>
-                     </div>
-                     <div className="h-2 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
-                       <div className="h-full bg-indigo-600 rounded-full transition-all duration-1000" style={{ width: `${progress}%` }} />
-                     </div>
-                   </div>
-                 );
-               })}
+               {reminders.filter(r => !r.completed).length === 0 && <p className="text-center py-10 text-[11px] font-black uppercase text-slate-400 opacity-50">No alerts</p>}
              </div>
           </div>
         </div>
