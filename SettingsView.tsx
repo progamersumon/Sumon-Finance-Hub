@@ -15,7 +15,7 @@ import {
   Lock,
   KeyRound,
   ShieldCheck,
-  CloudCheck,
+  Cloud,
   Database
 } from 'lucide-react';
 import { LanguageType, ThemeType } from './types';
@@ -237,7 +237,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ language, setLanguag
               <div className="bg-indigo-50/40 dark:bg-indigo-900/10 border border-indigo-200 dark:border-indigo-800 rounded-[32px] p-6 shadow-sm group">
                 <div className="flex items-center gap-4">
                    <div className="w-10 h-10 bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 rounded-xl flex items-center justify-center shadow-inner">
-                      <CloudCheck size={20} />
+                      <Cloud size={20} />
                    </div>
                    <div>
                       <h3 className="text-[14px] font-black text-indigo-800 dark:text-indigo-400 uppercase tracking-tight">{t.cloudStatus}</h3>
