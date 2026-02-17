@@ -20,6 +20,7 @@ import AttendanceView from './AttendanceView';
 import LeaveInfoView from './LeaveInfoView';
 import { t } from './translations';
 import { supabase } from './supabaseClient';
+import { Mail, Lock, ChevronRight } from 'lucide-react';
 
 const INITIAL_LEAVE_QUOTAS: LeaveType[] = [
   { id: 'annual', type: 'Annual Leave', total: 20, color: 'bg-blue-600' },
@@ -28,27 +29,6 @@ const INITIAL_LEAVE_QUOTAS: LeaveType[] = [
 ];
 
 const CACHE_KEY = 'finance_hub_data_cache';
-
-const FinanceHubLogo = ({ className = "w-48 h-48", textColor = "text-white" }: { className?: string, textColor?: string }) => (
-  <div className={`flex flex-col items-center justify-center ${className}`}>
-    <div className="relative w-28 h-28 flex items-center justify-center mb-3">
-      <svg viewBox="0 0 100 100" className="w-full h-full drop-shadow-xl">
-        <defs>
-          <linearGradient id="arrowGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="#60a5fa" />
-            <stop offset="100%" stopColor="#1d4ed8" />
-          </linearGradient>
-        </defs>
-        <rect x="25" y="45" width="10" height="35" rx="1.5" fill="#60a5fa" />
-        <rect x="42" y="30" width="10" height="50" rx="1.5" fill="#3b82f6" />
-        <rect x="59" y="15" width="10" height="65" rx="1.5" fill="#1d4ed8" />
-        <path d="M10 85 Q 50 85, 90 20" fill="none" stroke="url(#arrowGrad)" strokeWidth="6" strokeLinecap="round" />
-        <path d="M90 20 L80 22 L86 32 Z" fill="#fbbf24" />
-      </svg>
-    </div>
-    <h1 className={`${textColor} text-3xl font-black tracking-tighter text-center leading-none whitespace-nowrap`}>Finance Hub</h1>
-  </div>
-);
 
 const LoginView: React.FC<{ onLogin: (user: any) => void, language: LanguageType }> = ({ onLogin, language }) => {
   const [mode, setMode] = useState<'login' | 'signup'>('login');
@@ -90,39 +70,146 @@ const LoginView: React.FC<{ onLogin: (user: any) => void, language: LanguageType
   };
 
   return (
-    <div className="h-screen w-full flex overflow-hidden font-sans bg-white">
-      <div className="hidden md:flex flex-1 bg-gradient-to-br from-blue-600 to-indigo-800 flex-col items-center justify-center p-10 text-center text-white relative">
-        <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-10" />
-        <FinanceHubLogo />
-        <p className="mt-8 text-blue-100 font-medium max-w-xs opacity-80 uppercase tracking-widest text-[10px]">Your personal AI-powered financial ecosystem.</p>
-      </div>
-      <div className="flex-1 flex flex-col items-center justify-center p-6 bg-slate-50">
-        <div className="w-full max-sm:max-w-xs">
-          <div className="flex justify-center mb-10 md:hidden">
-             <FinanceHubLogo className="w-32 h-32" textColor="text-blue-600" />
+    <div className="h-screen w-full flex overflow-hidden font-sans bg-white selection:bg-blue-100">
+      {/* Autofill CSS Reset to prevent black/yellow background in inputs */}
+      <style>{`
+        input:-webkit-autofill,
+        input:-webkit-autofill:hover, 
+        input:-webkit-autofill:focus, 
+        input:-webkit-autofill:active {
+          -webkit-box-shadow: 0 0 0 1000px white inset !important;
+          -webkit-text-fill-color: #334155 !important;
+          transition: background-color 5000s ease-in-out 0s;
+        }
+      `}</style>
+
+      {/* Left Column: Branding (Image Reference) */}
+      <div className="hidden md:flex flex-1 bg-gradient-to-br from-[#0088ff] to-[#0077ee] flex-col items-center justify-center p-12 text-center text-white relative">
+        <div className="max-w-xl space-y-4">
+          <h1 className="text-6xl font-black tracking-tight leading-none drop-shadow-sm mb-6">Welcome Back!</h1>
+          <p className="text-[14px] font-medium text-blue-50/90 leading-relaxed mx-auto whitespace-nowrap">
+            Keep your data organized and your business running<br />smoothly with our advanced management system.
+          </p>
+          
+          {/* Pagination Indicators - spacing further reduced to pt-1 */}
+          <div className="pt-1 flex items-center justify-center gap-2">
+            <div className="w-12 h-1 bg-blue-300/40 rounded-full" />
+            <div className="w-2 h-2 bg-white rounded-full" />
+            <div className="w-12 h-1 bg-blue-300/40 rounded-full" />
           </div>
-          <h2 className="text-3xl font-black text-blue-900 mb-6 text-center uppercase tracking-tighter">
-            {mode === 'login' ? t('login', language) : t('signUp', language)}
-          </h2>
-          {errorMessage && <div className="mb-4 p-4 bg-rose-50 text-rose-600 text-xs rounded-2xl font-bold border border-rose-100">{errorMessage}</div>}
-          <div className="space-y-4">
+        </div>
+      </div>
+
+      {/* Right Column: Form (Image Reference) */}
+      <div className="flex-1 flex flex-col items-center justify-center p-6 bg-white">
+        <div className="w-full max-w-sm">
+          <div className="text-center mb-10">
+            <h2 className="text-[42px] font-black text-[#0088ff] uppercase tracking-tight leading-none mb-3">User Login</h2>
+            <div className="w-16 h-1.5 bg-[#0088ff] mx-auto rounded-full" />
+          </div>
+
+          {errorMessage && (
+            <div className="mb-6 p-4 bg-rose-50 text-rose-600 text-xs rounded-2xl font-bold border border-rose-100 animate-in fade-in slide-in-from-top-2">
+              {errorMessage}
+            </div>
+          )}
+
+          <div className="space-y-6">
             {mode === 'signup' && (
-              <input type="text" placeholder={t('fullName', language)} value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} className="w-full bg-white border-2 border-slate-200 rounded-2xl py-4 px-5 text-slate-900 outline-none focus:border-blue-500 font-bold transition-all" />
+              <div className="relative">
+                <label className="absolute -top-2.5 left-6 px-2 bg-white text-[#0088ff] text-[10px] font-black uppercase tracking-widest z-10">Full Name</label>
+                <div className="flex items-center bg-white border border-blue-200 rounded-full px-6 py-3.5 focus-within:border-[#0088ff] focus-within:ring-4 focus-within:ring-blue-50 transition-all">
+                  <User className="text-blue-300 mr-3 shrink-0" size={18} />
+                  <input 
+                    type="text" 
+                    placeholder="Enter your name" 
+                    value={formData.name} 
+                    onChange={e => setFormData({...formData, name: e.target.value})} 
+                    className="w-full bg-white text-slate-700 font-bold outline-none text-sm placeholder:text-slate-300" 
+                  />
+                </div>
+              </div>
             )}
-            <input type="email" placeholder="Email Address" value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} className="w-full bg-white border-2 border-slate-200 rounded-2xl py-4 px-5 text-slate-900 outline-none focus:border-blue-500 font-bold transition-all" />
-            <input type="password" placeholder="Password" value={formData.password} onChange={e => setFormData({...formData, password: e.target.value})} className="w-full bg-white border-2 border-slate-200 rounded-2xl py-4 px-5 text-slate-900 outline-none focus:border-blue-500 font-bold transition-all" />
-            <button onClick={handleAuthSubmit} disabled={loading} className="w-full bg-blue-600 text-white font-black py-4 rounded-2xl shadow-xl hover:bg-blue-700 transition-all uppercase tracking-widest text-sm mt-2 flex items-center justify-center gap-2">
-              {loading ? <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" /> : 'SUBMIT'}
-            </button>
-            <button onClick={() => setMode(mode === 'login' ? 'signup' : 'login')} className="w-full text-xs font-black text-blue-600 uppercase mt-4 hover:text-blue-800 transition-colors">
-              {mode === 'login' ? t('signUp', language) : t('alreadyHaveAccount', language)}
-            </button>
+
+            <div className="relative">
+              <label className="absolute -top-2.5 left-6 px-2 bg-white text-[#0088ff] text-[10px] font-black uppercase tracking-widest z-10">Email Id</label>
+              <div className="flex items-center bg-white border border-blue-200 rounded-full px-6 py-3.5 focus-within:border-[#0088ff] focus-within:ring-4 focus-within:ring-blue-50 transition-all group">
+                <Mail className="text-blue-300 mr-3 shrink-0 group-focus-within:text-[#0088ff] transition-colors" size={18} />
+                <input 
+                  type="email" 
+                  placeholder="user@example.com" 
+                  value={formData.email} 
+                  onChange={e => setFormData({...formData, email: e.target.value})} 
+                  className="w-full bg-white text-slate-700 font-bold outline-none text-sm placeholder:text-slate-300" 
+                />
+              </div>
+            </div>
+
+            <div className="relative">
+              <label className="absolute -top-2.5 left-6 px-2 bg-white text-[#0088ff] text-[10px] font-black uppercase tracking-widest z-10">Password</label>
+              <div className="flex items-center bg-white border border-blue-200 rounded-full px-6 py-3.5 focus-within:border-[#0088ff] focus-within:ring-4 focus-within:ring-blue-50 transition-all group">
+                <Lock className="text-blue-300 mr-3 shrink-0 group-focus-within:text-[#0088ff] transition-colors" size={18} />
+                <input 
+                  type="password" 
+                  placeholder="••••••••••••••••" 
+                  value={formData.password} 
+                  onChange={e => setFormData({...formData, password: e.target.value})} 
+                  className="w-full bg-white text-slate-700 font-bold outline-none text-sm placeholder:text-slate-300" 
+                />
+              </div>
+              <div className="flex justify-end mt-1.5">
+                <button className="text-[10px] font-bold text-slate-400 italic hover:text-[#0088ff] transition-colors">Forgot your password?</button>
+              </div>
+            </div>
+
+            <div className="pt-2">
+              <button 
+                onClick={handleAuthSubmit} 
+                disabled={loading} 
+                className="w-full bg-[#0099ff] hover:bg-[#0088ff] text-white font-black py-4 rounded-full shadow-xl shadow-blue-500/20 transition-all flex items-center justify-center gap-2 active:scale-[0.98] group"
+              >
+                {loading ? (
+                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                ) : (
+                  <>
+                    <span className="text-sm uppercase tracking-widest">Login</span>
+                    <ChevronRight size={18} className="group-hover:translate-x-1 transition-transform" />
+                  </>
+                )}
+              </button>
+            </div>
+
+            <div className="text-center pt-2">
+              <button 
+                onClick={() => setMode(mode === 'login' ? 'signup' : 'login')} 
+                className="text-[12px] font-bold text-slate-600 hover:text-[#0088ff] transition-colors"
+              >
+                {mode === 'login' ? "Don't have an account? Sign up" : "Already have an account? Login"}
+              </button>
+            </div>
           </div>
         </div>
       </div>
     </div>
   );
 };
+
+const User = ({ className, size }: { className?: string, size?: number }) => (
+  <svg 
+    xmlns="http://www.w3.org/2000/svg" 
+    width={size || 24} 
+    height={size || 24} 
+    viewBox="0 0 24 24" 
+    fill="none" 
+    stroke="currentColor" 
+    strokeWidth="2" 
+    strokeLinecap="round" 
+    strokeLinejoin="round" 
+    className={className}
+  >
+    <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+  </svg>
+);
 
 const AppContent: React.FC = () => {
   const [language, setLanguage] = useState<LanguageType>('en');
