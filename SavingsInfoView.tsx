@@ -18,9 +18,11 @@ import {
   Calculator,
   Wallet,
   TrendingDown,
-  Filter
+  Filter,
+  CalendarDays
 } from 'lucide-react';
 import { SavingsGoal, SavingsRecord, Transaction } from './types';
+import { toBnDigits } from './utils';
 
 interface SavingsInfoViewProps {
   goals: SavingsGoal[];
@@ -104,7 +106,6 @@ const SavingsInfoView: React.FC<SavingsInfoViewProps> = ({
     }
   }, [goalForm.monthlyDeposit, goalForm.profitPercent, goalForm.years]);
 
-  // Enhanced logic to calculate running totals and profit per transaction entry
   const processedHistory = useMemo(() => {
     const sortedOldestFirst = [...records].sort((a, b) => a.date.localeCompare(b.date));
     
@@ -120,7 +121,6 @@ const SavingsInfoView: React.FC<SavingsInfoViewProps> = ({
       const prevBalance = goalTrackers[goal.id].balance;
       const monthlyRate = (goal.profitPercent / 100) / 12;
       
-      // Based on provided chart logic: Interest calculated after adding deposit
       const balanceAfterDeposit = prevBalance + record.amount;
       const profitThisStep = balanceAfterDeposit * monthlyRate;
       const endBalance = balanceAfterDeposit + profitThisStep;
@@ -137,13 +137,11 @@ const SavingsInfoView: React.FC<SavingsInfoViewProps> = ({
     return results.sort((a, b) => b.date.localeCompare(a.date));
   }, [records, goals]);
 
-  // Filtered version of the processed history for rendering
   const filteredProcessedHistory = useMemo(() => {
     if (historyGoalFilter === 'all') return processedHistory;
     return processedHistory.filter(r => r.goalId === historyGoalFilter);
   }, [processedHistory, historyGoalFilter]);
 
-  // Updated analytics to match the processed history exactly
   const analytics = useMemo(() => {
     let totalDeposit = 0;
     let totalAccruedProfit = 0;
@@ -311,8 +309,8 @@ const SavingsInfoView: React.FC<SavingsInfoViewProps> = ({
     const years = Math.floor(totalMonths / 12);
     const months = Math.round(totalMonths % 12);
     let result = '';
-    if (years > 0) result += `${years} YEAR${years > 1 ? 'S' : ''} `;
-    if (months > 0 || years === 0) result += `${months} MONTH${months > 1 ? 'S' : ''}`;
+    if (years > 0) result += `${years}Y `;
+    if (months > 0 || years === 0) result += `${months}M`;
     return result.trim();
   };
 
@@ -337,12 +335,12 @@ const SavingsInfoView: React.FC<SavingsInfoViewProps> = ({
         ))}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-2 space-y-8">
+      <div className="grid grid-cols-1 lg:grid-cols-1 gap-8">
+        <div className="space-y-8">
           <section className="space-y-4">
             <div className="flex items-center justify-between">
               <h3 className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-wider flex items-center gap-2">
-                <div className="w-2 h-2 bg-indigo-600 rounded-full" /> Financial Assets
+                <div className="w-2 h-2 bg-indigo-600 rounded-full" /> Portfolio Accounts
               </h3>
               <div className="flex gap-2">
                 <button 
@@ -357,112 +355,143 @@ const SavingsInfoView: React.FC<SavingsInfoViewProps> = ({
                 </button>
               </div>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-              {goals.length > 0 ? goals.map(goal => (
-                <div 
-                  key={goal.id} 
-                  className="aspect-[1.586/1] rounded-[24px] p-6 shadow-2xl relative overflow-hidden group transition-all hover:scale-[1.03] active:scale-[0.98] cursor-pointer border border-white/20 select-none"
-                  style={{ 
-                    background: `linear-gradient(135deg, ${goal.color} 0%, ${goal.color}aa 40%, ${goal.color}ff 100%)`,
-                    boxShadow: `0 25px 50px -12px ${goal.color}55`
-                  }}
-                >
-                  <div className="absolute inset-0 pointer-events-none overflow-hidden">
-                    <div className="absolute -top-1/4 -left-1/4 w-3/4 h-3/4 bg-white/30 blur-[100px] rounded-full animate-pulse" />
-                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-[0.03] blend-overlay" />
-                    <div className="absolute inset-0 bg-gradient-to-tr from-black/20 via-transparent to-white/10" />
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-2 gap-8">
+              {goals.length > 0 ? goals.map(goal => {
+                const monthlyP = parseFloat(goal.plan.replace('৳', '').replace('/Mo', '')) || 1;
+                const totalMonthsNeeded = Math.round(goal.targetAmount / monthlyP);
+                const completedMonths = Math.min(Math.floor(goal.currentAmount / monthlyP), totalMonthsNeeded);
+                const remainingMonths = Math.max(0, totalMonthsNeeded - completedMonths);
+                const progressPercent = Math.min(Math.round((goal.currentAmount / goal.targetAmount) * 100), 100);
+
+                return (
+                  <div 
+                    key={goal.id} 
+                    className="rounded-[32px] p-0 shadow-2xl relative overflow-hidden group transition-all hover:translate-y-[-4px] cursor-default border border-white/20 select-none flex flex-col"
+                    style={{ 
+                      background: `linear-gradient(135deg, ${goal.color} 0%, ${goal.color}cc 100%)`,
+                      boxShadow: `0 25px 50px -12px ${goal.color}33`
+                    }}
+                  >
+                    {/* Card Content Top */}
+                    <div className="p-6 flex-1 relative z-10">
+                      <div className="absolute inset-0 pointer-events-none overflow-hidden">
+                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-[0.03] blend-overlay" />
+                        <div className="absolute inset-0 bg-gradient-to-tr from-black/20 via-transparent to-white/10" />
+                      </div>
+
+                      <div className="relative z-10 flex flex-col h-full space-y-4">
+                        <div className="flex justify-between items-start">
+                          <div className="flex flex-col">
+                            <p className="text-[10px] font-black text-white/60 uppercase tracking-[0.2em] leading-none mb-1">Savings Account</p>
+                            <h4 className="text-[17px] font-black text-white uppercase tracking-tight truncate max-w-[240px] drop-shadow-lg">{goal.name}</h4>
+                          </div>
+                          <div className="flex gap-2">
+                            <button 
+                              onClick={() => { 
+                                setEditingGoal(goal); 
+                                setGoalForm({ 
+                                  name: goal.name, 
+                                  monthlyDeposit: goal.monthlyDeposit ? goal.monthlyDeposit.toString() : goal.plan.replace('৳', '').replace('/Mo', ''), 
+                                  years: goal.years ? goal.years.toString() : '10', 
+                                  targetAmount: goal.targetAmount.toString(), 
+                                  profitPercent: goal.profitPercent ? goal.profitPercent.toString() : '9.48', 
+                                  maturityValue: goal.maturityValue.toString(), 
+                                  color: goal.color 
+                                }); 
+                                setIsGoalModalOpen(true); 
+                              }}
+                              className="w-7 h-7 flex items-center justify-center bg-white/10 hover:bg-white/20 text-white rounded-full transition-all border border-white/10 backdrop-blur-md"
+                            >
+                              <Pencil size={11} />
+                            </button>
+                            <button 
+                              onClick={() => { 
+                                setGoalToDelete(goal.id); 
+                                setIsDeleteGoalConfirmOpen(true); 
+                              }}
+                              className="w-7 h-7 flex items-center justify-center bg-rose-500/20 hover:bg-rose-500/40 text-white rounded-full transition-all border border-white/10 backdrop-blur-md"
+                            >
+                              <Trash2 size={11} />
+                            </button>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-7 rounded-lg bg-gradient-to-br from-yellow-100 via-amber-400 to-yellow-500 shadow-inner flex items-center justify-center relative overflow-hidden border border-amber-200/50">
+                            <div className="absolute inset-0 opacity-40">
+                              <div className="w-full h-full bg-[repeating-linear-gradient(45deg,transparent,transparent_2px,rgba(0,0,0,0.1)_2px,rgba(0,0,0,0.1)_4px)]" />
+                            </div>
+                            <div className="w-6 h-4 border-[0.5px] border-black/10 rounded-sm" />
+                          </div>
+                          <div className="flex-1">
+                            <p className="text-[13px] font-mono font-black text-white/80 tracking-[0.15em] drop-shadow-md">
+                              ••••  ••••  ••••  <span className="text-white">8842</span>
+                            </p>
+                          </div>
+                          <div className="flex flex-col items-end">
+                             <div className="px-2 py-0.5 bg-white/10 text-white text-[9px] font-black rounded-lg backdrop-blur-md border border-white/10">
+                                {progressPercent}%
+                             </div>
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <p className="text-[9px] font-black text-white/50 uppercase tracking-[0.2em] mb-1">Net Savings</p>
+                            <h2 className="text-2xl font-black text-white tracking-tighter drop-shadow-2xl">৳{goal.currentAmount.toLocaleString()}</h2>
+                          </div>
+                          <div className="text-right">
+                            <p className="text-[9px] font-black text-white/50 uppercase tracking-[0.2em] mb-1">Maturity Goal</p>
+                            <h2 className="text-2xl font-black text-white/90 tracking-tighter drop-shadow-2xl">৳{goal.targetAmount.toLocaleString()}</h2>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Progress Section Integrated - Thicker Progress Bar */}
+                    <div className="px-6 py-4 bg-black/10 backdrop-blur-xl border-t border-white/5">
+                        <div className="space-y-3">
+                            <div className="flex justify-between items-center text-[9px] font-black text-white/70 uppercase tracking-widest">
+                                <span>Timeline Progress</span>
+                                <span className="text-white">
+                                    {completedMonths} / {totalMonthsNeeded} Months
+                                </span>
+                            </div>
+                            
+                            {/* Increased height from h-2 to h-3.5 and adjusted style for thickness */}
+                            <div className="w-full bg-white/10 h-3.5 rounded-full overflow-hidden p-0.5 border border-white/5">
+                                <div 
+                                    className="h-full rounded-full transition-all duration-1000 bg-white shadow-[0_0_15px_rgba(255,255,255,0.6)]" 
+                                    style={{ width: `${progressPercent}%` }} 
+                                />
+                            </div>
+
+                            <div className="flex justify-between items-center">
+                                {/* Enhanced 'Remaining' visibility: Added background container, increased size and opacity */}
+                                <div className="flex items-center gap-1.5 px-2 py-0.5 bg-white/10 rounded-lg backdrop-blur-md border border-white/10">
+                                    <div className="w-1.5 h-1.5 bg-white rounded-full animate-pulse" />
+                                    <p className="text-[10px] font-black text-white uppercase tracking-tight">
+                                        REMAINING: {formatTimePeriod(remainingMonths)}
+                                    </p>
+                                </div>
+                                <div className="flex items-center gap-4">
+                                    <div className="flex flex-col items-end">
+                                        <p className="text-[7px] font-black text-white/40 uppercase tracking-widest leading-none mb-1">Plan Period</p>
+                                        <p className="text-[10px] font-black text-white uppercase leading-none">{goal.years} Years</p>
+                                    </div>
+                                    <div className="w-px h-5 bg-white/10" />
+                                    <div className="flex flex-col items-end">
+                                        <p className="text-[7px] font-black text-white/40 uppercase tracking-widest leading-none mb-1">Expected ROI</p>
+                                        <p className="text-[10px] font-black text-white leading-none">৳{goal.maturityValue.toLocaleString()}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                   </div>
-
-                  <div className="relative z-10 h-full flex flex-col justify-between">
-                    <div className="flex justify-between items-start">
-                      <div className="flex flex-col">
-                        <p className="text-[10px] font-black text-white/60 uppercase tracking-[0.2em] leading-none mb-1">Portfolio Account</p>
-                        <h4 className="text-[16px] font-black text-white uppercase tracking-tight truncate max-w-[210px] drop-shadow-lg">{goal.name}</h4>
-                      </div>
-                      <div className="flex gap-2">
-                        <button 
-                          onClick={(e) => { 
-                            e.stopPropagation(); 
-                            setEditingGoal(goal); 
-                            setGoalForm({ 
-                              name: goal.name, 
-                              monthlyDeposit: goal.monthlyDeposit ? goal.monthlyDeposit.toString() : goal.plan.replace('৳', '').replace('/Mo', ''), 
-                              years: goal.years ? goal.years.toString() : '10', 
-                              targetAmount: goal.targetAmount.toString(), 
-                              profitPercent: goal.profitPercent ? goal.profitPercent.toString() : '9.48', 
-                              maturityValue: goal.maturityValue.toString(), 
-                              color: goal.color 
-                            }); 
-                            setIsGoalModalOpen(true); 
-                          }}
-                          className="w-8 h-8 flex items-center justify-center bg-white/10 hover:bg-white/20 text-white rounded-full transition-all border border-white/10 backdrop-blur-md"
-                          title="Edit Account"
-                        >
-                          <Pencil size={12} />
-                        </button>
-                        <button 
-                          onClick={(e) => { 
-                            e.stopPropagation(); 
-                            setGoalToDelete(goal.id); 
-                            setIsDeleteGoalConfirmOpen(true); 
-                          }}
-                          className="w-8 h-8 flex items-center justify-center bg-rose-500/20 hover:bg-rose-500/40 text-white rounded-full transition-all border border-white/10 backdrop-blur-md"
-                          title="Delete Account"
-                        >
-                          <Trash2 size={12} />
-                        </button>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center gap-4">
-                      <div className="w-12 h-9 rounded-lg bg-gradient-to-br from-yellow-100 via-amber-400 to-yellow-500 shadow-inner flex items-center justify-center relative overflow-hidden border border-amber-200/50">
-                        <div className="absolute inset-0 opacity-40">
-                          <div className="w-full h-full bg-[repeating-linear-gradient(45deg,transparent,transparent_2px,rgba(0,0,0,0.1)_2px,rgba(0,0,0,0.1)_4px)]" />
-                        </div>
-                        <div className="w-8 h-6 border-[0.5px] border-black/10 rounded-sm flex flex-wrap">
-                          <div className="w-1/2 h-1/3 border-b border-r border-black/10" />
-                          <div className="w-1/2 h-1/3 border-b border-black/10" />
-                          <div className="w-1/2 h-1/3 border-b border-r border-black/10" />
-                          <div className="w-1/2 h-1/3 border-b border-black/10" />
-                          <div className="w-1/2 h-1/3 border-r border-black/10" />
-                          <div className="w-1/2 h-1/3" />
-                        </div>
-                      </div>
-                      <div className="flex-1">
-                        <p className="text-[14px] font-mono font-black text-white/80 tracking-[0.15em] drop-shadow-md">
-                          ••••  ••••  ••••  <span className="text-white">8842</span>
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="space-y-0.5">
-                      <p className="text-[10px] font-black text-white/50 uppercase tracking-[0.2em]">Net Savings</p>
-                      <h2 className="text-3xl font-black text-white tracking-tighter drop-shadow-2xl">৳{goal.currentAmount.toLocaleString()}</h2>
-                    </div>
-
-                    <div className="flex justify-between items-end border-t border-white/10 pt-4">
-                      <div className="flex items-center gap-3">
-                        <div>
-                          <p className="text-[8px] font-black text-white/40 uppercase tracking-widest mb-0.5">Maturity</p>
-                          <p className="text-[12px] font-black text-white/90">৳{goal.maturityValue.toLocaleString()}</p>
-                        </div>
-                        <div className="w-px h-6 bg-white/10" />
-                        <div>
-                          <p className="text-[8px] font-black text-white/40 uppercase tracking-widest mb-0.5">Monthly</p>
-                          <p className="text-[10px] font-black text-white/90 uppercase">{goal.plan}</p>
-                        </div>
-                      </div>
-                      <div className="text-right">
-                         <Layers size={22} className="text-white/30 group-hover:text-white/80 transition-all duration-500" />
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div className="absolute bottom-6 right-6 pointer-events-none opacity-0 group-hover:opacity-10 transition-opacity">
-                    <Fingerprint size={48} className="text-white" />
-                  </div>
-                </div>
-              )) : (
+                );
+              }) : (
                 <div className="col-span-full py-20 border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-[32px] flex flex-col items-center justify-center gap-3 bg-slate-50/50 dark:bg-slate-900/50">
                   <div className="w-16 h-16 bg-white dark:bg-slate-800 rounded-2xl flex items-center justify-center shadow-lg transform -rotate-6">
                     <PiggyBank size={32} className="text-indigo-500 opacity-80" />
@@ -470,12 +499,6 @@ const SavingsInfoView: React.FC<SavingsInfoViewProps> = ({
                   <div className="text-center px-4">
                     <span className="text-[13px] font-black uppercase tracking-widest text-slate-800 dark:text-slate-100">Portfolio is Empty</span>
                     <p className="text-[11px] font-bold text-slate-400 mt-1 max-w-[240px]">Initialize your first account to start tracking wealth</p>
-                    <button 
-                      onClick={() => { setEditingGoal(null); setIsGoalModalOpen(true); }}
-                      className="mt-4 px-6 py-2 bg-indigo-600 text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-600/20"
-                    >
-                      Initialize Asset
-                    </button>
                   </div>
                 </div>
               )}
@@ -501,7 +524,8 @@ const SavingsInfoView: React.FC<SavingsInfoViewProps> = ({
                 </select>
               </div>
             </div>
-            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-[24px] overflow-hidden shadow-sm">
+            {/* Reduced corner radius from rounded-[24px] to rounded-2xl */}
+            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden shadow-sm">
               <div className="overflow-x-auto">
                 <table className="w-full text-left">
                   <thead>
@@ -571,81 +595,6 @@ const SavingsInfoView: React.FC<SavingsInfoViewProps> = ({
                   </tbody>
                 </table>
               </div>
-            </div>
-          </section>
-        </div>
-
-        <div className="space-y-8">
-          <section className="space-y-4">
-            <h3 className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-wider flex items-center gap-2">
-              <div className="w-2 h-2 bg-indigo-900/80 rounded-full" /> TARGET PROGRESS
-            </h3>
-            <div className="space-y-6">
-              {goals.length > 0 ? goals.map(goal => {
-                const monthlyP = parseFloat(goal.plan.replace('৳', '').replace('/Mo', '')) || 1;
-                const totalMonthsNeeded = Math.round(goal.targetAmount / monthlyP);
-                const completedMonths = Math.min(Math.floor(goal.currentAmount / monthlyP), totalMonthsNeeded);
-                const remainingMonths = Math.max(0, totalMonthsNeeded - completedMonths);
-                const progressPercent = Math.min(Math.round((goal.currentAmount / goal.targetAmount) * 100), 100);
-
-                return (
-                  <div key={goal.id} className="bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800 rounded-[32px] p-5 shadow-sm relative overflow-hidden group hover:border-blue-400/30 transition-all">
-                    <div className="absolute top-5 right-5">
-                      <div className="px-3.5 py-1.5 bg-[#2563eb] text-white text-[10px] font-black rounded-full shadow-lg shadow-blue-600/20">
-                        {progressPercent}%
-                      </div>
-                    </div>
-
-                    <div className="mb-4">
-                      <h4 className="text-[18px] font-black text-[#1e293b] dark:text-white uppercase tracking-tight leading-tight">{goal.name}</h4>
-                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">
-                        {goal.years} YEARS PLAN • GOAL TARGETED
-                      </p>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-3 mb-4">
-                      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 p-3 rounded-2xl">
-                        <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-1">GOAL TARGET</p>
-                        <h5 className="text-[14px] font-black text-blue-600 tracking-tight leading-none">৳{goal.targetAmount.toLocaleString()}</h5>
-                      </div>
-                      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 p-3 rounded-2xl">
-                        <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-1">MATURITY VALUE</p>
-                        <h5 className="text-[14px] font-black text-emerald-500 tracking-tight leading-none">৳{goal.maturityValue.toLocaleString()}</h5>
-                      </div>
-                    </div>
-
-                    <div className="space-y-2">
-                      <div className="flex justify-between items-center px-1">
-                        <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">OVERALL PROGRESS</span>
-                        <span className="text-[10px] font-black text-blue-600 uppercase tracking-tight">
-                          {completedMonths} COMPLETE / {remainingMonths} REMAINING
-                        </span>
-                      </div>
-                      
-                      <div className="w-full bg-slate-100 dark:bg-slate-800 h-2.5 rounded-full overflow-hidden p-0.5">
-                        <div 
-                          className="h-full rounded-full transition-all duration-1000 bg-blue-600 shadow-sm" 
-                          style={{ width: `${progressPercent}%` }} 
-                        />
-                      </div>
-
-                      <div className="flex justify-between items-center px-1 pt-0.5">
-                        <p className="text-[9px] font-black text-slate-400 uppercase tracking-tight">
-                          COM- {formatTimePeriod(completedMonths)}
-                        </p>
-                        <p className="text-[9px] font-black text-slate-400 uppercase tracking-tight text-right">
-                          REM- {formatTimePeriod(remainingMonths)}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                );
-              }) : (
-                <div className="p-12 text-center border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-2xl bg-slate-50/30 dark:bg-slate-900/30">
-                  <Target size={32} className="mx-auto mb-3 text-slate-400 opacity-60" />
-                  <p className="text-[10px] font-black uppercase tracking-widest text-slate-500 opacity-80">Track your goals here</p>
-                </div>
-              )}
             </div>
           </section>
         </div>
@@ -796,7 +745,7 @@ const SavingsInfoView: React.FC<SavingsInfoViewProps> = ({
           <div className="bg-white dark:bg-[#1e293b] w-full max-w-[320px] rounded-[32px] p-8 text-center shadow-2xl border border-slate-200 dark:border-slate-700/50 animate-in zoom-in-95">
             <div className="w-16 h-16 bg-rose-100 text-rose-600 dark:bg-rose-900/30 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-inner"><AlertTriangle size={32} /></div>
             <h2 className="text-[16px] font-black text-slate-900 dark:text-white mb-2 uppercase tracking-tight">Destroy Account?</h2>
-            <p className="text-[12px] text-slate-500 dark:text-slate-400 mb-8 font-bold tracking-tight">Warning: This will permanently delete the bank account and all its historical records. This action cannot be undone.</p>
+            <p className="text-[12px] text-slate-500 dark:text-slate-400 mb-8 font-bold tracking-tight">Warning: This will permanently delete the bank account and all its historical records.</p>
             <div className="flex gap-3">
               <button onClick={confirmDeleteGoal} className="flex-1 py-3.5 bg-rose-600 text-white rounded-xl text-[12px] font-black uppercase hover:bg-rose-700 transition-all active:scale-95 shadow-lg shadow-rose-600/20">Delete</button>
               <button onClick={() => { setIsDeleteGoalConfirmOpen(false); setGoalToDelete(null); }} className="flex-1 py-3.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-xl text-[12px] font-black uppercase hover:bg-slate-200 transition-all active:scale-95">Cancel</button>
