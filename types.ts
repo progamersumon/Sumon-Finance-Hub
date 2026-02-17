@@ -1,7 +1,35 @@
 
 import React from 'react';
 
-export type ViewType = 'dashboard' | 'financial' | 'payroll' | 'savings' | 'bills' | 'betting' | 'reminders' | 'settings' | 'history';
+export type ViewType = 'dashboard' | 'financial' | 'payroll' | 'savings' | 'bills' | 'betting' | 'reminders' | 'settings' | 'history' | 'salary_info' | 'attendance' | 'leave_info';
+
+// Added AppTab enum to fix imports in Sidebar and Header
+export enum AppTab {
+  DASHBOARD = 'dashboard',
+  FINANCIAL = 'financial',
+  SALARY_INFO = 'salary_info',
+  ATTENDANCE = 'attendance',
+  LEAVE_INFO = 'leave_info',
+  SAVINGS = 'savings',
+  BILL = 'bills',
+  BETTING = 'betting',
+  REMINDERS = 'reminders',
+  SETTINGS = 'settings'
+}
+
+export const CATEGORIES = {
+  income: ['Salary', 'Business', 'Freelance', 'Investment', 'Gift', 'Others'],
+  expense: ['Rent', 'Food', 'Transport', 'Shopping', 'Medical', 'Education', 'Entertainment', 'DPS', 'Bill', 'Others']
+};
+
+// Added MenuItem interface for Sidebar
+export interface MenuItem {
+  id: AppTab;
+  label: string;
+  icon: React.ReactNode;
+}
+
+// New types to fix import errors
 export type LanguageType = 'en' | 'bn';
 export type ThemeType = 'light' | 'dark';
 
@@ -31,34 +59,32 @@ export interface Bill {
   status: 'paid' | 'pending' | 'overdue';
 }
 
-export interface SavingGoal {
-  id: string;
-  name: string;
-  target: number;
-  current: number;
-  deposit: number;
-  profit: number;
-  color: string;
-  startDate: string;
-  durationYears: number;
-  deadline?: string;
-}
-
+// Unified SavingsGoal interface to satisfy both Dashboard and Savings views
 export interface SavingsGoal {
   id: string;
-  title: string;
-  bank: string;
+  name: string; // Used in SavingsInfoView
+  title?: string; // Legacy/Compat
+  bank?: string; // Legacy/Compat
   plan: string;
-  target: number;
-  maturity: number;
-  progress: number;
-  completed: number;
-  total: number;
-  durationCompleted: string;
-  durationRemaining: string;
+  targetAmount: number; // Used in SavingsInfoView
+  currentAmount: number; // Used in SavingsInfoView and Dashboard
+  maturityValue: number; // Used in SavingsInfoView
+  color: string;
+  monthlyDeposit: number;
+  years: number;
+  profitPercent: number;
 }
 
-// Added SummaryData interface as it was missing and referenced in SummaryCard component
+// Added SavingsRecord interface for SavingsInfoView
+export interface SavingsRecord {
+  id: string;
+  goalId: string;
+  amount: number;
+  date: string;
+  note: string;
+  transactionId?: string;
+}
+
 export interface SummaryData {
   title: string;
   value: number;
@@ -76,12 +102,15 @@ export interface Bet {
   date: string;
 }
 
+// Updated Reminder to include note and time, and matched priority usage
 export interface Reminder {
   id: string;
   title: string;
   date: string;
+  time?: string;
   priority: 'low' | 'medium' | 'high';
   completed: boolean;
+  note?: string;
 }
 
 export interface Holiday {
@@ -98,6 +127,77 @@ export interface PayStub {
   deductions?: number;
   net: number;
   date: string;
+}
+
+// Added PayrollProfile for PayrollView
+export interface PayrollProfile {
+  name: string;
+  role: string;
+  department: string;
+  employeeId: string;
+  grossSalary: number;
+  basicSalary: number;
+  houseRent: number;
+  medical: number;
+  conveyance: number;
+  food: number;
+  attendanceBonus: number;
+  tiffinBillDays: number;
+  tiffinRate: number;
+  yearlyBonus: number;
+  eidBonus: number;
+  baseDeduction: number;
+  imageUrl: string;
+}
+
+// Added SalaryHistoryItem for PayrollView
+export interface SalaryHistoryItem {
+  id: string;
+  year: number;
+  inc: number;
+  amt: number;
+  total: number;
+}
+
+// Added LeaveType for LeaveInfoView
+export interface LeaveType {
+  id: string;
+  type: string;
+  total: number;
+  color: string;
+}
+
+// Added LeaveRecord for LeaveInfoView
+export interface LeaveRecord {
+  id: string;
+  typeId: string;
+  typeName: string;
+  startDate: string;
+  endDate: string;
+  totalDays: number;
+  reason: string;
+  status: 'Approved' | 'Pending' | 'Rejected';
+  appliedOn: string;
+}
+
+// Added BillRecord for BillInfoView
+export interface BillRecord {
+  id: string;
+  type: 'Electric' | 'Wifi';
+  amount: number;
+  date: string;
+  note: string;
+  transactionId?: string;
+}
+
+// Added BettingRecord for BettingInfoView
+export interface BettingRecord {
+  id: string;
+  type: 'deposit' | 'withdraw';
+  amount: number;
+  date: string;
+  note: string;
+  transactionId?: string;
 }
 
 export interface NavItem {

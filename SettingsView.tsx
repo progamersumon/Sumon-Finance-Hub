@@ -1,301 +1,361 @@
-
-import React, { useState, useRef, useEffect } from 'react';
-import { UserProfile, LanguageType, ThemeType } from './types';
-import { Card, Modal } from './components';
-import { t } from './translations';
-import { supabase } from './supabaseClient';
+import React, { useState } from 'react';
+import { 
+  User, 
+  Moon, 
+  Sun, 
+  LogOut, 
+  Camera, 
+  Globe, 
+  Palette,
+  Check,
+  Save,
+  Pencil,
+  AlertTriangle,
+  X,
+  Lock,
+  KeyRound,
+  ShieldCheck,
+  CloudCheck,
+  Database
+} from 'lucide-react';
+import { LanguageType, ThemeType } from './types';
 
 interface SettingsViewProps {
-  userProfile: UserProfile;
-  setUserProfile: (p: UserProfile) => void;
   language: LanguageType;
-  setLanguage: (l: LanguageType) => void;
-  theme: ThemeType;
-  setTheme: (t: ThemeType) => void;
+  setLanguage: (lang: LanguageType) => void;
+  profile: {
+    name: string;
+    email: string;
+    role: string;
+    imageUrl: string;
+  };
+  setProfile: React.Dispatch<React.SetStateAction<any>>;
   onLogout: () => void;
-  onResetData?: () => void;
-  allData?: any;
-  currentUserId?: string;
+  theme: ThemeType;
+  setTheme: (theme: ThemeType) => void;
 }
 
-const SettingsSwitch = ({ active, onClick }: { active: boolean, onClick: () => void }) => (
-  <button 
-    onClick={onClick}
-    className={`w-11 h-6 rounded-full relative transition-colors duration-200 focus:outline-none ${active ? 'bg-blue-600' : 'bg-slate-300 dark:bg-slate-700'}`}
-  >
-    <div className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full transition-transform duration-200 shadow-sm ${active ? 'translate-x-5' : 'translate-x-0'}`} />
-  </button>
-);
-
-export const SettingsView: React.FC<SettingsViewProps> = ({
-  userProfile, setUserProfile, language, setLanguage, theme, setTheme, onLogout, onResetData, allData, currentUserId
-}) => {
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [isSecurityModalOpen, setIsSecurityModalOpen] = useState(false);
-  const [isPrivacyModalOpen, setIsPrivacyModalOpen] = useState(false);
-  const [isDeleteAccountConfirmOpen, setIsDeleteAccountConfirmOpen] = useState(false);
-  const [isUpdating, setIsUpdating] = useState(false);
-  const [isDeleting, setIsDeleting] = useState(false);
-
-  const [editForm, setEditForm] = useState(userProfile);
-  const [privacySettings, setPrivacySettings] = useState({ personalizedAI: true, shareAnalytics: false, cloudSync: true });
+export const SettingsView: React.FC<SettingsViewProps> = ({ language, setLanguage, profile, setProfile, onLogout, theme, setTheme }) => {
+  const isDarkMode = theme === 'dark';
+  const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
+  const [isEditingProfile, setIsEditingProfile] = useState(false);
   
-  const [passwordForm, setPasswordForm] = useState({ current: '', new: '', confirm: '' });
-  const [message, setMessage] = useState<{ text: string, type: 'success' | 'error' } | null>(null);
+  const [tempProfile, setTempProfile] = useState(profile);
 
-  useEffect(() => {
-    if (message) {
-      const timer = setTimeout(() => setMessage(null), 5000);
-      return () => clearTimeout(timer);
+  const [passwordData, setPasswordData] = useState({
+    oldPassword: '',
+    newPassword: '',
+    confirmPassword: ''
+  });
+
+  const translations = {
+    en: {
+      profileSettings: 'Profile Settings',
+      manageIdentity: 'Manage your identity',
+      fullName: 'Full Name',
+      role: 'Role/Designation',
+      saveChanges: 'Save Changes',
+      editProfile: 'Edit Profile',
+      appearance: 'Appearance',
+      customizeView: 'Customize your view',
+      lightMode: 'Light Mode',
+      darkMode: 'Dark Mode',
+      languageLabel: 'Language',
+      regionalLocalization: 'Regional localization',
+      securitySettings: 'Security & Access',
+      changePassword: 'Change Password',
+      updateSecurity: 'Update your security',
+      oldPassword: 'Current Password',
+      newPassword: 'New Password',
+      confirmPassword: 'Confirm Password',
+      updatePassword: 'Update Password',
+      systemAccess: 'System Access',
+      securityControls: 'Security controls',
+      signOut: 'Sign Out from Account',
+      signOutConfirm: 'Sign Out?',
+      signOutMsg: 'Are you sure you want to end your current session and sign out of the application?',
+      confirm: 'Confirm Logout',
+      cancel: 'Cancel',
+      version: 'DataFlow Management v2.5.0',
+      cloudStatus: 'Cloud Sync Active',
+      backendUrl: 'emfgzqyhareavbkqortr.supabase.co'
+    },
+    bn: {
+      profileSettings: 'প্রোফাইল সেটিংস',
+      manageIdentity: 'আপনার পরিচয় পরিচালনা করুন',
+      fullName: 'পুরো নাম',
+      role: 'পদবী',
+      saveChanges: 'পরিবর্তন সংরক্ষণ করুন',
+      editProfile: 'ইডিট প্রোফাইল',
+      appearance: 'চেহারা',
+      customizeView: 'আপনার ভিউ কাস্টমাইজ করুন',
+      lightMode: 'লাইট মোড',
+      darkMode: 'ডার্ক মোড',
+      languageLabel: 'ভাষা',
+      regionalLocalization: 'আঞ্চলিক ভাষা',
+      securitySettings: 'নিরাপত্তা ও অ্যাক্সেস',
+      changePassword: 'পাসওয়ার্ড পরিবর্তন',
+      updateSecurity: 'নিরাপত্তা আপডেট করুন',
+      oldPassword: 'বর্তমান পাসওয়ার্ড',
+      newPassword: 'নতুন পাসওয়ার্ড',
+      confirmPassword: 'পাসওয়ার্ড নিশ্চিত করুন',
+      updatePassword: 'পাসওয়ার্ড আপডেট করুন',
+      systemAccess: 'সিস্টেম অ্যাক্সেস',
+      securityControls: 'নিরাপত্তা নিয়ন্ত্রণ',
+      signOut: 'অ্যাকাউন্ট থেকে লগ আউট করুন',
+      signOutConfirm: 'লগ আউট করবেন?',
+      signOutMsg: 'আপনি কি নিশ্চিত যে আপনি আপনার বর্তমান সেশন শেষ করে অ্যাপ্লিকেশন থেকে লগ আউট করতে চান?',
+      confirm: 'লগ আউট নিশ্চিত করুন',
+      cancel: 'বাতিল',
+      version: 'ডেটাফ্লো ম্যানেজমেন্ট ভার্সন ২.৫.০',
+      cloudStatus: 'ক্লাউড সিঙ্ক সক্রিয়',
+      backendUrl: 'emfgzqyhareavbkqortr.supabase.co'
     }
-  }, [message]);
-
-  const handleSaveProfile = () => {
-    setUserProfile(editForm);
-    setIsEditModalOpen(false);
-    setMessage({ text: language === 'bn' ? 'প্রোফাইল আপডেট হয়েছে!' : 'Profile updated!', type: 'success' });
   };
 
-  const handleUpdatePassword = async () => {
-    if (!passwordForm.new || !passwordForm.confirm) {
-      setMessage({ text: t('fillAllFields', language), type: 'error' });
-      return;
-    }
-    if (passwordForm.new !== passwordForm.confirm) {
-      setMessage({ text: language === 'bn' ? 'পাসওয়ার্ড মিলছে না!' : 'Passwords do not match!', type: 'error' });
-      return;
-    }
-
-    setIsUpdating(true);
-    try {
-      const { error } = await supabase.auth.updateUser({ password: passwordForm.new });
-      if (error) throw error;
-      
-      setMessage({ text: language === 'bn' ? 'পাসওয়ার্ড সফলভাবে পরিবর্তন হয়েছে!' : 'Password updated successfully!', type: 'success' });
-      setPasswordForm({ current: '', new: '', confirm: '' });
-      setTimeout(() => setIsSecurityModalOpen(false), 2000);
-    } catch (err: any) {
-      setMessage({ text: err.message, type: 'error' });
-    } finally {
-      setIsUpdating(false);
-    }
-  };
-
-  const handleDeleteAccount = async () => {
-    if (!currentUserId) return;
-    
-    setIsDeleting(true);
-    try {
-      // ১. RPC কল করে ডাটাবেস লেভেল থেকে ডিলিট করা
-      const { error: deleteError } = await supabase.rpc('delete_user_account');
-
-      if (deleteError) {
-        // যদি RPC এরর দেয় (যেমন ফাংশন তৈরি করা না থাকলে), বিকল্প হিসেবে ডাটা ডিলিট করার চেষ্টা
-        console.error("Account delete error:", deleteError.message);
-        throw new Error(language === 'bn' ? 'অ্যাকাউন্ট মুছতে সমস্যা হয়েছে। অনুগ্রহ করে SQL Editor-এর কোডটি রান করুন।' : 'Error deleting account. Please run the SQL Editor code.');
-      }
-      
-      // ২. সফল হলে সেশন থেকে লগআউট এবং রিলোড
-      await supabase.auth.signOut();
-      alert(language === 'bn' ? 'আপনার অ্যাকাউন্ট সফলভাবে মুছে ফেলা হয়েছে।' : 'Your account has been deleted successfully.');
-      window.location.href = '/'; // হোম পেজে পাঠিয়ে দেওয়া
-    } catch (err: any) {
-      alert(err.message);
-    } finally {
-      setIsDeleting(false);
-      setIsDeleteAccountConfirmOpen(false);
-    }
-  };
+  const t = translations[language];
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
       const reader = new FileReader();
-      reader.onloadend = () => setEditForm({ ...editForm, avatar: reader.result as string });
+      reader.onloadend = () => {
+        setTempProfile({ ...tempProfile, imageUrl: reader.result as string });
+      };
       reader.readAsDataURL(file);
     }
   };
 
-  const handleExportData = () => {
-    const dataStr = JSON.stringify(allData, null, 2);
-    const dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(dataStr);
-    const linkElement = document.createElement('a');
-    linkElement.setAttribute('href', dataUri);
-    linkElement.setAttribute('download', 'finance_hub_backup.json');
-    linkElement.click();
-    setMessage({ text: 'Data exported successfully!', type: 'success' });
+  const handleProfileButtonClick = () => {
+    if (isEditingProfile) {
+      setProfile((prev: any) => ({
+        ...prev,
+        name: tempProfile.name,
+        avatar: tempProfile.imageUrl
+      }));
+      setIsEditingProfile(false);
+    } else {
+      setTempProfile(profile);
+      setIsEditingProfile(true);
+    }
   };
 
   return (
-    <div className="space-y-6 animate-in fade-in duration-500 max-w-4xl mx-auto pb-24">
-      {message && (
-        <div className={`fixed top-24 left-1/2 -translate-x-1/2 z-[110] px-6 py-3 rounded-2xl shadow-2xl animate-in slide-in-from-top-4 duration-300 flex items-center gap-3 font-bold text-sm ${message.type === 'success' ? 'bg-emerald-600 text-white' : 'bg-rose-600 text-white'}`}>
-          {message.type === 'success' ? (
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><polyline points="20 6 9 17 4 12"/></svg>
-          ) : (
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-          )}
-          {message.text}
-        </div>
-      )}
-
-      <Card className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
-        <div className="flex flex-col sm:flex-row items-center gap-6">
-          <div className="relative group">
-            <img src={userProfile.avatar} alt="Profile" className="w-24 h-24 sm:w-32 sm:h-32 rounded-3xl border-4 border-white dark:border-slate-800 shadow-xl object-cover" />
-            <button onClick={() => setIsEditModalOpen(true)} className="absolute -bottom-2 -right-2 bg-blue-600 text-white p-2.5 rounded-xl shadow-lg hover:scale-110 active:scale-90 transition-all z-10">
-              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-            </button>
+    <div className="max-w-7xl mx-auto pb-20 animate-in fade-in slide-in-from-bottom-4 duration-500">
+      
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+        
+        <section className="space-y-4">
+          <div className="flex items-center gap-2 ml-4">
+            <div className="w-1 h-4 bg-purple-600 rounded-full" />
+            <h2 className="text-[11px] font-black text-slate-500 uppercase tracking-[0.2em]">{t.profileSettings}</h2>
           </div>
-          <div className="text-center sm:text-left flex-1">
-            <h2 className="text-2xl sm:text-3xl font-black text-slate-800 dark:text-white tracking-tight">{userProfile.name}</h2>
-            <p className="text-slate-500 dark:text-slate-400 font-medium text-sm sm:text-base">{userProfile.email}</p>
-          </div>
-        </div>
-      </Card>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <Card title={t('preferences', language)}>
-          <div className="space-y-6">
-            <div className="flex items-center justify-between">
-              <div><p className="font-bold text-slate-800 dark:text-white text-sm">{t('language', language)}</p></div>
-              <div className="flex bg-slate-100 dark:bg-slate-800 p-1 rounded-xl">
-                <button onClick={() => setLanguage('en')} className={`px-4 py-1.5 rounded-lg text-xs font-black transition-all ${language === 'en' ? 'bg-white dark:bg-slate-600 text-blue-600 dark:text-white shadow-sm' : 'text-slate-500'}`}>EN</button>
-                <button onClick={() => setLanguage('bn')} className={`px-4 py-1.5 rounded-lg text-xs font-black transition-all ${language === 'bn' ? 'bg-white dark:bg-slate-600 text-blue-600 dark:text-white shadow-sm' : 'text-slate-500'}`}>BN</button>
-              </div>
-            </div>
-            <div className="flex items-center justify-between">
-              <div><p className="font-bold text-slate-800 dark:text-white text-sm">{t('appearance', language)}</p></div>
-              <button onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')} className="w-14 h-8 bg-slate-100 dark:bg-slate-800 rounded-full relative p-1">
-                <div className={`w-6 h-6 rounded-lg flex items-center justify-center transition-all ${theme === 'dark' ? 'translate-x-6 bg-blue-600 text-white' : 'translate-x-0 bg-white text-amber-500'}`}>
-                  {theme === 'dark' ? <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg> : <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="M2 12h2"/><path d="M20 12h2"/></svg>}
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-[32px] p-6 shadow-sm relative overflow-hidden h-full flex flex-col">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-purple-500/5 blur-[50px] rounded-full -mr-10 -mt-10" />
+            
+            <div className="relative z-10 flex flex-col items-center flex-1">
+              <div className="relative group/avatar">
+                <div className="w-32 h-32 rounded-[32px] bg-slate-100 dark:bg-slate-800 border-4 border-white dark:border-slate-800 shadow-xl overflow-hidden ring-1 ring-slate-200 dark:ring-slate-700">
+                  <img src={isEditingProfile ? tempProfile.imageUrl : profile.imageUrl} alt="Profile" className="w-full h-full object-cover transition-transform duration-700 group-hover/avatar:scale-110" />
                 </div>
-              </button>
+                {isEditingProfile && (
+                  <label className="absolute -bottom-2 -right-2 w-10 h-10 bg-purple-600 text-white rounded-xl shadow-lg flex items-center justify-center cursor-pointer hover:scale-110 transition-all border-4 border-white dark:border-slate-900">
+                    <Camera size={18} />
+                    <input type="file" className="hidden" accept="image/*" onChange={handleImageChange} />
+                  </label>
+                )}
+              </div>
+              
+              <div className="mt-4 text-center mb-6">
+                <h3 className="text-lg font-black text-slate-900 dark:text-white uppercase tracking-tight leading-none">{isEditingProfile ? tempProfile.name : profile.name}</h3>
+                <p className="text-[10px] font-bold text-purple-600 dark:text-purple-400 uppercase tracking-widest mt-2 px-3 py-1 bg-purple-50 dark:bg-purple-900/20 rounded-full inline-block">{isEditingProfile ? tempProfile.role : profile.role}</p>
+              </div>
+
+              <div className="w-full space-y-4">
+                <div className="space-y-1">
+                  <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1">{t.fullName}</label>
+                  <input 
+                    type="text" 
+                    value={isEditingProfile ? tempProfile.name : profile.name} 
+                    readOnly={!isEditingProfile}
+                    onChange={(e) => setTempProfile({...tempProfile, name: e.target.value})}
+                    className={`w-full h-10 px-4 border rounded-xl text-[12px] font-bold outline-none transition-all ${
+                      isEditingProfile 
+                        ? 'bg-white dark:bg-slate-950 border-purple-500 text-slate-900 dark:text-white' 
+                        : 'bg-slate-50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-800 text-slate-500'
+                    }`}
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1">{t.role}</label>
+                  <input 
+                    type="text" 
+                    value={isEditingProfile ? tempProfile.role : profile.role} 
+                    readOnly={!isEditingProfile}
+                    onChange={(e) => setTempProfile({...tempProfile, role: e.target.value})}
+                    className={`w-full h-10 px-4 border rounded-xl text-[12px] font-bold outline-none transition-all ${
+                      isEditingProfile 
+                        ? 'bg-white dark:bg-slate-950 border-purple-500 text-slate-900 dark:text-white' 
+                        : 'bg-slate-50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-800 text-slate-500'
+                    }`}
+                  />
+                </div>
+              </div>
+              
+              <div className="flex gap-2 w-full mt-8">
+                <button 
+                  onClick={handleProfileButtonClick}
+                  className={`flex-1 h-11 rounded-xl font-black text-[11px] uppercase transition-all flex items-center justify-center gap-2 active:scale-95 ${
+                    isEditingProfile 
+                    ? 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg shadow-emerald-600/20' 
+                    : 'bg-purple-600 hover:bg-purple-700 text-white shadow-lg shadow-purple-600/20'
+                  }`}
+                >
+                  {isEditingProfile ? <Save size={16} /> : <Pencil size={14} />}
+                  {isEditingProfile ? t.saveChanges : t.editProfile}
+                </button>
+                {isEditingProfile && (
+                  <button 
+                    onClick={() => setIsEditingProfile(false)}
+                    className="w-11 h-11 flex items-center justify-center bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 rounded-xl hover:bg-rose-50 hover:text-rose-600 transition-all active:scale-95"
+                  >
+                    <X size={20} />
+                  </button>
+                )}
+              </div>
             </div>
           </div>
-        </Card>
+        </section>
 
-        <Card title={t('account', language)}>
-          <div className="space-y-4">
-            <button onClick={() => setIsSecurityModalOpen(true)} className="w-full text-left p-3.5 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800 flex items-center justify-between group border border-transparent transition-all">
-              <div className="flex items-center gap-3">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="text-blue-500"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-                <span className="text-sm font-bold text-slate-700 dark:text-slate-300">Security Settings</span>
+        <section className="space-y-6">
+          <div className="flex flex-col gap-6">
+            <div className="space-y-4">
+              <div className="flex items-center gap-2 ml-4">
+                <div className="w-1 h-4 bg-indigo-600 rounded-full" />
+                <h2 className="text-[11px] font-black text-slate-500 uppercase tracking-[0.2em]">Backend Info</h2>
               </div>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="m9 18 6-6-6-6"/></svg>
-            </button>
-            <button onClick={() => setIsPrivacyModalOpen(true)} className="w-full text-left p-3.5 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800 flex items-center justify-between group transition-all">
-              <div className="flex items-center gap-3">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="text-emerald-500"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10"/></svg>
-                <span className="text-sm font-bold text-slate-700 dark:text-slate-300">Data & Privacy</span>
+              <div className="bg-indigo-50/40 dark:bg-indigo-900/10 border border-indigo-200 dark:border-indigo-800 rounded-[32px] p-6 shadow-sm group">
+                <div className="flex items-center gap-4">
+                   <div className="w-10 h-10 bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 rounded-xl flex items-center justify-center shadow-inner">
+                      <CloudCheck size={20} />
+                   </div>
+                   <div>
+                      <h3 className="text-[14px] font-black text-indigo-800 dark:text-indigo-400 uppercase tracking-tight">{t.cloudStatus}</h3>
+                      <p className="text-[9px] font-bold text-indigo-400 uppercase tracking-widest">{t.backendUrl}</p>
+                   </div>
+                </div>
               </div>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="m9 18 6-6-6-6"/></svg>
-            </button>
-            <button onClick={onLogout} className="w-full py-3.5 bg-rose-50 dark:bg-rose-900/10 text-rose-600 dark:text-rose-400 font-black rounded-xl hover:bg-rose-100 transition-all flex items-center justify-center gap-2">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-              <span className="text-[10px] uppercase tracking-widest">{t('logout', language)}</span>
-            </button>
+            </div>
+
+            <div className="space-y-4">
+              <div className="flex items-center gap-2 ml-4">
+                <div className="w-1 h-4 bg-blue-600 rounded-full" />
+                <h2 className="text-[11px] font-black text-slate-500 uppercase tracking-[0.2em]">{t.appearance}</h2>
+              </div>
+              <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-[32px] p-6 shadow-sm group">
+                <div className="flex items-center gap-4 mb-5">
+                  <div className="w-9 h-9 bg-blue-100 dark:bg-blue-900/30 text-blue-600 rounded-lg flex items-center justify-center shadow-inner group-hover:scale-110 transition-transform">
+                    <Palette size={18} />
+                  </div>
+                  <div>
+                    <h3 className="text-[13px] font-black text-slate-800 dark:text-white uppercase tracking-tight">{t.appearance}</h3>
+                    <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest">{t.customizeView}</p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 gap-3">
+                  <button onClick={() => setTheme('light')} className={`p-3 rounded-2xl border-2 transition-all flex items-center justify-between px-5 ${!isDarkMode ? 'border-blue-500 bg-blue-50/50' : 'border-slate-100 dark:border-slate-800 hover:border-slate-300'}`}>
+                    <div className="flex items-center gap-3">
+                      <Sun size={18} className={!isDarkMode ? 'text-blue-600' : 'text-slate-400'} />
+                      <span className={`text-[10px] font-black uppercase tracking-widest ${!isDarkMode ? 'text-blue-600' : 'text-slate-400'}`}>{t.lightMode}</span>
+                    </div>
+                    {!isDarkMode && <div className="w-2 h-2 bg-blue-500 rounded-full" />}
+                  </button>
+                  <button onClick={() => setTheme('dark')} className={`p-3 rounded-2xl border-2 transition-all flex items-center justify-between px-5 ${isDarkMode ? 'border-blue-500 bg-slate-800/50' : 'border-slate-100 dark:border-slate-800 hover:border-slate-300'}`}>
+                    <div className="flex items-center gap-3">
+                      <Moon size={18} className={isDarkMode ? 'text-blue-400' : 'text-slate-400'} />
+                      <span className={`text-[10px] font-black uppercase tracking-widest ${isDarkMode ? 'text-blue-400' : 'text-slate-400'}`}>{t.darkMode}</span>
+                    </div>
+                    {isDarkMode && <div className="w-2 h-2 bg-blue-500 rounded-full" />}
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
-        </Card>
+        </section>
+
+        <section className="space-y-6">
+          <div className="flex flex-col gap-6">
+            <div className="space-y-4">
+              <div className="flex items-center gap-2 ml-4">
+                <div className="w-1 h-4 bg-emerald-600 rounded-full" />
+                <h2 className="text-[11px] font-black text-slate-500 uppercase tracking-[0.2em]">{t.languageLabel}</h2>
+              </div>
+              <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-[32px] p-6 shadow-sm group">
+                <div className="flex items-center gap-4 mb-5">
+                  <div className="w-9 h-9 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 rounded-lg flex items-center justify-center shadow-inner group-hover:scale-110 transition-transform">
+                    <Globe size={18} />
+                  </div>
+                  <div>
+                    <h3 className="text-[13px] font-black text-slate-800 dark:text-white uppercase tracking-tight">{t.languageLabel}</h3>
+                    <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest">{t.regionalLocalization}</p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 gap-3">
+                  {[
+                    { id: 'en', name: 'English', flag: '🇺🇸' },
+                    { id: 'bn', name: 'বাংলা', flag: '🇧🇩' }
+                  ].map((lang) => (
+                    <button key={lang.id} onClick={() => setLanguage(lang.id as LanguageType)} className={`p-3 rounded-2xl border-2 flex items-center justify-between px-5 transition-all ${language === lang.id ? 'border-emerald-500 bg-emerald-50/50 dark:bg-emerald-900/10' : 'border-slate-100 dark:border-slate-800 hover:border-emerald-200'}`}>
+                      <div className="flex items-center gap-3">
+                        <span className="text-xl">{lang.flag}</span>
+                        <span className={`text-[11px] font-black uppercase tracking-tight ${language === lang.id ? 'text-emerald-700 dark:text-emerald-400' : 'text-slate-700 dark:text-slate-200'}`}>{lang.name}</span>
+                      </div>
+                      {language === lang.id && <div className="w-2 h-2 bg-emerald-500 rounded-full" />}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              <div className="flex items-center gap-2 ml-4">
+                <div className="w-1 h-4 bg-rose-600 rounded-full" />
+                <h2 className="text-[11px] font-black text-slate-500 uppercase tracking-[0.2em]">{t.systemAccess}</h2>
+              </div>
+              <div className="bg-rose-50/30 dark:bg-rose-950/10 border border-rose-100 dark:border-rose-900/20 rounded-[32px] p-6 shadow-sm group">
+                <div className="flex items-center gap-4 mb-6">
+                  <div className="w-10 h-10 bg-rose-100 dark:bg-rose-900/30 text-rose-600 rounded-xl flex items-center justify-center shadow-inner group-hover:scale-110 transition-transform">
+                    <LogOut size={20} />
+                  </div>
+                  <div>
+                    <h3 className="text-[14px] font-black text-rose-700 dark:text-rose-400 uppercase tracking-tight">{t.systemAccess}</h3>
+                    <p className="text-[9px] font-bold text-rose-400 uppercase tracking-widest">{t.securityControls}</p>
+                  </div>
+                </div>
+                <button onClick={() => setIsLogoutModalOpen(true)} className="w-full py-4 bg-rose-600 hover:bg-rose-700 text-white rounded-2xl font-black text-[12px] uppercase tracking-widest shadow-lg shadow-rose-600/20 transition-all flex items-center justify-center gap-3 active:scale-95">
+                  <LogOut size={18} /> {t.signOut}
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
       </div>
 
-      <Card title="Danger Zone" className="border-rose-200 dark:border-rose-900/30">
-        <div className="space-y-4">
-          <p className="text-xs text-slate-500 dark:text-slate-400 font-medium px-1">
-            {language === 'bn' ? 'সতর্কতা: এই অ্যাকশনগুলো স্থায়ী এবং পরিবর্তনযোগ্য নয়।' : 'Warning: These actions are permanent and cannot be reversed.'}
-          </p>
-          <button 
-            onClick={() => setIsDeleteAccountConfirmOpen(true)}
-            className="w-full p-4 bg-white dark:bg-slate-900 text-rose-600 dark:text-rose-500 border border-rose-200 dark:border-rose-900/50 rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-rose-50 dark:hover:bg-rose-900/10 transition-all flex items-center justify-center gap-2"
-          >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M12 11v6"/><path d="M16 11v6"/><path d="M8 11v6"/></svg>
-            {language === 'bn' ? 'অ্যাকাউন্ট ও সব ডাটা মুছে ফেলুন' : 'Delete Account & WIPE ALL DATA'}
-          </button>
-        </div>
-      </Card>
-
-      {/* Profile Edit Modal */}
-      <Modal isOpen={isEditModalOpen} onClose={() => setIsEditModalOpen(false)} title={t('editProfile', language)}>
-        <div className="space-y-6">
-          <div className="flex flex-col items-center gap-4">
-            <div className="relative">
-              <img src={editForm.avatar} className="w-28 h-28 rounded-[2rem] object-cover border-4 border-blue-50 dark:border-slate-800 shadow-xl" />
-              <label className="absolute -bottom-2 -right-2 bg-blue-600 text-white p-2.5 rounded-xl cursor-pointer shadow-lg hover:scale-110 active:scale-90 transition-all">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-                <input type="file" className="hidden" accept="image/*" onChange={handleImageChange} />
-              </label>
-            </div>
-          </div>
-          <div className="space-y-4">
-            <div>
-              <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 pl-1">Display Name</label>
-              <input type="text" value={editForm.name} onChange={e => setEditForm({...editForm, name: e.target.value})} className="w-full p-4 bg-slate-50 dark:bg-slate-800 border dark:border-slate-700 rounded-2xl outline-none font-bold text-sm dark:text-white" placeholder="Full Name" />
-            </div>
-            <div>
-              <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 pl-1">Email (Read Only)</label>
-              <input type="email" value={editForm.email} readOnly className="w-full p-4 bg-slate-100 dark:bg-slate-800 border dark:border-slate-700 rounded-2xl outline-none font-bold text-sm text-slate-500 cursor-not-allowed" placeholder="Email" />
-            </div>
-          </div>
-          <button onClick={handleSaveProfile} className="w-full py-4 bg-blue-600 text-white font-black rounded-2xl shadow-xl uppercase tracking-widest text-xs active:scale-95 transition-all">{t('saveChanges', language)}</button>
-        </div>
-      </Modal>
-
-      {/* Security Modal */}
-      <Modal isOpen={isSecurityModalOpen} onClose={() => setIsSecurityModalOpen(false)} title="Security Settings">
-        <div className="space-y-6 py-2">
-          <div className="space-y-4">
-            <div className="flex items-center gap-2 mb-2 border-l-4 border-blue-600 pl-3">
-              <h4 className="text-[11px] font-black text-slate-800 dark:text-white uppercase tracking-widest">{t('changePassword', language)}</h4>
-            </div>
+      {isLogoutModalOpen && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-950/40 backdrop-blur-md animate-in fade-in duration-300">
+          <div className="bg-white dark:bg-slate-900 w-full max-w-[340px] rounded-[32px] p-10 text-center shadow-2xl border border-slate-200 dark:border-slate-800 animate-in zoom-in-95 duration-200">
+            <div className="w-16 h-16 bg-rose-100 text-rose-600 dark:bg-rose-900/30 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-inner"><AlertTriangle size={32} /></div>
+            <h2 className="text-[18px] font-black text-slate-900 dark:text-white mb-2 uppercase tracking-tight">{t.signOutConfirm}</h2>
+            <p className="text-[12px] text-slate-500 dark:text-slate-400 mb-8 font-bold leading-relaxed">{t.signOutMsg}</p>
             <div className="space-y-3">
-              <input 
-                type="password" 
-                placeholder={t('newPassword', language)} 
-                value={passwordForm.new} 
-                onChange={e => setPasswordForm({...passwordForm, new: e.target.value})} 
-                className="w-full p-4 bg-slate-50 dark:bg-slate-800 border dark:border-slate-700 rounded-2xl outline-none text-sm dark:text-white focus:ring-4 focus:ring-blue-100 dark:focus:ring-blue-900/20 transition-all" 
-              />
-              <input 
-                type="password" 
-                placeholder={language === 'bn' ? 'পাসওয়ার্ড নিশ্চিত করুন' : 'Confirm Password'} 
-                value={passwordForm.confirm} 
-                onChange={e => setPasswordForm({...passwordForm, confirm: e.target.value})} 
-                className="w-full p-4 bg-slate-50 dark:bg-slate-800 border dark:border-slate-700 rounded-2xl outline-none text-sm dark:text-white focus:ring-4 focus:ring-blue-100 dark:focus:ring-blue-900/20 transition-all" 
-              />
+              <button onClick={onLogout} className="w-full py-3.5 bg-rose-600 text-white rounded-xl text-[11px] font-black uppercase tracking-widest shadow-xl shadow-rose-600/20 hover:bg-rose-700 transition-all active:scale-95">{t.confirm}</button>
+              <button onClick={() => setIsLogoutModalOpen(false)} className="w-full py-3.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-xl text-[11px] font-black uppercase hover:bg-slate-200 transition-all active:scale-95">{t.cancel}</button>
             </div>
-            <button 
-              onClick={handleUpdatePassword} 
-              disabled={isUpdating}
-              className="w-full py-4 bg-blue-600 text-white font-black rounded-2xl shadow-xl uppercase tracking-widest text-xs active:scale-95 transition-all disabled:opacity-50"
-            >
-              {isUpdating ? 'UPDATING...' : t('update', language)}
-            </button>
           </div>
         </div>
-      </Modal>
-
-      {/* Delete Account Confirm Modal */}
-      <Modal isOpen={isDeleteAccountConfirmOpen} onClose={() => setIsDeleteAccountConfirmOpen(false)} title="Confirm Account Deletion">
-        <div className="text-center space-y-4">
-          <div className="w-16 h-16 bg-rose-100 dark:bg-rose-900/40 text-rose-600 rounded-full flex items-center justify-center mx-auto animate-bounce">
-            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M12 11v6"/><path d="M16 11v6"/><path d="M8 11v6"/></svg>
-          </div>
-          <p className="font-black text-xl text-slate-800 dark:text-white">
-            {language === 'bn' ? 'আপনি কি নিশ্চিত?' : 'Are you absolutely sure?'}
-          </p>
-          <p className="text-slate-500 dark:text-slate-400 text-sm px-4">
-            {language === 'bn' 
-              ? 'এটি আপনার সব লেনদেন, বিল এবং সেটিংস স্থায়ীভাবে মুছে ফেলবে। এটি আর ফিরে পাওয়া সম্ভব নয়।' 
-              : 'This will permanently delete ALL your transactions, bills, and settings. This action is irreversible.'}
-          </p>
-          <div className="grid grid-cols-2 gap-3 mt-8">
-            <button disabled={isDeleting} onClick={() => setIsDeleteAccountConfirmOpen(false)} className="py-3.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-bold rounded-2xl uppercase text-[10px] tracking-widest">Cancel</button>
-            <button disabled={isDeleting} onClick={handleDeleteAccount} className="py-3.5 bg-rose-600 text-white font-black rounded-2xl shadow-xl hover:bg-rose-700 uppercase text-[10px] tracking-widest">
-              {isDeleting ? 'DELETING...' : (language === 'bn' ? 'মুছে ফেলুন' : 'DELETE EVERYTHING')}
-            </button>
-          </div>
-        </div>
-      </Modal>
+      )}
     </div>
   );
 };

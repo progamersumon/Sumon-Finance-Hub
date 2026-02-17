@@ -1,5 +1,5 @@
 
-import { PayStub, SavingGoal, Bill, Bet, Reminder, Transaction } from './types';
+import { PayStub, SavingsGoal, Bill, Bet, Reminder, Transaction } from './types';
 
 // Helper to generate DPS schedule
 const generateDPSSchedule = (): Transaction[] => {
@@ -61,17 +61,18 @@ export const MOCK_PAYROLL: PayStub[] = [
   { id: '3', gross: 75000, tax: 12000, deductions: 5000, net: 58000, date: '2023-08-31' },
 ];
 
-export const MOCK_SAVINGS: SavingGoal[] = [
+export const MOCK_SAVINGS: SavingsGoal[] = [
   { 
     id: '1', 
     name: 'DPS - Prime Bank', 
-    target: 500000, 
-    current: 185000, 
-    deposit: 154000, 
-    profit: 31000, 
+    plan: '৳5000/Mo',
+    targetAmount: 500000, 
+    currentAmount: 185000, 
+    maturityValue: 650000,
     color: '#3b82f6', 
-    startDate: '2023-01-01', 
-    durationYears: 10 
+    monthlyDeposit: 5000,
+    years: 10,
+    profitPercent: 7.5
   }
 ];
 
