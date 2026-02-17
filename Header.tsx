@@ -1,5 +1,6 @@
+
 import React, { useState } from 'react';
-import { Menu, Search, Sun, Moon, ChevronDown } from 'lucide-react';
+import { Menu, Search, Sun, Moon, ChevronDown, RefreshCcw } from 'lucide-react';
 import { AppTab } from './types';
 
 interface HeaderProps {
@@ -11,9 +12,10 @@ interface HeaderProps {
     role: string;
     imageUrl: string;
   };
+  isSyncing?: boolean;
 }
 
-const Header: React.FC<HeaderProps> = ({ activeTab, onOpenMenu, language = 'English', profile }) => {
+const Header: React.FC<HeaderProps> = ({ activeTab, onOpenMenu, language = 'English', profile, isSyncing }) => {
   const [isDarkMode, setIsDarkMode] = useState(document.documentElement.classList.contains('dark'));
 
   const toggleDarkMode = () => {
@@ -66,11 +68,16 @@ const Header: React.FC<HeaderProps> = ({ activeTab, onOpenMenu, language = 'Engl
           <Menu size={20} />
         </button>
         
-        {/* Active Tab Title with left outline */}
-        <div className="border-l-[3px] border-indigo-600 pl-4 py-1 ml-1">
+        <div className="border-l-[3px] border-indigo-600 pl-4 py-1 ml-1 flex items-center gap-3">
           <h1 className="text-sm md:text-base font-black text-gray-900 dark:text-gray-100 truncate uppercase tracking-tight">
             {t[activeTab]}
           </h1>
+          {isSyncing && (
+            <div className="flex items-center gap-1.5 px-2 py-0.5 bg-indigo-50/50 dark:bg-indigo-900/10 rounded-full border border-indigo-100 dark:border-indigo-800/20">
+               <div className="w-1.5 h-1.5 bg-indigo-600 rounded-full animate-pulse" />
+               <span className="text-[9px] font-black uppercase text-indigo-600 tracking-tighter hidden xs:inline">Syncing</span>
+            </div>
+          )}
         </div>
 
         <div className="h-6 w-px bg-gray-200 dark:bg-slate-800 mx-2 hidden xs:block"></div>

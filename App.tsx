@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { ViewType, Transaction, SavingsGoal, SavingsRecord, Reminder, LanguageType, ThemeType, UserProfile, AppTab, LeaveType, LeaveRecord, PayrollProfile, SalaryHistoryItem, BillRecord, BettingRecord } from './types';
 import { ICONS } from './constants';
 import { 
@@ -26,6 +26,8 @@ const INITIAL_LEAVE_QUOTAS: LeaveType[] = [
   { id: 'medical', type: 'Medical Leave', total: 14, color: 'bg-rose-500' },
   { id: 'casual', type: 'Casual Leave', total: 10, color: 'bg-amber-500' },
 ];
+
+const CACHE_KEY = 'finance_hub_data_cache';
 
 const FinanceHubLogo = ({ className = "w-48 h-48", textColor = "text-white" }: { className?: string, textColor?: string }) => (
   <div className={`flex flex-col items-center justify-center ${className}`}>
@@ -128,9 +130,9 @@ const AppContent: React.FC = () => {
   const [activeView, setActiveView] = useState<AppTab>(AppTab.DASHBOARD);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [theme, setTheme] = useState<ThemeType>('light');
-  const [isDataLoaded, setIsDataLoaded] = useState(false);
+  const [isSyncing, setIsSyncing] = useState(false);
 
-  // States
+  // Core Data States
   const [userProfile, setUserProfile] = useState<UserProfile>({ name: 'User', email: '', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Sumon' });
   const [transactions, setTransactions] = useState<Transaction[]>(MOCK_TRANSACTIONS);
   const [reminders, setReminders] = useState<Reminder[]>(MOCK_REMINDERS);
@@ -165,10 +167,35 @@ const AppContent: React.FC = () => {
     { id: '2', year: 2023, inc: 0, amt: 0, total: 30000 }
   ]);
 
+  const loadDataFromCache = useCallback(() => {
+    const cached = localStorage.getItem(CACHE_KEY);
+    if (cached) {
+      try {
+        const c = JSON.parse(cached);
+        if (c.transactions) setTransactions(c.transactions);
+        if (c.reminders) setReminders(c.reminders);
+        if (c.savingsGoals) setSavingsGoals(c.savingsGoals);
+        if (c.savingsRecords) setSavingsRecords(c.savingsRecords);
+        if (c.billRecords) setBillRecords(c.billRecords);
+        if (c.bettingRecords) setBettingRecords(c.bettingRecords);
+        if (c.attendanceList) setAttendanceList(c.attendanceList);
+        if (c.leaveQuotas) setLeaveQuotas(c.leaveQuotas);
+        if (c.leaveHistory) setLeaveHistory(c.leaveHistory);
+        if (c.payrollProfile) setPayrollProfile(c.payrollProfile);
+        if (c.salaryHistory) setSalaryHistory(c.salaryHistory);
+        if (c.theme) setTheme(c.theme);
+        if (c.language) setLanguage(c.language);
+      } catch (e) {
+        console.error("Cache parsing error", e);
+      }
+    }
+  }, []);
+
   const syncToSupabase = useCallback(async (data: any) => {
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) return;
     
+    setIsSyncing(true);
     const { error } = await supabase
       .from('user_data')
       .upsert({ 
@@ -178,14 +205,20 @@ const AppContent: React.FC = () => {
       });
     
     if (error) console.error("Database Sync Fail:", error.message);
+    
+    localStorage.setItem(CACHE_KEY, JSON.stringify(data));
+    setIsSyncing(false);
   }, []);
 
   useEffect(() => {
+    loadDataFromCache(); // Instant load from local storage
+
     const initData = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (session) {
         setIsAuthenticated(true);
-        const { data, error } = await supabase
+        setIsSyncing(true);
+        const { data } = await supabase
           .from('user_data')
           .select('content')
           .eq('id', session.user.id)
@@ -193,24 +226,27 @@ const AppContent: React.FC = () => {
 
         if (data && data.content) {
           const c = data.content;
-          if (c.transactions) setTransactions(c.transactions);
-          if (c.reminders) setReminders(c.reminders);
-          if (c.savingsGoals) setSavingsGoals(c.savingsGoals);
-          if (c.savingsRecords) setSavingsRecords(c.savingsRecords);
-          if (c.billRecords) setBillRecords(c.billRecords);
-          if (c.bettingRecords) setBettingRecords(c.bettingRecords);
-          if (c.attendanceList) setAttendanceList(c.attendanceList);
-          if (c.leaveQuotas) setLeaveQuotas(c.leaveQuotas);
-          if (c.leaveHistory) setLeaveHistory(c.leaveHistory);
-          if (c.payrollProfile) setPayrollProfile(c.payrollProfile);
-          if (c.salaryHistory) setSalaryHistory(c.salaryHistory);
+          // Only update if data is different or more fresh
+          setTransactions(c.transactions || []);
+          setReminders(c.reminders || []);
+          setSavingsGoals(c.savingsGoals || []);
+          setSavingsRecords(c.savingsRecords || []);
+          setBillRecords(c.billRecords || []);
+          setBettingRecords(c.bettingRecords || []);
+          setAttendanceList(c.attendanceList || []);
+          setLeaveQuotas(c.leaveQuotas || INITIAL_LEAVE_QUOTAS);
+          setLeaveHistory(c.leaveHistory || []);
+          setPayrollProfile(c.payrollProfile || payrollProfile);
+          setSalaryHistory(c.salaryHistory || []);
           if (c.theme) setTheme(c.theme);
           if (c.language) setLanguage(c.language);
+          
+          localStorage.setItem(CACHE_KEY, JSON.stringify(c));
         }
         
         const name = session.user.user_metadata?.full_name || 'Finance User';
         setUserProfile({ name, email: session.user.email || '', avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${session.user.id}` });
-        setIsDataLoaded(true);
+        setIsSyncing(false);
       }
     };
 
@@ -221,16 +257,16 @@ const AppContent: React.FC = () => {
         setIsAuthenticated(true);
       } else {
         setIsAuthenticated(false);
-        setIsDataLoaded(false);
+        localStorage.removeItem(CACHE_KEY);
       }
     });
 
     return () => subscription.unsubscribe();
-  }, []);
+  }, [loadDataFromCache]);
 
-  // Sync effect without LocalStorage
+  // Debounced Syncing
   useEffect(() => {
-    if (!isDataLoaded || !isAuthenticated) return;
+    if (!isAuthenticated) return;
     
     const timeout = setTimeout(() => {
       syncToSupabase({
@@ -243,7 +279,7 @@ const AppContent: React.FC = () => {
   }, [
     transactions, reminders, savingsGoals, savingsRecords, billRecords, bettingRecords,
     attendanceList, leaveQuotas, leaveHistory, payrollProfile, salaryHistory, theme, language, 
-    isDataLoaded, isAuthenticated, syncToSupabase
+    isAuthenticated, syncToSupabase
   ]);
 
   useEffect(() => {
@@ -254,6 +290,7 @@ const AppContent: React.FC = () => {
   const handleLogout = async () => {
     await supabase.auth.signOut();
     setIsAuthenticated(false);
+    localStorage.removeItem(CACHE_KEY);
   };
 
   const handleAddTransaction = (tx: Omit<Transaction, 'id'>) => {
@@ -325,20 +362,11 @@ const AppContent: React.FC = () => {
         </div>
       )}
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
-        <Header activeTab={activeView} onOpenMenu={() => setIsSidebarOpen(true)} language={language === 'bn' ? 'বাংলা' : 'English'} profile={{ name: userProfile.name, role: payrollProfile.role, imageUrl: userProfile.avatar }} />
+        <Header activeTab={activeView} onOpenMenu={() => setIsSidebarOpen(true)} language={language === 'bn' ? 'বাংলা' : 'English'} profile={{ name: userProfile.name, role: payrollProfile.role, imageUrl: userProfile.avatar }} isSyncing={isSyncing} />
         <main className="flex-1 overflow-y-auto p-4 md:p-6 custom-scrollbar">
-          {!isDataLoaded && isAuthenticated ? (
-             <div className="h-full flex items-center justify-center">
-                <div className="flex flex-col items-center gap-4">
-                   <div className="w-10 h-10 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin" />
-                   <p className="text-[10px] font-black uppercase tracking-widest text-indigo-600">Cloud Sync Active...</p>
-                </div>
-             </div>
-          ) : (
-            <div className="max-w-7xl mx-auto">
-              {renderView()}
-            </div>
-          )}
+          <div className="max-w-7xl mx-auto">
+            {renderView()}
+          </div>
         </main>
       </div>
     </div>
