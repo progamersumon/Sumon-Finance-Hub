@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { ViewType, Transaction, SavingsGoal, SavingsRecord, Reminder, LanguageType, ThemeType, UserProfile, AppTab, LeaveType, LeaveRecord, PayrollProfile, SalaryHistoryItem } from './types';
+import { ViewType, Transaction, SavingsGoal, SavingsRecord, Reminder, LanguageType, ThemeType, UserProfile, AppTab, LeaveType, LeaveRecord, PayrollProfile, SalaryHistoryItem, BillRecord, BettingRecord } from './types';
 import { ICONS } from './constants';
 import { 
   MOCK_SAVINGS, 
@@ -26,8 +26,6 @@ const INITIAL_LEAVE_QUOTAS: LeaveType[] = [
   { id: 'medical', type: 'Medical Leave', total: 14, color: 'bg-rose-500' },
   { id: 'casual', type: 'Casual Leave', total: 10, color: 'bg-amber-500' },
 ];
-
-const STORAGE_KEY = 'finance_hub_cache';
 
 const FinanceHubLogo = ({ className = "w-48 h-48", textColor = "text-white" }: { className?: string, textColor?: string }) => (
   <div className={`flex flex-col items-center justify-center ${className}`}>
@@ -131,7 +129,6 @@ const AppContent: React.FC = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [theme, setTheme] = useState<ThemeType>('light');
   const [isDataLoaded, setIsDataLoaded] = useState(false);
-  const [isInitialLoading, setIsInitialLoading] = useState(true);
 
   // States
   const [userProfile, setUserProfile] = useState<UserProfile>({ name: 'User', email: '', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Sumon' });
@@ -139,6 +136,8 @@ const AppContent: React.FC = () => {
   const [reminders, setReminders] = useState<Reminder[]>(MOCK_REMINDERS);
   const [savingsGoals, setSavingsGoals] = useState<SavingsGoal[]>(MOCK_SAVINGS);
   const [savingsRecords, setSavingsRecords] = useState<SavingsRecord[]>([]);
+  const [billRecords, setBillRecords] = useState<BillRecord[]>([]);
+  const [bettingRecords, setBettingRecords] = useState<BettingRecord[]>([]);
   const [attendanceList, setAttendanceList] = useState<any[]>([]);
   const [leaveQuotas, setLeaveQuotas] = useState<LeaveType[]>(INITIAL_LEAVE_QUOTAS);
   const [leaveHistory, setLeaveHistory] = useState<LeaveRecord[]>([]);
@@ -170,72 +169,49 @@ const AppContent: React.FC = () => {
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) return;
     
-    // Save to LocalStorage as cache immediately
-    localStorage.setItem(STORAGE_KEY + '_' + session.user.id, JSON.stringify(data));
-
-    await supabase
+    const { error } = await supabase
       .from('user_data')
       .upsert({ 
         id: session.user.id, 
         content: data,
         updated_at: new Date().toISOString()
       });
+    
+    if (error) console.error("Database Sync Fail:", error.message);
   }, []);
 
-  // Initialize data from LocalStorage first, then Supabase in background
   useEffect(() => {
     const initData = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (session) {
         setIsAuthenticated(true);
-        const userId = session.user.id;
-        
-        // 1. Load from LocalStorage Cache for instant UI
-        const cached = localStorage.getItem(STORAGE_KEY + '_' + userId);
-        if (cached) {
-          try {
-            const c = JSON.parse(cached);
-            applyData(c);
-            setIsDataLoaded(true);
-          } catch (e) { console.error("Cache corrupted", e); }
-        }
-        
-        // 2. Fetch from Supabase in background
         const { data, error } = await supabase
           .from('user_data')
           .select('content')
-          .eq('id', userId)
+          .eq('id', session.user.id)
           .single();
 
         if (data && data.content) {
-          applyData(data.content);
-          // Update cache with server data
-          localStorage.setItem(STORAGE_KEY + '_' + userId, JSON.stringify(data.content));
+          const c = data.content;
+          if (c.transactions) setTransactions(c.transactions);
+          if (c.reminders) setReminders(c.reminders);
+          if (c.savingsGoals) setSavingsGoals(c.savingsGoals);
+          if (c.savingsRecords) setSavingsRecords(c.savingsRecords);
+          if (c.billRecords) setBillRecords(c.billRecords);
+          if (c.bettingRecords) setBettingRecords(c.bettingRecords);
+          if (c.attendanceList) setAttendanceList(c.attendanceList);
+          if (c.leaveQuotas) setLeaveQuotas(c.leaveQuotas);
+          if (c.leaveHistory) setLeaveHistory(c.leaveHistory);
+          if (c.payrollProfile) setPayrollProfile(c.payrollProfile);
+          if (c.salaryHistory) setSalaryHistory(c.salaryHistory);
+          if (c.theme) setTheme(c.theme);
+          if (c.language) setLanguage(c.language);
         }
         
         const name = session.user.user_metadata?.full_name || 'Finance User';
-        const avatar = `https://api.dicebear.com/7.x/avataaars/svg?seed=${userId}`;
-        setUserProfile({ name, email: session.user.email || '', avatar });
-        
+        setUserProfile({ name, email: session.user.email || '', avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${session.user.id}` });
         setIsDataLoaded(true);
-        setIsInitialLoading(false);
-      } else {
-        setIsInitialLoading(false);
       }
-    };
-
-    const applyData = (c: any) => {
-      if (c.transactions) setTransactions(c.transactions);
-      if (c.reminders) setReminders(c.reminders);
-      if (c.savingsGoals) setSavingsGoals(c.savingsGoals);
-      if (c.savingsRecords) setSavingsRecords(c.savingsRecords);
-      if (c.attendanceList) setAttendanceList(c.attendanceList);
-      if (c.leaveQuotas) setLeaveQuotas(c.leaveQuotas);
-      if (c.leaveHistory) setLeaveHistory(c.leaveHistory);
-      if (c.payrollProfile) setPayrollProfile(c.payrollProfile);
-      if (c.salaryHistory) setSalaryHistory(c.salaryHistory);
-      if (c.theme) setTheme(c.theme);
-      if (c.language) setLanguage(c.language);
     };
 
     initData();
@@ -246,39 +222,27 @@ const AppContent: React.FC = () => {
       } else {
         setIsAuthenticated(false);
         setIsDataLoaded(false);
-        // Clean up memory but keep storage for potential re-login
       }
     });
 
     return () => subscription.unsubscribe();
   }, []);
 
-  // Auto-Sync Effect
+  // Sync effect without LocalStorage
   useEffect(() => {
     if (!isDataLoaded || !isAuthenticated) return;
     
     const timeout = setTimeout(() => {
-      const payload = {
-        transactions,
-        reminders,
-        savingsGoals,
-        savingsRecords,
-        attendanceList,
-        leaveQuotas,
-        leaveHistory,
-        payrollProfile,
-        salaryHistory,
-        theme,
-        language
-      };
-      syncToSupabase(payload);
-    }, 1500); // 1.5s debounce to save network requests
+      syncToSupabase({
+        transactions, reminders, savingsGoals, savingsRecords, billRecords, bettingRecords,
+        attendanceList, leaveQuotas, leaveHistory, payrollProfile, salaryHistory, theme, language
+      });
+    }, 1000); 
 
     return () => clearTimeout(timeout);
   }, [
-    transactions, reminders, savingsGoals, savingsRecords, 
-    attendanceList, leaveQuotas, leaveHistory, 
-    payrollProfile, salaryHistory, theme, language, 
+    transactions, reminders, savingsGoals, savingsRecords, billRecords, bettingRecords,
+    attendanceList, leaveQuotas, leaveHistory, payrollProfile, salaryHistory, theme, language, 
     isDataLoaded, isAuthenticated, syncToSupabase
   ]);
 
@@ -288,10 +252,6 @@ const AppContent: React.FC = () => {
   }, [theme]);
 
   const handleLogout = async () => {
-    const { data: { session } } = await supabase.auth.getSession();
-    if (session) {
-      localStorage.removeItem(STORAGE_KEY + '_' + session.user.id);
-    }
     await supabase.auth.signOut();
     setIsAuthenticated(false);
   };
@@ -309,17 +269,6 @@ const AppContent: React.FC = () => {
   const handleDeleteTransaction = (id: string) => {
     setTransactions(prev => prev.filter(t => t.id !== id));
   };
-
-  if (isInitialLoading) {
-    return (
-      <div className="h-screen w-screen flex items-center justify-center bg-slate-50 dark:bg-slate-950">
-        <div className="flex flex-col items-center gap-4">
-          <FinanceHubLogo className="w-32 h-32 animate-pulse" textColor="text-blue-600" />
-          <div className="w-10 h-1 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
-        </div>
-      </div>
-    );
-  }
 
   if (!isAuthenticated) return <LoginView onLogin={() => setIsAuthenticated(true)} language={language} />;
 
@@ -350,9 +299,9 @@ const AppContent: React.FC = () => {
       case AppTab.LEAVE_INFO:
         return <LeaveInfoView leaveQuotas={leaveQuotas} setLeaveQuotas={setLeaveQuotas} leaveHistory={leaveHistory} setLeaveHistory={setLeaveHistory} />;
       case AppTab.BILL: 
-        return <BillsView bills={[]} setBills={() => {}} onAddTransaction={handleAddTransaction} onEditTransaction={handleEditTransaction} onDeleteTransaction={handleDeleteTransaction} />;
+        return <BillsView bills={billRecords} setBills={setBillRecords} onAddTransaction={handleAddTransaction} onEditTransaction={handleEditTransaction} onDeleteTransaction={handleDeleteTransaction} />;
       case AppTab.BETTING: 
-        return <BettingView records={[]} setRecords={() => {}} onAddTransaction={handleAddTransaction} onEditTransaction={handleEditTransaction} onDeleteTransaction={handleDeleteTransaction} />;
+        return <BettingView records={bettingRecords} setRecords={setBettingRecords} onAddTransaction={handleAddTransaction} onEditTransaction={handleEditTransaction} onDeleteTransaction={handleDeleteTransaction} />;
       case AppTab.REMINDERS: 
         return <RemindersView {...commonProps} reminders={reminders} setReminders={setReminders} />;
       case AppTab.SETTINGS: 
@@ -378,9 +327,18 @@ const AppContent: React.FC = () => {
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
         <Header activeTab={activeView} onOpenMenu={() => setIsSidebarOpen(true)} language={language === 'bn' ? 'বাংলা' : 'English'} profile={{ name: userProfile.name, role: payrollProfile.role, imageUrl: userProfile.avatar }} />
         <main className="flex-1 overflow-y-auto p-4 md:p-6 custom-scrollbar">
-          <div className="max-w-7xl mx-auto">
-            {renderView()}
-          </div>
+          {!isDataLoaded && isAuthenticated ? (
+             <div className="h-full flex items-center justify-center">
+                <div className="flex flex-col items-center gap-4">
+                   <div className="w-10 h-10 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin" />
+                   <p className="text-[10px] font-black uppercase tracking-widest text-indigo-600">Cloud Sync Active...</p>
+                </div>
+             </div>
+          ) : (
+            <div className="max-w-7xl mx-auto">
+              {renderView()}
+            </div>
+          )}
         </main>
       </div>
     </div>
