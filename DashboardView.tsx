@@ -35,7 +35,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ language, profile,
       savings: 'Active Savings',
       attendance: 'Attendance Rate',
       latestActivity: 'Latest Activity',
-      activeReminders: 'Active Reminders',
+      activeReminders: 'Reminders',
       today: 'TODAY',
       noActivity: 'No Activity',
       noAlerts: 'No Alerts',
@@ -52,7 +52,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ language, profile,
       savings: 'সক্রিয় সঞ্চয়',
       attendance: 'উপস্থিতির হার',
       latestActivity: 'সাম্প্রতিক কার্যকলাপ',
-      activeReminders: 'সক্রিয় রিমাইন্ডার',
+      activeReminders: 'রিমাইন্ডার',
       today: 'আজ',
       noActivity: 'কোনো কার্যকলাপ নেই',
       noAlerts: 'কোনো সতর্কবার্তা নেই',
@@ -168,14 +168,19 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ language, profile,
     }
   };
 
-  // Helper for dynamic card styling
+  // Helper for dynamic card styling - Enhanced with border-2 and clearer colors
   const getCardThemedClasses = (color: string) => {
     switch (color) {
-      case 'emerald': return 'bg-emerald-50/50 border-emerald-100 dark:bg-emerald-900/10 dark:border-emerald-800/50 hover:border-emerald-500/50';
-      case 'rose': return 'bg-rose-50/50 border-rose-100 dark:bg-rose-900/10 dark:border-rose-800/50 hover:border-rose-500/50';
-      case 'indigo': return 'bg-indigo-50/50 border-indigo-100 dark:bg-indigo-900/10 dark:border-indigo-800/50 hover:border-indigo-500/50';
-      case 'blue': return 'bg-blue-50/50 border-blue-100 dark:bg-blue-900/10 dark:border-blue-800/50 hover:border-blue-500/50';
-      default: return 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:border-indigo-500/50';
+      case 'emerald': 
+        return 'bg-emerald-50/50 border-emerald-200 dark:bg-emerald-950/20 dark:border-emerald-800 hover:border-emerald-500/50 shadow-emerald-600/5';
+      case 'rose': 
+        return 'bg-rose-50/50 border-rose-200 dark:bg-rose-950/20 dark:border-rose-800 hover:border-rose-500/50 shadow-rose-600/5';
+      case 'indigo': 
+        return 'bg-indigo-50/50 border-indigo-200 dark:bg-indigo-950/20 dark:border-indigo-800 hover:border-indigo-500/50 shadow-indigo-600/5';
+      case 'blue': 
+        return 'bg-blue-50/50 border-blue-200 dark:bg-blue-950/20 dark:border-blue-800 hover:border-blue-500/50 shadow-blue-600/5';
+      default: 
+        return 'bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-800 hover:border-indigo-500/50';
     }
   };
 
@@ -230,7 +235,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ language, profile,
           {mainStats.map((stat, i) => (
             <div 
               key={i} 
-              className={`p-3 pt-3 pb-3 h-[112px] rounded-xl border shadow-sm flex flex-col justify-between group transition-all ${getCardThemedClasses(stat.color)}`}
+              className={`p-3 pt-3 pb-3 h-[112px] rounded-xl border-2 shadow-sm flex flex-col justify-between group transition-all duration-300 ${getCardThemedClasses(stat.color)}`}
             >
               <div className="flex items-start justify-between">
                 <div className="flex flex-col min-w-0">
@@ -363,7 +368,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ language, profile,
       {/* Activity and Details */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-6">
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-sm overflow-hidden min-h-[300px] flex flex-col">
+          <div className="bg-white dark:bg-slate-900 border-2 border-indigo-100 dark:border-indigo-900/30 rounded-2xl p-6 shadow-sm overflow-hidden min-h-[300px] flex flex-col transition-all hover:border-indigo-200 dark:hover:border-indigo-800/50">
             <h3 className="text-[11px] font-black text-indigo-600 dark:text-indigo-400 -mx-6 -mt-6 mb-6 px-6 py-3 bg-indigo-50/50 dark:bg-indigo-900/20 border-b border-indigo-100 dark:border-indigo-800/50 flex items-center gap-2 uppercase tracking-tight">
               <div className="w-1.5 h-1.5 rounded-full bg-indigo-600" /> {t.latestActivity}
             </h3>
@@ -398,8 +403,8 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ language, profile,
         </div>
 
         <div className="space-y-6">
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-sm overflow-hidden min-h-[300px] flex flex-col">
-             <h3 className="text-[11px] font-black text-emerald-600 dark:text-emerald-400 -mx-6 -mt-6 mb-6 px-6 py-3 bg-emerald-50/50 dark:bg-indigo-900/20 border-b border-emerald-100 dark:border-indigo-800/50 flex items-center gap-2 uppercase tracking-tight">
+          <div className="bg-white dark:bg-slate-900 border-2 border-emerald-100 dark:border-emerald-900/30 rounded-2xl p-6 shadow-sm overflow-hidden min-h-[300px] flex flex-col transition-all hover:border-emerald-200 dark:hover:border-emerald-800/50">
+             <h3 className="text-[11px] font-black text-emerald-600 dark:text-emerald-400 -mx-6 -mt-6 mb-6 px-6 py-3 bg-emerald-50/50 dark:bg-emerald-900/20 border-b border-emerald-100 dark:border-emerald-800/50 flex items-center gap-2 uppercase tracking-tight">
                <div className="w-1.5 h-1.5 rounded-full bg-emerald-600" /> {t.activeReminders}
              </h3>
              <div className="space-y-4 flex-1">

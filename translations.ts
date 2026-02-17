@@ -10,7 +10,6 @@ const translations = {
     bills: 'Bill Info',
     betting: 'Betting Info',
     reminders: 'Reminders',
-    settings: 'Settings',
     logout: 'Logout',
     netWorth: 'Net Worth',
     welcome: 'Welcome Back',

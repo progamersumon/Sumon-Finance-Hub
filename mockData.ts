@@ -23,8 +23,4 @@ export const MOCK_BILLS: Bill[] = [];
 
 export const MOCK_BETS: Bet[] = [];
 
-export const MOCK_REMINDERS: Reminder[] = [
-  { id: '1', title: 'Prime Bank DPS Payment', date: '2025-01-01', priority: 'high', completed: false },
-  { id: '2', title: 'Internet Bill Renewal', date: '2025-01-05', priority: 'medium', completed: false },
-  { id: '3', title: 'Submit Income Tax Documents', date: '2025-02-15', priority: 'high', completed: false },
-];
+export const MOCK_REMINDERS: Reminder[] = [];

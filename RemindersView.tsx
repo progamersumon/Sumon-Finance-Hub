@@ -44,7 +44,7 @@ const RemindersView: React.FC<RemindersViewProps> = ({ language, reminders, setR
 
   const translations = {
     English: {
-      reminders: 'Active Reminders',
+      reminders: 'Reminders',
       addReminder: 'Set Reminder',
       bulkAdd: 'Bulk Add (Excel)',
       title: 'Reminder Title',
@@ -75,7 +75,7 @@ const RemindersView: React.FC<RemindersViewProps> = ({ language, reminders, setR
       validPriority: 'Priority must be: High, Medium, or Low'
     },
     'বাংলা': {
-      reminders: 'সক্রিয় রিমাইন্ডার',
+      reminders: 'রিমাইন্ডার',
       addReminder: 'নতুন রিমাইন্ডার',
       bulkAdd: 'এক্সেলে এড করুন',
       title: 'রিমাইন্ডার শিরোনাম',
