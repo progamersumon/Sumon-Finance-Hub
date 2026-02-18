@@ -23,9 +23,9 @@ import { supabase } from './supabaseClient';
 import { Mail, Lock, ChevronRight, ArrowLeft, KeyRound, Smartphone } from 'lucide-react';
 
 const INITIAL_LEAVE_QUOTAS: LeaveType[] = [
-  { id: 'annual', type: 'Annual Leave', total: 20, color: 'bg-blue-600' },
-  { id: 'medical', type: 'Medical Leave', total: 14, color: 'bg-rose-500' },
   { id: 'casual', type: 'Casual Leave', total: 10, color: 'bg-amber-500' },
+  { id: 'medical', type: 'Medical Leave', total: 14, color: 'bg-rose-500' },
+  { id: 'annual', type: 'Annual Leave', total: 20, color: 'bg-blue-600' },
 ];
 
 const CACHE_KEY = 'finance_hub_data_cache';
