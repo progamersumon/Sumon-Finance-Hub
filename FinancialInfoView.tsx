@@ -1,13 +1,13 @@
 
-import React, { useState, useMemo, useRef } from 'react';
+import React, { useState, useMemo } from 'react';
 import { 
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, 
-  PieChart, Pie, Cell, Legend, Sector
+  PieChart, Pie, Cell
 } from 'recharts';
 import { Transaction, CATEGORIES } from './types';
 import { 
   LayoutGrid, Pencil, Trash2, ArrowUpCircle, ArrowDownCircle, Wallet, Plus, 
-  TrendingUp, TrendingDown, X, Database, Calendar, AlertTriangle, ArrowUp, ArrowDown
+  X, Database, AlertTriangle, ArrowUp, ArrowDown
 } from 'lucide-react';
 
 interface FinancialInfoViewProps {
@@ -32,7 +32,6 @@ const MONTH_OPTIONS = [
   { label: 'December', value: '12' }
 ];
 
-// Updated colors to match the reference image: Navy Blue, Teal, Emerald, etc.
 const IMAGE_THEME_COLORS = ['#1e3a8a', '#0891b2', '#10b981', '#4f46e5', '#7c3aed', '#db2777'];
 
 export const FinancialInfoView: React.FC<FinancialInfoViewProps> = ({ transactions, onAdd, onEdit, onDelete }) => {
@@ -46,8 +45,6 @@ export const FinancialInfoView: React.FC<FinancialInfoViewProps> = ({ transactio
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
   
-  const dateInputRef = useRef<HTMLInputElement>(null);
-
   const [formData, setFormData] = useState({
     type: 'expense' as 'income' | 'expense',
     category: CATEGORIES.expense[0],
@@ -106,12 +103,10 @@ export const FinancialInfoView: React.FC<FinancialInfoViewProps> = ({ transactio
     const { cx, cy, midAngle, innerRadius, outerRadius, percent, name } = props;
     const RADIAN = Math.PI / 180;
     
-    // Percentage Position (Inside the ring)
     const midRadius = innerRadius + (outerRadius - innerRadius) * 0.5;
     const x = cx + midRadius * Math.cos(-midAngle * RADIAN);
     const y = cy + midRadius * Math.sin(-midAngle * RADIAN);
     
-    // Line and Label Position (Outside)
     const sin = Math.sin(-RADIAN * midAngle);
     const cos = Math.cos(-RADIAN * midAngle);
     const sx = cx + (outerRadius + 2) * cos;
@@ -124,7 +119,6 @@ export const FinancialInfoView: React.FC<FinancialInfoViewProps> = ({ transactio
 
     return (
       <g>
-        {/* Percentage Label Inside the Segment */}
         <text 
           x={x} 
           y={y} 
@@ -136,7 +130,6 @@ export const FinancialInfoView: React.FC<FinancialInfoViewProps> = ({ transactio
           {`${(percent * 100).toFixed(0)}%`}
         </text>
         
-        {/* Callout Line */}
         <path 
           d={`M${sx},${sy}L${mx},${my}L${ex},${ey}`} 
           stroke="#94a3b8" 
@@ -144,7 +137,6 @@ export const FinancialInfoView: React.FC<FinancialInfoViewProps> = ({ transactio
           fill="none" 
         />
         
-        {/* Category Name Outside */}
         <text 
           x={ex + (cos >= 0 ? 1 : -1) * 4} 
           y={ey} 
@@ -190,18 +182,6 @@ export const FinancialInfoView: React.FC<FinancialInfoViewProps> = ({ transactio
     const month = (d.getMonth() + 1).toString().padStart(2, '0');
     const year = d.getFullYear();
     return `${day}-${month}-${year}`;
-  };
-
-  const triggerDatePicker = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    if (dateInputRef.current) {
-      if ('showPicker' in HTMLInputElement.prototype) {
-        dateInputRef.current.showPicker();
-      } else {
-        dateInputRef.current.click();
-      }
-    }
   };
 
   return (
@@ -372,13 +352,12 @@ export const FinancialInfoView: React.FC<FinancialInfoViewProps> = ({ transactio
                 </div>
                 <div className="space-y-1.5">
                   <label className="text-[10px] font-black text-slate-600 dark:text-slate-300 uppercase tracking-[0.1em] ml-1">Date</label>
-                  <div className="relative w-full h-10 group cursor-pointer active:scale-[0.98] transition-transform" onClick={triggerDatePicker}>
-                    <div className="absolute inset-0 px-4 bg-[#f8fafc] dark:bg-slate-900/60 border border-[#e2e8f0] dark:border-slate-600 rounded-[12px] flex items-center justify-between pointer-events-none z-0 group-hover:border-blue-400 dark:group-hover:border-indigo-400 transition-colors">
-                      <span className="text-[12px] font-black text-[#334155] dark:text-slate-200 tracking-tight">{formatDateDisplay(formData.date)}</span>
-                      <Calendar size={16} className="text-[#64748b] dark:text-slate-500 group-hover:text-blue-500 dark:group-hover:text-indigo-400 transition-colors" />
-                    </div>
-                    <input ref={dateInputRef} type="date" value={formData.date} onChange={(e) => setFormData({...formData, date: e.target.value})} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" onClick={(e) => e.stopPropagation()} />
-                  </div>
+                  <input 
+                    type="date" 
+                    value={formData.date} 
+                    onChange={(e) => setFormData({...formData, date: e.target.value})} 
+                    className="w-full h-10 px-4 bg-[#f8fafc] dark:bg-slate-900/60 border border-[#e2e8f0] dark:border-slate-600 rounded-[12px] text-[13px] font-bold text-[#334155] dark:text-slate-100 outline-none focus:border-blue-500 dark:focus:border-indigo-500 focus:ring-4 focus:ring-blue-500/5 dark:focus:ring-indigo-500/10 transition-all [color-scheme:light] dark:[color-scheme:dark]" 
+                  />
                 </div>
               </div>
               <div className="space-y-1.5">

@@ -41,11 +41,10 @@ const LeaveInfoView: React.FC<LeaveInfoViewProps> = ({
   const [isEditRecordModalOpen, setIsEditRecordModalOpen] = useState(false);
   const [editingRecord, setEditingRecord] = useState<LeaveRecord | null>(null);
 
-  // Date formatter utility for the UI
   const formatUI = (dateStr: string) => {
     if (!dateStr || !dateStr.includes('-')) return dateStr;
     const parts = dateStr.split('-');
-    if (parts[0].length === 4) { // ISO YYYY-MM-DD
+    if (parts[0].length === 4) { 
       return `${parts[2]}-${parts[1]}-${parts[0]}`;
     }
     return dateStr;
@@ -72,7 +71,6 @@ const LeaveInfoView: React.FC<LeaveInfoViewProps> = ({
     return map;
   }, [leaveHistory, selectedYear]);
 
-  // Comprehensive multi-year summary
   const annualSummary = useMemo(() => {
     const summary: Record<string, { casual: number, medical: number, annual: number, total: number }> = {};
     leaveHistory.forEach(record => {
@@ -288,7 +286,6 @@ const LeaveInfoView: React.FC<LeaveInfoViewProps> = ({
           const available = leave.total - usedForThisYear;
           const usagePercent = Math.min(Math.round((usedForThisYear / leave.total) * 100), 100);
           
-          // Determine themed border colors
           const borderClass = 
             leave.id === 'casual' ? 'border-amber-200 dark:border-amber-800/60' :
             leave.id === 'medical' ? 'border-rose-200 dark:border-rose-800/60' :
@@ -339,7 +336,6 @@ const LeaveInfoView: React.FC<LeaveInfoViewProps> = ({
         <Plus size={28} className="group-hover:rotate-90 transition-transform duration-300" />
       </button>
 
-      {/* Annual Summary Modal */}
       {isSummaryModalOpen && (
         <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-slate-950/40 backdrop-blur-md animate-in fade-in">
           <div className="bg-white dark:bg-slate-900 w-full max-w-[500px] rounded-[32px] overflow-hidden shadow-2xl border border-slate-200 dark:border-slate-800 animate-in zoom-in-95 duration-200">
@@ -449,11 +445,11 @@ const LeaveInfoView: React.FC<LeaveInfoViewProps> = ({
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1.5">
                   <label className="text-[10px] font-black text-slate-500 uppercase ml-1">Start Date</label>
-                  <input type="date" value={applyFormData.startDate} onChange={(e) => setApplyFormData({...applyFormData, startDate: e.target.value})} className="w-full h-11 px-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-[12px] font-bold text-slate-900 dark:text-white outline-none focus:border-purple-500 transition-all" />
+                  <input type="date" value={applyFormData.startDate} onChange={(e) => setApplyFormData({...applyFormData, startDate: e.target.value})} className="w-full h-11 px-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-[12px] font-bold text-slate-900 dark:text-white outline-none focus:border-purple-500 transition-all [color-scheme:light] dark:[color-scheme:dark]" />
                 </div>
                 <div className="space-y-1.5">
                   <label className="text-[10px] font-black text-slate-500 uppercase ml-1">End Date</label>
-                  <input type="date" value={applyFormData.endDate} onChange={(e) => setApplyFormData({...applyFormData, endDate: e.target.value})} className="w-full h-11 px-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-[12px] font-bold text-slate-900 dark:text-white outline-none focus:border-purple-500 transition-all" />
+                  <input type="date" value={applyFormData.endDate} onChange={(e) => setApplyFormData({...applyFormData, endDate: e.target.value})} className="w-full h-11 px-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-[12px] font-bold text-slate-900 dark:text-white outline-none focus:border-purple-500 transition-all [color-scheme:light] dark:[color-scheme:dark]" />
                 </div>
               </div>
               <div className="space-y-1.5">
@@ -470,8 +466,8 @@ const LeaveInfoView: React.FC<LeaveInfoViewProps> = ({
       )}
 
       {isDeleteConfirmOpen && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-md animate-in fade-in">
-          <div className="bg-white dark:bg-[#1e293b] w-full max-w-[280px] rounded-[24px] p-8 text-center shadow-2xl border border-slate-200 dark:border-slate-700/50">
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-slate-950/40 backdrop-blur-md animate-in fade-in">
+          <div className="bg-white dark:bg-[#1e293b] w-full max-w-[280px] rounded-[24px] p-8 text-center shadow-2xl border border-slate-200 dark:border-slate-700/50 animate-in zoom-in-95 duration-200">
             <div className="w-14 h-14 bg-rose-100 text-rose-600 dark:bg-rose-900/30 rounded-2xl flex items-center justify-center mx-auto mb-5 shadow-inner"><AlertTriangle size={28} /></div>
             <h2 className="text-[15px] font-black text-slate-900 dark:text-white mb-1.5 uppercase tracking-tight">Remove Record?</h2>
             <p className="text-[12px] text-slate-500 dark:text-slate-400 mb-8 font-bold tracking-tight">This will permanently delete the selected leave record and restore balance for {selectedYear}.</p>

@@ -3,8 +3,6 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { 
   Bell, 
   Plus, 
-  Clock, 
-  Calendar, 
   CheckCircle2, 
   Trash2, 
   Pencil, 
@@ -14,7 +12,6 @@ import {
   AlertCircle,
   FileSpreadsheet,
   Upload,
-  Eye,
   AlertTriangle
 } from 'lucide-react';
 import { Reminder } from './types';
@@ -415,7 +412,7 @@ const RemindersView: React.FC<RemindersViewProps> = ({ language, reminders, setR
                     type="date" 
                     value={formData.date}
                     onChange={(e) => setFormData({...formData, date: e.target.value})}
-                    className="w-full h-12 px-4 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-[12px] font-bold text-slate-900 dark:text-white outline-none focus:border-purple-600 focus:ring-2 focus:ring-purple-500/10 transition-all shadow-sm"
+                    className="w-full h-12 px-4 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-[12px] font-bold text-slate-900 dark:text-white outline-none focus:border-purple-600 transition-all shadow-sm [color-scheme:light] dark:[color-scheme:dark]"
                   />
                 </div>
                 <div className="space-y-1.5">
@@ -423,7 +420,7 @@ const RemindersView: React.FC<RemindersViewProps> = ({ language, reminders, setR
                   <select 
                     value={formData.priority}
                     onChange={(e) => setFormData({...formData, priority: e.target.value as any})}
-                    className="w-full h-12 px-4 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-[12px] font-bold text-slate-900 dark:text-white outline-none focus:border-purple-600 focus:ring-2 focus:ring-purple-500/10 transition-all shadow-sm cursor-pointer appearance-none"
+                    className="w-full h-12 px-4 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-[12px] font-bold text-slate-900 dark:text-white outline-none focus:border-purple-600 transition-all shadow-sm cursor-pointer appearance-none"
                   >
                     <option value="high">{language === 'বাংলা' ? 'উচ্চ' : 'High'}</option>
                     <option value="medium">{language === 'বাংলা' ? 'মাঝারি' : 'Medium'}</option>
@@ -437,7 +434,7 @@ const RemindersView: React.FC<RemindersViewProps> = ({ language, reminders, setR
                   value={formData.note}
                   onChange={(e) => setFormData({...formData, note: e.target.value})}
                   rows={3}
-                  className="w-full px-5 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-[12px] font-bold text-slate-900 dark:text-white outline-none focus:border-purple-600 focus:ring-2 focus:ring-purple-500/10 transition-all shadow-sm resize-none"
+                  className="w-full px-5 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-[12px] font-bold text-slate-900 dark:text-white outline-none focus:border-purple-600 transition-all shadow-sm resize-none"
                   placeholder="Optional details..."
                 />
               </div>
@@ -453,7 +450,7 @@ const RemindersView: React.FC<RemindersViewProps> = ({ language, reminders, setR
       )}
 
       {isBulkModalOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-md animate-in fade-in duration-300">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-950/40 backdrop-blur-md animate-in fade-in duration-300">
           <div className="bg-white dark:bg-slate-900 w-full max-w-[550px] rounded-[40px] p-8 shadow-2xl border border-slate-200 dark:border-slate-800 animate-in zoom-in-95 duration-200 max-h-[90vh] overflow-y-auto custom-scrollbar">
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center gap-3">

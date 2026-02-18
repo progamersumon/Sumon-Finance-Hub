@@ -6,23 +6,16 @@ import {
   X, 
   Pencil, 
   Trash2, 
-  Target,
   Save,
   History,
-  Layers,
-  Fingerprint,
   Percent,
   AlertTriangle,
   TrendingUp,
-  ArrowUpRight,
   Calculator,
   Wallet,
-  TrendingDown,
-  Filter,
-  CalendarDays
+  Filter
 } from 'lucide-react';
 import { SavingsGoal, SavingsRecord, Transaction } from './types';
-import { toBnDigits } from './utils';
 
 interface SavingsInfoViewProps {
   goals: SavingsGoal[];
@@ -316,14 +309,12 @@ const SavingsInfoView: React.FC<SavingsInfoViewProps> = ({
 
   return (
     <div className="space-y-8 pb-24 animate-in fade-in duration-500">
-      
-      {/* Wealth Overview Dashboard */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {[
           { label: 'Net Savings', value: analytics.deposit, icon: <Wallet size={20} />, color: 'from-blue-600 to-blue-800' },
           { label: 'Accrued Profit', value: Math.round(analytics.profit), icon: <TrendingUp size={20} />, color: 'from-emerald-500 to-emerald-700' },
           { label: 'Wealth Portfolio', value: Math.round(analytics.total), icon: <Calculator size={20} />, color: 'from-indigo-600 to-indigo-800' },
-          { label: 'Projected Maturity', value: analytics.projected, icon: <ArrowUpRight size={20} />, color: 'from-violet-600 to-purple-800' }
+          { label: 'Projected Maturity', value: analytics.projected, icon: <TrendingUp size={20} />, color: 'from-violet-600 to-purple-800' }
         ].map((stat, idx) => (
           <div key={idx} className={`p-6 rounded-[24px] bg-gradient-to-br ${stat.color} text-white shadow-xl shadow-indigo-600/10 relative overflow-hidden group hover:scale-[1.02] transition-all`}>
             <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
@@ -373,7 +364,6 @@ const SavingsInfoView: React.FC<SavingsInfoViewProps> = ({
                       boxShadow: `0 25px 50px -12px ${goal.color}33`
                     }}
                   >
-                    {/* Card Content Top */}
                     <div className="p-6 flex-1 relative z-10">
                       <div className="absolute inset-0 pointer-events-none overflow-hidden">
                         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-[0.03] blend-overlay" />
@@ -449,7 +439,6 @@ const SavingsInfoView: React.FC<SavingsInfoViewProps> = ({
                       </div>
                     </div>
 
-                    {/* Progress Section Integrated - Thicker Progress Bar */}
                     <div className="px-6 py-4 bg-black/10 backdrop-blur-xl border-t border-white/5">
                         <div className="space-y-3">
                             <div className="flex justify-between items-center text-[9px] font-black text-white/70 uppercase tracking-widest">
@@ -459,7 +448,6 @@ const SavingsInfoView: React.FC<SavingsInfoViewProps> = ({
                                 </span>
                             </div>
                             
-                            {/* Increased height from h-2 to h-3.5 and adjusted style for thickness */}
                             <div className="w-full bg-white/10 h-3.5 rounded-full overflow-hidden p-0.5 border border-white/5">
                                 <div 
                                     className="h-full rounded-full transition-all duration-1000 bg-white shadow-[0_0_15px_rgba(255,255,255,0.6)]" 
@@ -468,7 +456,6 @@ const SavingsInfoView: React.FC<SavingsInfoViewProps> = ({
                             </div>
 
                             <div className="flex justify-between items-center">
-                                {/* Enhanced 'Remaining' visibility: Added background container, increased size and opacity */}
                                 <div className="flex items-center gap-1.5 px-2 py-0.5 bg-white/10 rounded-lg backdrop-blur-md border border-white/10">
                                     <div className="w-1.5 h-1.5 bg-white rounded-full animate-pulse" />
                                     <p className="text-[10px] font-black text-white uppercase tracking-tight">
@@ -524,7 +511,6 @@ const SavingsInfoView: React.FC<SavingsInfoViewProps> = ({
                 </select>
               </div>
             </div>
-            {/* Reduced corner radius from rounded-[24px] to rounded-2xl */}
             <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden shadow-sm">
               <div className="overflow-x-auto">
                 <table className="w-full text-left">
@@ -600,7 +586,6 @@ const SavingsInfoView: React.FC<SavingsInfoViewProps> = ({
         </div>
       </div>
 
-      {/* Goal Modal */}
       {isGoalModalOpen && (
         <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-slate-950/40 backdrop-blur-md animate-in fade-in">
           <div className="bg-white dark:bg-slate-900 w-full max-w-[440px] rounded-[32px] overflow-hidden shadow-2xl border border-slate-200 dark:border-slate-800 animate-in zoom-in-95">
@@ -701,7 +686,6 @@ const SavingsInfoView: React.FC<SavingsInfoViewProps> = ({
         </div>
       )}
 
-      {/* Record Modal */}
       {isRecordModalOpen && (
         <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-slate-950/40 backdrop-blur-md animate-in fade-in">
           <div className="bg-white dark:bg-slate-900 w-full max-w-[380px] rounded-[32px] overflow-hidden shadow-2xl border border-slate-200 dark:border-slate-800 animate-in zoom-in-95">
@@ -724,7 +708,7 @@ const SavingsInfoView: React.FC<SavingsInfoViewProps> = ({
                 </div>
                 <div className="space-y-1.5">
                   <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Date Paid</label>
-                  <input type="date" value={recordForm.date} onChange={(e) => setRecordForm({...recordForm, date: e.target.value})} className="w-full h-10 px-4 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl text-[12px] font-bold text-slate-900 dark:text-white outline-none focus:border-indigo-500 transition-all" />
+                  <input type="date" value={recordForm.date} onChange={(e) => setRecordForm({...recordForm, date: e.target.value})} className="w-full h-10 px-4 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl text-[12px] font-bold text-slate-900 dark:text-white outline-none focus:border-indigo-500 transition-all [color-scheme:light] dark:[color-scheme:dark]" />
                 </div>
               </div>
               <div className="space-y-1.5">

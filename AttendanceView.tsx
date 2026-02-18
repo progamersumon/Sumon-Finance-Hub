@@ -7,19 +7,15 @@ import {
   Clock,
   Calendar,
   Filter,
-  Search,
   LayoutGrid,
   Pencil,
   Trash2,
-  ChevronDown,
   Plus,
   X,
   AlertTriangle,
   Save,
-  ArrowRight,
   ChevronLeft,
   ChevronRight,
-  UserCheck,
   UserMinus,
   UtensilsCrossed
 } from 'lucide-react';
@@ -54,21 +50,19 @@ const AttendanceView: React.FC<AttendanceViewProps> = ({ activitiesList, setActi
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const filterRef = useRef<HTMLDivElement>(null);
   
-  // Modal States
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [editingRecord, setEditingRecord] = useState<any | null>(null);
   const [recordToDelete, setRecordToDelete] = useState<number | null>(null);
 
   const [formData, setFormData] = useState({
-    type: 'STANDARD', // 'STANDARD' | 'HOLIDAY' | 'OFF DAY'
+    type: 'STANDARD', 
     date: `${currentYearValue}-${currentMonthValue}-02`,
     multiDates: [] as string[],
     checkIn: '08:00 AM',
     checkOut: '05:00 PM'
   });
 
-  // Calendar states for the multi-select modal
   const [calMonth, setCalMonth] = useState(new Date().getMonth());
   const [calYear, setCalYear] = useState(new Date().getFullYear());
 
@@ -77,7 +71,6 @@ const AttendanceView: React.FC<AttendanceViewProps> = ({ activitiesList, setActi
     return Array.from(new Set([currentYearValue, ...years])).sort();
   }, [activitiesList, currentYearValue]);
 
-  // Handle click outside to close filter
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (filterRef.current && !filterRef.current.contains(event.target as Node)) {
@@ -96,7 +89,6 @@ const AttendanceView: React.FC<AttendanceViewProps> = ({ activitiesList, setActi
     };
   }, [isFilterOpen]);
 
-  // 1. First, filter data by Data Period (Month & Year)
   const periodFilteredActivities = useMemo(() => {
     return activitiesList.filter(a => {
       const [year, month] = a.date.split('-');
@@ -106,7 +98,6 @@ const AttendanceView: React.FC<AttendanceViewProps> = ({ activitiesList, setActi
     });
   }, [activitiesList, selectedMonth, selectedYear]);
 
-  // Helper to check for Tiffin eligibility (Check Out >= 7:00 PM)
   const isTiffinTime = (timeStr: string) => {
     if (!timeStr || timeStr === '-') return false;
     const match = timeStr.match(/(\d+):(\d+)\s*(AM|PM)/i);
@@ -118,10 +109,9 @@ const AttendanceView: React.FC<AttendanceViewProps> = ({ activitiesList, setActi
     if (ampm === 'AM' && hours === 12) hours = 0;
     
     const totalMinutes = hours * 60 + minutes;
-    return totalMinutes >= 19 * 60; // 7:00 PM is 19:00 (1140 minutes)
+    return totalMinutes >= 19 * 60; 
   };
 
-  // 2. Statistics reflect the period filtered data
   const statsCount = useMemo(() => {
     return {
       present: periodFilteredActivities.filter(a => a.status === 'On Time' || a.status === 'Late').length,
@@ -133,7 +123,6 @@ const AttendanceView: React.FC<AttendanceViewProps> = ({ activitiesList, setActi
     };
   }, [periodFilteredActivities]);
 
-  // 3. Table activities use period filtered data + additional status filter
   const activities = useMemo(() => {
     let filtered = periodFilteredActivities;
     if (statusFilter !== 'All') {
@@ -159,7 +148,6 @@ const AttendanceView: React.FC<AttendanceViewProps> = ({ activitiesList, setActi
     return option ? option.label : 'All Months';
   };
 
-  // Helper functions for time conversion between state (12h) and input (24h)
   const convert12to24 = (time12: string) => {
     if (!time12 || time12 === '-') return '';
     const match = time12.match(/(\d+):(\d+)\s*(AM|PM)/i);
@@ -360,7 +348,6 @@ const AttendanceView: React.FC<AttendanceViewProps> = ({ activitiesList, setActi
 
   return (
     <div className="space-y-4 animate-in fade-in duration-300 relative">
-      {/* Data Period Filter */}
       <div className="flex flex-wrap gap-3 items-center bg-white dark:bg-slate-900 p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
         <div className="flex items-center gap-2 pr-3 border-r border-slate-100 dark:border-slate-800">
           <LayoutGrid size={14} className="text-purple-600" />
@@ -386,7 +373,6 @@ const AttendanceView: React.FC<AttendanceViewProps> = ({ activitiesList, setActi
         </div>
       </div>
 
-      {/* Statistics Grid */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
         {[
           { label: 'Present', value: statsCount.present, icon: <CheckCircle2 size={18} />, color: 'emerald' },
@@ -411,7 +397,6 @@ const AttendanceView: React.FC<AttendanceViewProps> = ({ activitiesList, setActi
       </div>
 
       <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm overflow-hidden flex flex-col">
-        {/* Log Header */}
         <div className="px-5 py-2 border-b border-indigo-100 dark:border-indigo-900/30 bg-indigo-50/50 dark:bg-indigo-950/20 flex flex-wrap items-center justify-between gap-4 shrink-0 min-h-[44px] relative">
           <div className="flex items-center gap-3">
             <h3 className="text-[11px] font-black text-indigo-700 dark:text-indigo-300 uppercase tracking-tight flex items-center gap-2">
@@ -483,11 +468,9 @@ const AttendanceView: React.FC<AttendanceViewProps> = ({ activitiesList, setActi
                 <tr key={item.id} className="hover:bg-slate-50/30 dark:hover:bg-slate-800/20 transition-colors group">
                   <td className="px-6 py-1.5">
                     <div className="flex items-center gap-3">
-                      {/* Abbreviated Day Icon */}
                       <div className="w-7 h-7 rounded-lg bg-slate-50 dark:bg-slate-800 flex items-center justify-center shrink-0 border border-slate-100 dark:border-slate-700 font-black text-[9px] text-slate-500 uppercase leading-none">
                         {item.day.substring(0, 3)}
                       </div>
-                      {/* Date Only (Redundant Day Name Removed) */}
                       <div className="flex flex-col">
                         <span className="text-[11px] font-black text-slate-800 dark:text-slate-200 uppercase tracking-tight">{formatDateUI(item.date)}</span>
                       </div>
@@ -582,7 +565,6 @@ const AttendanceView: React.FC<AttendanceViewProps> = ({ activitiesList, setActi
         </div>
       </div>
 
-      {/* Add/Edit Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/40 backdrop-blur-md animate-in fade-in">
           <div className="bg-white dark:bg-[#1e293b] w-full max-w-[420px] rounded-[24px] overflow-hidden shadow-2xl border border-slate-200 dark:border-slate-700/80 animate-in zoom-in-95 duration-200">
@@ -591,7 +573,6 @@ const AttendanceView: React.FC<AttendanceViewProps> = ({ activitiesList, setActi
               <button onClick={() => setIsModalOpen(false)} className="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors"><X size={18} /></button>
             </div>
             <div className="p-6 space-y-5">
-              {/* Row 1: Segmented Switcher */}
               <div className="bg-slate-50 dark:bg-slate-900/50 p-1.5 rounded-full flex border border-slate-100 dark:border-slate-800 shadow-sm">
                 {['STANDARD', 'HOLIDAY', 'OFF DAY'].map(cat => (
                   <button
@@ -608,7 +589,6 @@ const AttendanceView: React.FC<AttendanceViewProps> = ({ activitiesList, setActi
                 ))}
               </div>
 
-              {/* Row 2: Date Section */}
               {formData.type === 'STANDARD' || editingRecord ? (
                 <div className="space-y-1.5">
                   <label className="text-[10px] font-black text-slate-600 dark:text-slate-300 uppercase tracking-widest ml-1">Date</label>
@@ -616,7 +596,7 @@ const AttendanceView: React.FC<AttendanceViewProps> = ({ activitiesList, setActi
                     type="date" 
                     value={formData.date} 
                     onChange={(e) => setFormData({...formData, date: e.target.value})}
-                    className="w-full h-10 px-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-[13px] font-bold text-slate-900 dark:text-white outline-none focus:border-indigo-500 transition-all"
+                    className="w-full h-10 px-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-[13px] font-bold text-slate-900 dark:text-white outline-none focus:border-indigo-500 transition-all [color-scheme:light] dark:[color-scheme:dark]"
                   />
                 </div>
               ) : (
@@ -667,7 +647,6 @@ const AttendanceView: React.FC<AttendanceViewProps> = ({ activitiesList, setActi
                 </div>
               )}
 
-              {/* Row 3: Check In & Check Out */}
               {(formData.type === 'STANDARD' || editingRecord) && (
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-1.5">
@@ -697,7 +676,6 @@ const AttendanceView: React.FC<AttendanceViewProps> = ({ activitiesList, setActi
                 </div>
               )}
               
-              {/* Alerts in Modal */}
               {formData.type === 'STANDARD' && formData.checkIn && (!formData.checkOut || formData.checkOut === '-') && (
                 <div className="flex items-center gap-2 p-3 bg-rose-50 dark:bg-rose-900/20 border border-rose-200 dark:border-rose-800 rounded-xl text-rose-600 dark:text-rose-400 animate-in fade-in slide-in-from-top-1">
                   <AlertTriangle size={16} />
@@ -724,7 +702,6 @@ const AttendanceView: React.FC<AttendanceViewProps> = ({ activitiesList, setActi
         </div>
       )}
 
-      {/* Delete Confirmation Modal */}
       {isDeleteModalOpen && (
         <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-md animate-in fade-in">
           <div className="bg-white dark:bg-[#1e293b] w-full max-w-[280px] rounded-[24px] p-8 text-center shadow-2xl border border-slate-200 dark:border-slate-700/50">
