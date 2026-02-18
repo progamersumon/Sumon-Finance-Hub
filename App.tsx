@@ -20,7 +20,7 @@ import AttendanceView from './AttendanceView';
 import LeaveInfoView from './LeaveInfoView';
 import { t } from './translations';
 import { supabase } from './supabaseClient';
-import { Mail, Lock, ChevronRight, ArrowLeft, KeyRound, Smartphone } from 'lucide-react';
+import { Mail, Lock, ChevronRight, ArrowLeft, KeyRound, Smartphone, Layers } from 'lucide-react';
 
 const INITIAL_LEAVE_QUOTAS: LeaveType[] = [
   { id: 'casual', type: 'Casual Leave', total: 10, color: 'bg-amber-500' },
@@ -133,13 +133,17 @@ const LoginView: React.FC<{ onLogin: (user: any) => void, language: LanguageType
 
       <div className="hidden md:flex flex-1 bg-gradient-to-br from-[#0088ff] to-[#0077ee] flex-col items-center justify-center p-12 text-center text-white relative overflow-hidden">
         <div className="absolute inset-0 opacity-10 bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:20px_20px]" />
-        <div className="max-w-xl space-y-4 relative z-10">
-          <h1 className="text-6xl font-black tracking-tight leading-none drop-shadow-sm mb-6">Welcome Back!</h1>
+        <div className="max-w-xl space-y-2 relative z-10 flex flex-col items-center">
+          <div className="w-20 h-20 bg-white/20 backdrop-blur-xl rounded-[28px] flex items-center justify-center mb-1 border border-white/30 shadow-2xl animate-float">
+            <Layers size={42} className="text-white drop-shadow-md" strokeWidth={2.5} />
+          </div>
+          
+          <h1 className="text-6xl font-black tracking-tight leading-none drop-shadow-sm mb-4">Welcome Back!</h1>
           <p className="text-[14px] font-medium text-blue-50/90 leading-relaxed mx-auto whitespace-nowrap">
             Keep your data organized using our AI-powered<br />management dashboard and tracking system.
           </p>
           
-          <div className="pt-1 flex items-center justify-center gap-2">
+          <div className="pt-6 flex items-center justify-center gap-2">
             <div className="w-12 h-1 bg-blue-300/40 rounded-full" />
             <div className="w-2 h-2 bg-white rounded-full animate-pulse" />
             <div className="w-12 h-1 bg-blue-300/40 rounded-full" />
@@ -408,6 +412,7 @@ const AppContent: React.FC = () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (session) {
         setIsAuthenticated(true);
+        setActiveView(AppTab.DASHBOARD);
         setIsSyncing(true);
         const { data } = await supabase
           .from('user_data')
@@ -454,9 +459,13 @@ const AppContent: React.FC = () => {
 
     initData();
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (session) {
         setIsAuthenticated(true);
+        // Explicitly set dashboard view on sign in events
+        if (event === 'SIGNED_IN' || event === 'INITIAL_SESSION') {
+          setActiveView(AppTab.DASHBOARD);
+        }
       } else {
         setIsAuthenticated(false);
         localStorage.removeItem(CACHE_KEY);
@@ -510,7 +519,10 @@ const AppContent: React.FC = () => {
     setTransactions(prev => prev.filter(t => t.id !== id));
   };
 
-  if (!isAuthenticated) return <LoginView onLogin={() => setIsAuthenticated(true)} language={language} />;
+  if (!isAuthenticated) return <LoginView onLogin={() => {
+    setIsAuthenticated(true);
+    setActiveView(AppTab.DASHBOARD);
+  }} language={language} />;
 
   const renderView = () => {
     const commonProps = { language: language === 'bn' ? ('বাংলা' as const) : ('English' as const) };
