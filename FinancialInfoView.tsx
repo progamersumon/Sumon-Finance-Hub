@@ -7,7 +7,7 @@ import {
 import { Transaction, CATEGORIES } from './types';
 import { 
   LayoutGrid, Pencil, Trash2, ArrowUpCircle, ArrowDownCircle, Wallet, Plus, 
-  X, Database, AlertTriangle, ArrowUp, ArrowDown
+  X, Database, AlertTriangle, ArrowUp, ArrowDown, Save
 } from 'lucide-react';
 
 interface FinancialInfoViewProps {
@@ -326,45 +326,84 @@ export const FinancialInfoView: React.FC<FinancialInfoViewProps> = ({ transactio
 
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/40 backdrop-blur-md animate-in fade-in">
-          <div className="bg-white dark:bg-[#1e293b] w-full max-w-[380px] rounded-[24px] overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.3)] border border-slate-200 dark:border-slate-700/80 animate-in zoom-in-95 duration-200">
-            <div className="flex items-center justify-between px-6 py-4 border-b border-slate-50 dark:border-slate-700/50">
-              <h2 className="text-[17px] font-black text-[#1e293b] dark:text-white tracking-tight uppercase tracking-tight">{editingTransaction ? 'Edit Transaction' : 'Add Transaction'}</h2>
-              <button onClick={() => setIsModalOpen(false)} className="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors"><X size={18} /></button>
-            </div>
-            <div className="p-6 space-y-4">
-              <div className="flex p-1 bg-[#f1f5f9] dark:bg-slate-900/80 rounded-full h-10 border border-transparent dark:border-slate-800">
-                <button onClick={() => setFormData({...formData, type: 'expense', category: CATEGORIES.expense[0]})} className={`flex-1 flex items-center justify-center text-[11px] font-black rounded-full transition-all duration-300 ${formData.type === 'expense' ? 'bg-[#FF0000] text-white shadow-[0_4px_12px_rgba(255,0,0,0.4)]' : 'text-[#64748b] hover:text-slate-400'}`}>Expense</button>
-                <button onClick={() => setFormData({...formData, type: 'income', category: CATEGORIES.income[0]})} className={`flex-1 flex items-center justify-center text-[11px] font-black rounded-full transition-all duration-300 ${formData.type === 'income' ? 'bg-[#10b981] text-white shadow-[0_4px_12px_rgba(16,185,129,0.4)]' : 'text-[#64748b] hover:text-slate-400'}`}>Income</button>
+          <div className="bg-white dark:bg-[#1e293b] w-full max-w-[420px] rounded-[24px] overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.3)] border border-slate-300 dark:border-slate-700 animate-in zoom-in-95 duration-200">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 dark:border-slate-700/50">
+              <div className="flex items-center gap-2">
+                <Plus size={18} className="text-blue-600" />
+                <h2 className="text-[17px] font-black text-slate-900 dark:text-white tracking-tight uppercase">{editingTransaction ? 'Edit Transaction' : 'Add Transaction'}</h2>
               </div>
+              <button onClick={() => setIsModalOpen(false)} className="p-1.5 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors"><X size={20} /></button>
+            </div>
+            <div className="p-6 space-y-6">
+              <div className="bg-slate-50 dark:bg-slate-950/50 p-1 rounded-full flex border border-slate-200 dark:border-slate-800 shadow-sm">
+                <button 
+                  onClick={() => setFormData({...formData, type: 'expense', category: CATEGORIES.expense[0]})} 
+                  className={`flex-1 py-2 text-[10px] font-black uppercase tracking-widest rounded-full transition-all duration-300 ${formData.type === 'expense' ? 'bg-rose-600 text-white shadow-lg shadow-rose-600/30' : 'text-slate-400 hover:text-slate-600'}`}
+                >
+                  Expense
+                </button>
+                <button 
+                  onClick={() => setFormData({...formData, type: 'income', category: CATEGORIES.income[0]})} 
+                  className={`flex-1 py-2 text-[10px] font-black uppercase tracking-widest rounded-full transition-all duration-300 ${formData.type === 'income' ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-600/30' : 'text-slate-400 hover:text-slate-600'}`}
+                >
+                  Income
+                </button>
+              </div>
+
               <div className="space-y-1.5">
-                <label className="text-[10px] font-black text-slate-600 dark:text-slate-300 uppercase tracking-[0.1em] ml-1">Category</label>
+                <label className="text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest ml-1">Category Selection</label>
                 <div className="relative">
-                  <select value={formData.category} onChange={(e) => setFormData({...formData, category: e.target.value})} className="w-full h-10 px-4 bg-[#f8fafc] dark:bg-slate-900/60 border border-[#e2e8f0] dark:border-slate-600 rounded-[12px] text-[13px] font-bold text-[#334155] dark:text-slate-100 appearance-none outline-none focus:border-blue-500 dark:focus:border-indigo-500 focus:ring-4 focus:ring-blue-500/5 dark:focus:ring-indigo-500/10 transition-all cursor-pointer">
+                  <select 
+                    value={formData.category} 
+                    onChange={(e) => setFormData({...formData, category: e.target.value})} 
+                    className="w-full h-10 px-4 bg-slate-50 dark:bg-slate-900 border border-slate-400 dark:border-slate-600 rounded-lg text-[13px] font-semibold text-slate-900 dark:text-white outline-none focus:border-blue-500 transition-all shadow-sm appearance-none cursor-pointer"
+                  >
                     {CATEGORIES[formData.type].map(cat => <option key={cat} value={cat}>{cat}</option>)}
                   </select>
-                  <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-[#64748b] dark:text-slate-500"><ArrowDown size={14} /></div>
+                  <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400"><ArrowDown size={14} /></div>
                 </div>
               </div>
+
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1.5">
-                  <label className="text-[10px] font-black text-slate-600 dark:text-slate-300 uppercase tracking-[0.1em] ml-1">Amount (৳)</label>
-                  <input type="number" value={formData.amount} onChange={(e) => setFormData({...formData, amount: e.target.value})} placeholder="0.00" className="w-full h-10 px-4 bg-[#f8fafc] dark:bg-slate-900/60 border border-[#e2e8f0] dark:border-slate-600 rounded-[12px] text-[13px] font-bold text-[#334155] dark:text-slate-100 outline-none focus:border-blue-500 dark:focus:border-indigo-500 focus:ring-4 focus:ring-blue-500/5 dark:focus:ring-indigo-500/10 transition-all placeholder:text-[#cbd5e1] dark:placeholder:text-slate-600" />
+                  <label className="text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest ml-1">Amount (৳)</label>
+                  <input 
+                    type="number" 
+                    value={formData.amount} 
+                    onChange={(e) => setFormData({...formData, amount: e.target.value})} 
+                    placeholder="0.00" 
+                    className="w-full h-10 px-4 bg-slate-50 dark:bg-slate-900 border border-slate-400 dark:border-slate-600 rounded-lg text-[13px] font-semibold text-slate-900 dark:text-white outline-none focus:border-blue-500 transition-all shadow-sm placeholder:text-slate-300 dark:placeholder:text-slate-700" 
+                  />
                 </div>
                 <div className="space-y-1.5">
-                  <label className="text-[10px] font-black text-slate-600 dark:text-slate-300 uppercase tracking-[0.1em] ml-1">Date</label>
+                  <label className="text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest ml-1">Transaction Date</label>
                   <input 
                     type="date" 
                     value={formData.date} 
                     onChange={(e) => setFormData({...formData, date: e.target.value})} 
-                    className="w-full h-10 px-4 bg-[#f8fafc] dark:bg-slate-900/60 border border-[#e2e8f0] dark:border-slate-600 rounded-[12px] text-[13px] font-bold text-[#334155] dark:text-slate-100 outline-none focus:border-blue-500 dark:focus:border-indigo-500 focus:ring-4 focus:ring-blue-500/5 dark:focus:ring-indigo-500/10 transition-all [color-scheme:light] dark:[color-scheme:dark]" 
+                    className="w-full h-10 px-4 bg-slate-50 dark:bg-slate-900 border border-slate-400 dark:border-slate-600 rounded-lg text-[13px] font-semibold text-slate-900 dark:text-white outline-none focus:border-blue-500 transition-all shadow-sm [color-scheme:light] dark:[color-scheme:dark]" 
                   />
                 </div>
               </div>
+
               <div className="space-y-1.5">
-                <label className="text-[10px] font-black text-slate-600 dark:text-slate-300 uppercase tracking-[0.1em] ml-1">Description (Optional)</label>
-                <input type="text" value={formData.description} onChange={(e) => setFormData({...formData, description: e.target.value})} placeholder="e.g. Grocery" className="w-full h-10 px-4 bg-[#f8fafc] dark:bg-slate-900/60 border border-[#e2e8f0] dark:border-slate-600 rounded-[12px] text-[13px] font-bold text-[#334155] dark:text-slate-100 outline-none focus:border-blue-500 dark:focus:border-indigo-500 focus:ring-4 focus:ring-blue-500/5 dark:focus:ring-indigo-500/10 transition-all placeholder:text-[#cbd5e1] dark:placeholder:text-slate-600" />
+                <label className="text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest ml-1">Short Description</label>
+                <input 
+                  type="text" 
+                  value={formData.description} 
+                  onChange={(e) => setFormData({...formData, description: e.target.value})} 
+                  placeholder="e.g. Weekly Grocery" 
+                  className="w-full h-10 px-4 bg-slate-50 dark:bg-slate-900 border border-slate-400 dark:border-slate-600 rounded-lg text-[13px] font-semibold text-slate-900 dark:text-white outline-none focus:border-blue-500 transition-all shadow-sm placeholder:text-slate-300 dark:placeholder:text-slate-700" 
+                />
               </div>
-              <button onClick={handleSave} className="w-full h-12 bg-[#2563eb] hover:bg-[#1d4ed8] text-white rounded-2xl font-black text-[14px] shadow-[0_8px_20px_rgba(37,99,235,0.25)] transition-all active:scale-[0.97] mt-2 uppercase tracking-wider">{editingTransaction ? 'Save Changes' : 'Save Transaction'}</button>
+
+              <button 
+                onClick={handleSave} 
+                className="w-full h-12 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-black text-[14px] uppercase shadow-lg shadow-blue-600/20 flex items-center justify-center gap-2 transition-all active:scale-[0.98] mt-2"
+              >
+                <Save size={18} />
+                {editingTransaction ? 'Save Changes' : 'Record Transaction'}
+              </button>
             </div>
           </div>
         </div>
@@ -372,13 +411,25 @@ export const FinancialInfoView: React.FC<FinancialInfoViewProps> = ({ transactio
 
       {isDeleteModalOpen && (
         <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-md animate-in fade-in">
-          <div className="bg-white dark:bg-[#1e293b] w-full max-w-[280px] rounded-[24px] p-8 text-center shadow-2xl border border-slate-200 dark:border-slate-700/50">
-            <div className="w-14 h-14 bg-rose-100 text-rose-600 dark:bg-rose-900/30 rounded-2xl flex items-center justify-center mx-auto mb-5 shadow-inner"><AlertTriangle size={28} /></div>
-            <h2 className="text-[15px] font-black text-slate-900 dark:text-white mb-1.5 uppercase tracking-tight">Confirm Removal?</h2>
-            <p className="text-[12px] text-slate-500 dark:text-slate-400 mb-6 font-bold tracking-tight">This action cannot be undone</p>
-            <div className="flex gap-3">
-              <button onClick={() => { if (deleteId) onDelete(deleteId); setIsDeleteModalOpen(false); }} className="flex-1 py-3 bg-rose-600 text-white rounded-xl text-[12px] font-black uppercase shadow-lg shadow-rose-600/20 hover:bg-rose-700 transition-colors">Delete</button>
-              <button onClick={() => setIsDeleteModalOpen(false)} className="flex-1 py-3 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-xl text-[12px] font-black uppercase hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">Back</button>
+          <div className="bg-white dark:bg-[#1e293b] w-full max-w-[300px] rounded-[24px] p-8 text-center shadow-2xl border border-slate-200 dark:border-slate-800 animate-in zoom-in-95 duration-200">
+            <div className="w-16 h-16 bg-rose-100 text-rose-600 dark:bg-rose-900/30 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-inner">
+              <AlertTriangle size={32} />
+            </div>
+            <h2 className="text-[16px] font-black text-slate-900 dark:text-white mb-2 uppercase tracking-tight">Confirm Removal?</h2>
+            <p className="text-[12px] text-slate-500 dark:text-slate-400 mb-8 font-bold tracking-tight">This action cannot be undone.</p>
+            <div className="flex gap-4">
+              <button 
+                onClick={() => { if (deleteId) onDelete(deleteId); setIsDeleteModalOpen(false); }} 
+                className="flex-1 py-3.5 bg-rose-600 text-white rounded-xl text-[12px] font-black uppercase shadow-lg shadow-rose-600/20 hover:bg-rose-700 transition-all active:scale-95"
+              >
+                Delete
+              </button>
+              <button 
+                onClick={() => setIsDeleteModalOpen(false)} 
+                className="flex-1 py-3.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-xl text-[12px] font-black uppercase hover:bg-slate-200 transition-all active:scale-95"
+              >
+                Cancel
+              </button>
             </div>
           </div>
         </div>

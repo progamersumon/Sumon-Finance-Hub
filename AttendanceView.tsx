@@ -17,7 +17,9 @@ import {
   ChevronLeft,
   ChevronRight,
   UserMinus,
-  UtensilsCrossed
+  UtensilsCrossed,
+  Check,
+  History
 } from 'lucide-react';
 
 const MONTH_OPTIONS = [
@@ -59,8 +61,8 @@ const AttendanceView: React.FC<AttendanceViewProps> = ({ activitiesList, setActi
     type: 'STANDARD', 
     date: `${currentYearValue}-${currentMonthValue}-02`,
     multiDates: [] as string[],
-    checkIn: '08:00 AM',
-    checkOut: '05:00 PM'
+    checkIn: '',
+    checkOut: ''
   });
 
   const [calMonth, setCalMonth] = useState(new Date().getMonth());
@@ -346,6 +348,13 @@ const AttendanceView: React.FC<AttendanceViewProps> = ({ activitiesList, setActi
     }
   };
 
+  // Helper component for the green dashed circle with white tick
+  const VerifiedBadge = () => (
+    <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center justify-center w-5 h-5 bg-emerald-600 rounded-full border border-dashed border-emerald-300 shadow-sm transition-transform hover:scale-110">
+      <Check size={10} strokeWidth={4} className="text-white" />
+    </div>
+  );
+
   return (
     <div className="space-y-4 animate-in fade-in duration-300 relative">
       <div className="flex flex-wrap gap-3 items-center bg-white dark:bg-slate-900 p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
@@ -567,21 +576,24 @@ const AttendanceView: React.FC<AttendanceViewProps> = ({ activitiesList, setActi
 
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/40 backdrop-blur-md animate-in fade-in">
-          <div className="bg-white dark:bg-[#1e293b] w-full max-w-[420px] rounded-[24px] overflow-hidden shadow-2xl border border-slate-200 dark:border-slate-700/80 animate-in zoom-in-95 duration-200">
-            <div className="flex items-center justify-between px-6 py-4 border-b border-slate-50 dark:border-slate-700/50">
-              <h2 className="text-[17px] font-black text-[#1e293b] dark:text-white tracking-tight uppercase">{editingRecord ? 'Edit Attendance' : 'Add Attendance'}</h2>
-              <button onClick={() => setIsModalOpen(false)} className="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors"><X size={18} /></button>
+          <div className="bg-white dark:bg-[#1e293b] w-full max-w-[420px] rounded-[24px] overflow-hidden shadow-[0_25px_50px_-12px_rgba(0,0,0,0.5)] border border-slate-300 dark:border-slate-700 animate-in zoom-in-95 duration-200">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 dark:border-slate-700/50">
+              <div className="flex items-center gap-2">
+                <Plus size={18} className="text-blue-600" />
+                <h2 className="text-[17px] font-black text-slate-900 dark:text-white tracking-tight uppercase">{editingRecord ? 'Edit Attendance' : 'Add Attendance'}</h2>
+              </div>
+              <button onClick={() => setIsModalOpen(false)} className="p-1.5 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors"><X size={20} /></button>
             </div>
-            <div className="p-6 space-y-5">
-              <div className="bg-slate-50 dark:bg-slate-900/50 p-1.5 rounded-full flex border border-slate-100 dark:border-slate-800 shadow-sm">
+            <div className="p-6 space-y-6">
+              <div className="bg-slate-50 dark:bg-slate-950/50 p-1 rounded-full flex border border-slate-200 dark:border-slate-800 shadow-sm">
                 {['STANDARD', 'HOLIDAY', 'OFF DAY'].map(cat => (
                   <button
                     key={cat}
                     onClick={() => setFormData({...formData, type: cat})}
                     className={`flex-1 py-1.5 text-[9px] font-black uppercase tracking-widest rounded-full transition-all duration-300 ${
                       formData.type === cat 
-                      ? 'bg-emerald-600 text-white shadow-[0_4px_12px_rgba(16,185,129,0.4)] transform scale-[1.02]' 
-                      : 'text-slate-400 dark:text-slate-500 hover:text-slate-600'
+                      ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-600/30' 
+                      : 'text-slate-400 hover:text-slate-600'
                     }`}
                   >
                     {cat}
@@ -591,40 +603,40 @@ const AttendanceView: React.FC<AttendanceViewProps> = ({ activitiesList, setActi
 
               {formData.type === 'STANDARD' || editingRecord ? (
                 <div className="space-y-1.5">
-                  <label className="text-[10px] font-black text-slate-600 dark:text-slate-300 uppercase tracking-widest ml-1">Date</label>
+                  <label className="text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest ml-1">Log Date</label>
                   <input 
                     type="date" 
                     value={formData.date} 
                     onChange={(e) => setFormData({...formData, date: e.target.value})}
-                    className="w-full h-10 px-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-[13px] font-bold text-slate-900 dark:text-white outline-none focus:border-indigo-500 transition-all [color-scheme:light] dark:[color-scheme:dark]"
+                    className="w-full h-10 px-4 bg-slate-50 dark:bg-slate-900 border border-slate-400 dark:border-slate-600 rounded-lg text-[13px] font-semibold text-slate-900 dark:text-white outline-none focus:border-indigo-500 transition-all shadow-sm [color-scheme:light] dark:[color-scheme:dark]"
                   />
                 </div>
               ) : (
                 <div className="space-y-2 animate-in fade-in zoom-in-95">
-                  <div className="flex items-center justify-between ml-1 mb-2">
-                    <label className="text-[10px] font-black text-slate-600 dark:text-slate-300 uppercase tracking-widest">Select Multiple Dates</label>
-                    <div className="flex items-center gap-1 bg-indigo-50 dark:bg-indigo-900/30 px-2 py-0.5 rounded-full">
-                      <span className="text-[10px] font-black text-indigo-600 dark:text-indigo-400">{formData.multiDates.length} Selected</span>
+                  <div className="flex items-center justify-between ml-1 mb-1">
+                    <label className="text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest">Select Multi-Dates</label>
+                    <div className="px-2 py-0.5 bg-indigo-50 dark:bg-indigo-900/30 rounded-full">
+                      <span className="text-[9px] font-black text-indigo-600 dark:text-indigo-400 uppercase tracking-widest">{formData.multiDates.length} Days</span>
                     </div>
                   </div>
                   
-                  <div className="bg-slate-50 dark:bg-slate-900/60 p-4 rounded-3xl border border-slate-100 dark:border-slate-800 shadow-inner">
-                    <div className="flex items-center justify-between mb-4 px-2">
+                  <div className="bg-slate-50 dark:bg-slate-950/30 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-inner">
+                    <div className="flex items-center justify-between mb-4 px-1">
                       <span className="text-[11px] font-black uppercase text-slate-600 dark:text-slate-300 tracking-tight">
                         {new Intl.DateTimeFormat('en-US', { month: 'long', year: 'numeric' }).format(new Date(calYear, calMonth))}
                       </span>
-                      <div className="flex gap-2">
-                        <button onClick={handlePrevMonth} className="p-1.5 text-slate-600 dark:text-slate-300 bg-white/50 dark:bg-slate-800/50 hover:bg-white dark:hover:bg-slate-700 rounded-lg transition-colors border border-slate-200/50 dark:border-slate-700/50 shadow-sm"><ChevronLeft size={16} /></button>
-                        <button onClick={handleNextMonth} className="p-1.5 text-slate-600 dark:text-slate-300 bg-white/50 dark:bg-slate-800/50 hover:bg-white dark:hover:bg-slate-700 rounded-lg transition-colors border border-slate-200/50 dark:border-slate-700/50 shadow-sm"><ChevronRight size={16} /></button>
+                      <div className="flex gap-1.5">
+                        <button onClick={handlePrevMonth} className="p-1 text-slate-500 bg-white dark:bg-slate-800 hover:bg-slate-100 rounded-md transition-colors border border-slate-200 dark:border-slate-700"><ChevronLeft size={14} /></button>
+                        <button onClick={handleNextMonth} className="p-1 text-slate-500 bg-white dark:bg-slate-800 hover:bg-slate-100 rounded-md transition-colors border border-slate-200 dark:border-slate-700"><ChevronRight size={14} /></button>
                       </div>
                     </div>
                     
-                    <div className="grid grid-cols-7 gap-1 justify-items-center">
+                    <div className="grid grid-cols-7 gap-1">
                       {['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'].map(d => (
-                        <span key={d} className="w-8 text-[9px] font-black text-slate-400 uppercase text-center">{d}</span>
+                        <span key={d} className="text-[9px] font-black text-slate-400 uppercase text-center mb-1">{d}</span>
                       ))}
                       {calendarDays.map((day, i) => {
-                        if (!day) return <div key={`empty-${i}`} className="w-8 h-8" />;
+                        if (!day) return <div key={`empty-${i}`} className="w-7 h-7" />;
                         const dateObj = new Date(calYear, calMonth, day);
                         const dateStr = dateObj.toISOString().split('T')[0];
                         const isSelected = formData.multiDates.includes(dateStr);
@@ -632,9 +644,9 @@ const AttendanceView: React.FC<AttendanceViewProps> = ({ activitiesList, setActi
                           <button
                             key={i}
                             onClick={() => toggleMultiDate(dateStr)}
-                            className={`w-8 h-8 rounded-xl text-[11px] font-bold transition-all flex items-center justify-center ${
+                            className={`w-7 h-7 rounded-lg text-[11px] font-bold transition-all flex items-center justify-center ${
                               isSelected 
-                              ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/30 scale-110' 
+                              ? 'bg-blue-600 text-white shadow-md' 
                               : 'text-slate-600 dark:text-slate-400 hover:bg-white dark:hover:bg-slate-800'
                             }`}
                           >
@@ -650,52 +662,53 @@ const AttendanceView: React.FC<AttendanceViewProps> = ({ activitiesList, setActi
               {(formData.type === 'STANDARD' || editingRecord) && (
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-1.5">
-                    <label className="text-[10px] font-black text-slate-600 dark:text-slate-300 uppercase tracking-widest ml-1">Check In</label>
-                    <div className="relative">
-                      <input 
-                        type="time" 
-                        value={convert12to24(formData.checkIn)} 
-                        onChange={(e) => setFormData({...formData, checkIn: convert24to12(e.target.value)})}
-                        disabled={formData.type !== 'STANDARD' && !editingRecord}
-                        className={`w-full h-10 px-4 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-full text-[13px] font-bold text-slate-900 dark:text-white outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10 transition-all ${(formData.type !== 'STANDARD' && !editingRecord) ? 'opacity-50 cursor-not-allowed' : ''} [color-scheme:light] dark:[color-scheme:dark]`}
-                      />
-                    </div>
+                    <label className="text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest ml-1">Check In Time</label>
+                    <input 
+                      type="time" 
+                      value={convert12to24(formData.checkIn)} 
+                      onChange={(e) => setFormData({...formData, checkIn: convert24to12(e.target.value)})}
+                      disabled={formData.type !== 'STANDARD' && !editingRecord}
+                      className={`w-full h-10 px-4 bg-slate-50 dark:bg-slate-900 border border-slate-400 dark:border-slate-600 rounded-lg text-[13px] font-semibold text-slate-900 dark:text-white outline-none focus:border-blue-500 transition-all ${(formData.type !== 'STANDARD' && !editingRecord) ? 'opacity-50 cursor-not-allowed' : ''} [color-scheme:light] dark:[color-scheme:dark]`}
+                    />
                   </div>
                   <div className="space-y-1.5">
-                    <label className="text-[10px] font-black text-slate-600 dark:text-slate-300 uppercase tracking-widest ml-1">Check Out</label>
-                    <div className="relative">
-                      <input 
-                        type="time" 
-                        value={convert12to24(formData.checkOut)} 
-                        onChange={(e) => setFormData({...formData, checkOut: convert24to12(e.target.value)})}
-                        disabled={formData.type !== 'STANDARD' && !editingRecord}
-                        className={`w-full h-10 px-4 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-full text-[13px] font-bold text-slate-900 dark:text-white outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10 transition-all ${(formData.type !== 'STANDARD' && !editingRecord) ? 'opacity-50 cursor-not-allowed' : ''} [color-scheme:light] dark:[color-scheme:dark]`}
-                      />
-                    </div>
+                    <label className="text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest ml-1">Check Out Time</label>
+                    <input 
+                      type="time" 
+                      value={convert12to24(formData.checkOut)} 
+                      onChange={(e) => setFormData({...formData, checkOut: convert24to12(e.target.value)})}
+                      disabled={formData.type !== 'STANDARD' && !editingRecord}
+                      className={`w-full h-10 px-4 bg-slate-50 dark:bg-slate-900 border border-slate-400 dark:border-slate-600 rounded-lg text-[13px] font-semibold text-slate-900 dark:text-white outline-none focus:border-blue-500 transition-all ${(formData.type !== 'STANDARD' && !editingRecord) ? 'opacity-50 cursor-not-allowed' : ''} [color-scheme:light] dark:[color-scheme:dark]`}
+                    />
                   </div>
                 </div>
               )}
               
-              {formData.type === 'STANDARD' && formData.checkIn && (!formData.checkOut || formData.checkOut === '-') && (
-                <div className="flex items-center gap-2 p-3 bg-rose-50 dark:bg-rose-900/20 border border-rose-200 dark:border-rose-800 rounded-xl text-rose-600 dark:text-rose-400 animate-in fade-in slide-in-from-top-1">
-                  <AlertTriangle size={16} />
-                  <span className="text-[11px] font-black uppercase tracking-tight">Out Missing Signal: Check-out entry is missing!</span>
-                </div>
-              )}
+              <div className="space-y-3">
+                {formData.type === 'STANDARD' && formData.checkIn && (!formData.checkOut || formData.checkOut === '-') && (
+                  <div className="flex items-center gap-2 p-3 bg-rose-50 dark:bg-rose-900/20 border border-rose-200 dark:border-rose-800 rounded-xl text-rose-600 dark:text-rose-400 animate-in fade-in slide-in-from-top-1">
+                    <AlertTriangle size={16} />
+                    <span className="text-[11px] font-black uppercase tracking-tight">OUT MISSING DETECTED!</span>
+                  </div>
+                )}
 
-              {formData.type === 'STANDARD' && isTiffinTime(formData.checkOut) && (
-                <div className="flex items-center gap-2 p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl text-amber-600 dark:text-amber-400 animate-in fade-in slide-in-from-top-1">
-                  <UtensilsCrossed size={16} />
-                  <span className="text-[11px] font-black uppercase tracking-tight">Tiffin Eligible: Late stay detected (7:00 PM+)</span>
-                </div>
-              )}
+                {formData.type === 'STANDARD' && isTiffinTime(formData.checkOut) && (
+                  <div className="flex items-center justify-between p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl animate-in fade-in slide-in-from-top-1">
+                    <div className="flex items-center gap-2 text-amber-600 dark:text-amber-400">
+                      <UtensilsCrossed size={16} />
+                      <span className="text-[11px] font-black uppercase tracking-tight">TIFFIN ELIGIBLE (7:00 PM+)</span>
+                    </div>
+                    <VerifiedBadge />
+                  </div>
+                )}
+              </div>
 
               <button 
                 onClick={handleSave}
                 disabled={formData.type !== 'STANDARD' && formData.multiDates.length === 0 && !editingRecord}
-                className="w-full h-12 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-2xl font-black text-[14px] shadow-xl shadow-blue-500/20 transition-all active:scale-[0.97] mt-2 uppercase tracking-widest flex items-center justify-center gap-2"
+                className="w-full h-12 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white rounded-xl font-black text-[14px] uppercase shadow-lg shadow-blue-600/20 flex items-center justify-center gap-2 transition-all active:scale-[0.98]"
               >
-                <Save size={18} /> {editingRecord ? 'Update Attendance' : 'Save Attendance'}
+                <Save size={18} /> {editingRecord ? 'Update Record' : 'Save Attendance'}
               </button>
             </div>
           </div>
@@ -703,14 +716,26 @@ const AttendanceView: React.FC<AttendanceViewProps> = ({ activitiesList, setActi
       )}
 
       {isDeleteModalOpen && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-md animate-in fade-in">
-          <div className="bg-white dark:bg-[#1e293b] w-full max-w-[280px] rounded-[24px] p-8 text-center shadow-2xl border border-slate-200 dark:border-slate-700/50">
-            <div className="w-14 h-14 bg-rose-100 text-rose-600 dark:bg-rose-900/30 rounded-2xl flex items-center justify-center mx-auto mb-5 shadow-inner"><AlertTriangle size={28} /></div>
-            <h2 className="text-[15px] font-black text-slate-900 dark:text-white mb-1.5 uppercase tracking-tight">Confirm Removal?</h2>
-            <p className="text-[12px] text-slate-500 dark:text-slate-400 mb-6 font-bold tracking-tight">This record will be deleted.</p>
-            <div className="flex gap-3">
-              <button onClick={handleDelete} className="flex-1 py-3 bg-rose-600 text-white rounded-xl text-[12px] font-black uppercase hover:bg-rose-700 transition-colors">Delete</button>
-              <button onClick={() => setIsDeleteModalOpen(false)} className="flex-1 py-3 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-xl text-[12px] font-black uppercase hover:bg-slate-200 transition-colors">Back</button>
+        <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-md animate-in fade-in duration-300">
+          <div className="bg-white dark:bg-[#1e293b] w-full max-w-[300px] rounded-[24px] p-8 text-center shadow-2xl border border-slate-200 dark:border-slate-800 animate-in zoom-in-95 duration-200">
+            <div className="w-16 h-16 bg-rose-100 text-rose-600 dark:bg-rose-900/30 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-inner">
+              <AlertTriangle size={32} />
+            </div>
+            <h2 className="text-[16px] font-black text-slate-900 dark:text-white mb-2 uppercase tracking-tight">Confirm Removal?</h2>
+            <p className="text-[12px] text-slate-500 dark:text-slate-400 mb-8 font-bold tracking-tight">This entry will be permanently deleted from your attendance log.</p>
+            <div className="flex gap-4">
+              <button 
+                onClick={handleDelete} 
+                className="flex-1 py-3.5 bg-rose-600 text-white rounded-xl text-[12px] font-black uppercase shadow-lg shadow-rose-600/20 hover:bg-rose-700 transition-all active:scale-95"
+              >
+                Delete
+              </button>
+              <button 
+                onClick={() => setIsDeleteModalOpen(false)} 
+                className="flex-1 py-3.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-xl text-[12px] font-black uppercase hover:bg-slate-200 transition-all active:scale-95"
+              >
+                Cancel
+              </button>
             </div>
           </div>
         </div>

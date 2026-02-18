@@ -13,7 +13,8 @@ import {
   Trash2,
   AlertTriangle,
   History,
-  TrendingUp
+  TrendingUp,
+  Check
 } from 'lucide-react';
 import { LeaveType, LeaveRecord } from './types';
 
@@ -197,6 +198,13 @@ const LeaveInfoView: React.FC<LeaveInfoViewProps> = ({
   const approvedLeaves = filteredHistory.filter(r => r.status === 'Approved');
   const pendingLeaves = filteredHistory.filter(r => r.status === 'Pending' || r.status === 'Rejected');
 
+  // Helper component for the green dashed circle with white tick
+  const VerifiedBadge = () => (
+    <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center justify-center w-5 h-5 bg-emerald-600 rounded-full border border-dashed border-emerald-300 shadow-sm transition-transform hover:scale-110">
+      <Check size={10} strokeWidth={4} className="text-white" />
+    </div>
+  );
+
   const renderHistoryTable = (data: LeaveRecord[], title: string, colorClass: string) => (
     <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm overflow-hidden flex flex-col h-full">
       <div className={`p-4 border-b border-${colorClass}-100 dark:border-${colorClass}-800/30 bg-${colorClass}-50/50 dark:bg-${colorClass}-900/10 flex items-center justify-between transition-colors`}>
@@ -332,16 +340,16 @@ const LeaveInfoView: React.FC<LeaveInfoViewProps> = ({
         {renderHistoryTable(pendingLeaves, `Pending/Rejected (${selectedYear})`, "amber")}
       </div>
 
-      <button onClick={() => setIsApplyModalOpen(true)} className="fixed bottom-8 right-8 w-14 h-14 bg-purple-600 hover:bg-purple-700 text-white rounded-2xl shadow-xl flex items-center justify-center z-40 transition-all hover:scale-110 active:scale-95 group">
+      <button onClick={() => setIsApplyModalOpen(true)} className="fixed bottom-8 right-8 w-14 h-14 bg-purple-600 hover:bg-purple-700 text-white rounded-2xl shadow-xl flex items-center justify-center z-40 transition-all hover:scale-110 active:scale-95 group shadow-purple-600/20">
         <Plus size={28} className="group-hover:rotate-90 transition-transform duration-300" />
       </button>
 
       {isSummaryModalOpen && (
         <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-slate-950/40 backdrop-blur-md animate-in fade-in">
-          <div className="bg-white dark:bg-slate-900 w-full max-w-[500px] rounded-[32px] overflow-hidden shadow-2xl border border-slate-200 dark:border-slate-800 animate-in zoom-in-95 duration-200">
-            <div className="flex items-center justify-between px-8 py-6 border-b border-slate-50 dark:border-slate-800 bg-indigo-50/50 dark:bg-indigo-900/10">
+          <div className="bg-white dark:bg-[#1e293b] w-full max-w-[500px] rounded-[32px] overflow-hidden shadow-2xl border border-slate-300 dark:border-slate-700 animate-in zoom-in-95 duration-200">
+            <div className="flex items-center justify-between px-8 py-6 border-b border-slate-100 dark:border-slate-700/50">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-indigo-600 text-white rounded-2xl flex items-center justify-center shadow-lg shadow-indigo-600/20">
+                <div className="w-10 h-10 bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 rounded-2xl flex items-center justify-center shadow-inner">
                   <History size={20} />
                 </div>
                 <div>
@@ -349,7 +357,7 @@ const LeaveInfoView: React.FC<LeaveInfoViewProps> = ({
                   <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1.5">Historical usage breakdown</p>
                 </div>
               </div>
-              <button onClick={() => setIsSummaryModalOpen(false)} className="w-10 h-10 flex items-center justify-center bg-white dark:bg-slate-800 text-slate-400 hover:text-rose-500 rounded-xl transition-all border border-slate-100 dark:border-slate-700 shadow-sm"><X size={20} /></button>
+              <button onClick={() => setIsSummaryModalOpen(false)} className="p-1.5 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors"><X size={20} /></button>
             </div>
             
             <div className="p-8 max-h-[60vh] overflow-y-auto custom-scrollbar">
@@ -398,45 +406,67 @@ const LeaveInfoView: React.FC<LeaveInfoViewProps> = ({
       )}
 
       {isQuotaModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/40 backdrop-blur-md animate-in fade-in">
-          <div className="bg-white dark:bg-slate-900 w-full max-w-[320px] rounded-[24px] overflow-hidden shadow-2xl border border-slate-200 dark:border-slate-800 animate-in zoom-in-95 duration-200">
-            <div className="flex items-center justify-between px-6 py-4 border-b border-slate-50 dark:border-slate-800">
-              <h2 className="text-[15px] font-black text-slate-900 dark:text-white uppercase tracking-tight">Edit Leave Quotas</h2>
-              <button onClick={() => setIsQuotaModalOpen(false)} className="text-slate-400 hover:text-rose-500 transition-colors"><X size={18} /></button>
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-950/40 backdrop-blur-md animate-in fade-in">
+          <div className="bg-white dark:bg-[#1e293b] w-full max-w-[320px] rounded-[24px] overflow-hidden shadow-[0_25px_50px_-12px_rgba(0,0,0,0.5)] border border-slate-300 dark:border-slate-700 animate-in zoom-in-95 duration-200">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 dark:border-slate-700/50">
+              <div className="flex items-center gap-2">
+                <Pencil size={18} className="text-blue-600" />
+                <h2 className="text-[17px] font-black text-slate-900 dark:text-white tracking-tight uppercase">Edit Quotas</h2>
+              </div>
+              <button onClick={() => setIsQuotaModalOpen(false)} className="p-1.5 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors"><X size={20} /></button>
             </div>
-            <div className="p-6 space-y-4">
+            <div className="p-6 space-y-5">
               {['casual', 'medical', 'annual'].map((type) => (
                 <div key={type} className="space-y-1.5">
-                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">{type} Leave Limit</label>
-                  <input type="number" value={(editFormData as any)[type]} onChange={(e) => setEditFormData({...editFormData, [type]: parseInt(e.target.value) || 0})} className="w-full h-10 px-4 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-[13px] font-bold text-slate-900 dark:text-white outline-none focus:border-purple-500 transition-all" />
+                  <label className="text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest ml-1">{type} Leave Limit</label>
+                  <input 
+                    type="number" 
+                    value={(editFormData as any)[type]} 
+                    onChange={(e) => setEditFormData({...editFormData, [type]: parseInt(e.target.value) || 0})} 
+                    className="w-full h-10 px-4 bg-slate-50 dark:bg-slate-900 border border-slate-400 dark:border-slate-600 rounded-lg text-[13px] font-semibold text-slate-900 dark:text-white outline-none focus:border-blue-500 transition-all shadow-sm" 
+                  />
                 </div>
               ))}
-              <button onClick={handleSaveQuotas} className="w-full h-11 bg-purple-600 hover:bg-purple-700 text-white rounded-xl font-black text-[12px] uppercase shadow-lg shadow-purple-600/20 flex items-center justify-center gap-2 transition-all active:scale-95 mt-2"><Save size={14} />Save Changes</button>
+              <button onClick={handleSaveQuotas} className="w-full h-12 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-black text-[14px] uppercase shadow-lg shadow-blue-600/20 flex items-center justify-center gap-2 transition-all active:scale-[0.98] mt-2">
+                <Save size={18} />
+                Save Changes
+              </button>
             </div>
           </div>
         </div>
       )}
 
       {(isApplyModalOpen || isEditRecordModalOpen) && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/40 backdrop-blur-md animate-in fade-in">
-          <div className="bg-white dark:bg-slate-900 w-full max-w-[380px] rounded-[24px] overflow-hidden shadow-2xl border border-slate-200 dark:border-slate-800 animate-in zoom-in-95 duration-200">
-            <div className="flex items-center justify-between px-6 py-4 border-b border-slate-50 dark:border-slate-800">
-              <h2 className="text-[16px] font-black text-slate-900 dark:text-white uppercase tracking-tight">{isEditRecordModalOpen ? 'Update Record' : 'Apply for Leave'}</h2>
-              <button onClick={() => { setIsApplyModalOpen(false); setIsEditRecordModalOpen(false); setEditingRecord(null); }} className="text-slate-400 hover:text-rose-500 transition-colors"><X size={18} /></button>
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-950/40 backdrop-blur-md animate-in fade-in">
+          <div className="bg-white dark:bg-[#1e293b] w-full max-w-[420px] rounded-[24px] overflow-hidden shadow-[0_25px_50px_-12px_rgba(0,0,0,0.5)] border border-slate-300 dark:border-slate-700 animate-in zoom-in-95 duration-200">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 dark:border-slate-700/50">
+              <div className="flex items-center gap-2">
+                {isEditRecordModalOpen ? <Pencil size={18} className="text-blue-600" /> : <Plus size={18} className="text-emerald-600" />}
+                <h2 className="text-[17px] font-black text-slate-900 dark:text-white tracking-tight uppercase">{isEditRecordModalOpen ? 'Update Record' : 'Apply for Leave'}</h2>
+              </div>
+              <button onClick={() => { setIsApplyModalOpen(false); setIsEditRecordModalOpen(false); setEditingRecord(null); }} className="p-1.5 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors"><X size={20} /></button>
             </div>
-            <div className="p-6 space-y-4">
+            <div className="p-6 space-y-5">
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1.5">
-                  <label className="text-[10px] font-black text-slate-500 uppercase ml-1">Leave Type</label>
-                  <select value={applyFormData.typeId} onChange={(e) => setApplyFormData({...applyFormData, typeId: e.target.value})} className="w-full h-11 px-4 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-[13px] font-bold text-slate-900 dark:text-white outline-none focus:border-purple-500 transition-all cursor-pointer">
+                  <label className="text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest ml-1">Leave Type</label>
+                  <select 
+                    value={applyFormData.typeId} 
+                    onChange={(e) => setApplyFormData({...applyFormData, typeId: e.target.value})} 
+                    className="w-full h-10 px-4 bg-slate-50 dark:bg-slate-900 border border-slate-400 dark:border-slate-600 rounded-lg text-[13px] font-semibold text-slate-900 dark:text-white outline-none focus:border-blue-500 transition-all shadow-sm appearance-none cursor-pointer"
+                  >
                     <option value="casual">Casual Leave</option>
                     <option value="medical">Medical Leave</option>
                     <option value="annual">Annual Leave</option>
                   </select>
                 </div>
                 <div className="space-y-1.5">
-                  <label className="text-[10px] font-black text-slate-500 uppercase ml-1">Status</label>
-                  <select value={applyFormData.status} onChange={(e) => setApplyFormData({...applyFormData, status: e.target.value as any})} className="w-full h-11 px-4 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-[13px] font-bold text-slate-900 dark:text-white outline-none focus:border-purple-500 transition-all cursor-pointer">
+                  <label className="text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest ml-1">Status</label>
+                  <select 
+                    value={applyFormData.status} 
+                    onChange={(e) => setApplyFormData({...applyFormData, status: e.target.value as any})} 
+                    className="w-full h-10 px-4 bg-slate-50 dark:bg-slate-900 border border-slate-400 dark:border-slate-600 rounded-lg text-[13px] font-semibold text-slate-900 dark:text-white outline-none focus:border-blue-500 transition-all shadow-sm appearance-none cursor-pointer"
+                  >
                     <option value="Approved">Approved</option>
                     <option value="Pending">Pending</option>
                   </select>
@@ -444,21 +474,52 @@ const LeaveInfoView: React.FC<LeaveInfoViewProps> = ({
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1.5">
-                  <label className="text-[10px] font-black text-slate-500 uppercase ml-1">Start Date</label>
-                  <input type="date" value={applyFormData.startDate} onChange={(e) => setApplyFormData({...applyFormData, startDate: e.target.value})} className="w-full h-11 px-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-[12px] font-bold text-slate-900 dark:text-white outline-none focus:border-purple-500 transition-all [color-scheme:light] dark:[color-scheme:dark]" />
+                  <label className="text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest ml-1">Start Date</label>
+                  <input 
+                    type="date" 
+                    value={applyFormData.startDate} 
+                    onChange={(e) => setApplyFormData({...applyFormData, startDate: e.target.value})} 
+                    className="w-full h-10 px-4 bg-slate-50 dark:bg-slate-900 border border-slate-400 dark:border-slate-600 rounded-lg text-[12px] font-semibold text-slate-900 dark:text-white outline-none focus:border-blue-500 transition-all shadow-sm [color-scheme:light] dark:[color-scheme:dark]" 
+                  />
                 </div>
                 <div className="space-y-1.5">
-                  <label className="text-[10px] font-black text-slate-500 uppercase ml-1">End Date</label>
-                  <input type="date" value={applyFormData.endDate} onChange={(e) => setApplyFormData({...applyFormData, endDate: e.target.value})} className="w-full h-11 px-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-[12px] font-bold text-slate-900 dark:text-white outline-none focus:border-purple-500 transition-all [color-scheme:light] dark:[color-scheme:dark]" />
+                  <label className="text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest ml-1">End Date</label>
+                  <input 
+                    type="date" 
+                    value={applyFormData.endDate} 
+                    onChange={(e) => setApplyFormData({...applyFormData, endDate: e.target.value})} 
+                    className="w-full h-10 px-4 bg-slate-50 dark:bg-slate-900 border border-slate-400 dark:border-slate-600 rounded-lg text-[12px] font-semibold text-slate-900 dark:text-white outline-none focus:border-blue-500 transition-all shadow-sm [color-scheme:light] dark:[color-scheme:dark]" 
+                  />
                 </div>
               </div>
               <div className="space-y-1.5">
-                <label className="text-[10px] font-black text-slate-500 uppercase ml-1">Reason</label>
-                <textarea value={applyFormData.reason} onChange={(e) => setApplyFormData({...applyFormData, reason: e.target.value})} rows={3} placeholder="Briefly explain..." className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-[13px] font-bold text-slate-900 dark:text-white outline-none focus:border-purple-500 transition-all resize-none" />
+                <label className="text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest ml-1">Detailed Reason</label>
+                <textarea 
+                  value={applyFormData.reason} 
+                  onChange={(e) => setApplyFormData({...applyFormData, reason: e.target.value})} 
+                  rows={3} 
+                  placeholder="Briefly explain the purpose..." 
+                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900 border border-slate-400 dark:border-slate-600 rounded-lg text-[13px] font-semibold text-slate-900 dark:text-white outline-none focus:border-blue-500 transition-all shadow-sm resize-none" 
+                />
               </div>
-              <button onClick={isEditRecordModalOpen ? handleUpdateHistoryRecord : handleApplyLeave} disabled={!applyFormData.startDate || !applyFormData.endDate} className="w-full h-12 bg-purple-600 hover:bg-purple-700 disabled:opacity-50 text-white rounded-xl font-black text-[13px] uppercase shadow-lg transition-all active:scale-95 mt-2 flex items-center justify-center gap-2">
-                {isEditRecordModalOpen ? <Save size={16} /> : <Send size={16} />}
-                {isEditRecordModalOpen ? 'Update' : 'Submit'}
+
+              {applyFormData.startDate && applyFormData.endDate && (
+                <div className="flex items-center justify-between p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl">
+                  <div className="flex items-center gap-2 text-blue-600 dark:text-blue-400">
+                    <CalendarDays size={16} />
+                    <span className="text-[11px] font-black uppercase tracking-tight">Total Duration: {calculateDays(applyFormData.startDate, applyFormData.endDate)} Days</span>
+                  </div>
+                  <VerifiedBadge />
+                </div>
+              )}
+
+              <button 
+                onClick={isEditRecordModalOpen ? handleUpdateHistoryRecord : handleApplyLeave} 
+                disabled={!applyFormData.startDate || !applyFormData.endDate} 
+                className="w-full h-12 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white rounded-xl font-black text-[14px] uppercase shadow-lg shadow-blue-600/20 flex items-center justify-center gap-2 transition-all active:scale-[0.98] mt-2"
+              >
+                {isEditRecordModalOpen ? <Save size={18} /> : <Send size={18} />}
+                {isEditRecordModalOpen ? 'Update Record' : 'Submit Application'}
               </button>
             </div>
           </div>
@@ -466,14 +527,26 @@ const LeaveInfoView: React.FC<LeaveInfoViewProps> = ({
       )}
 
       {isDeleteConfirmOpen && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-slate-950/40 backdrop-blur-md animate-in fade-in">
-          <div className="bg-white dark:bg-[#1e293b] w-full max-w-[280px] rounded-[24px] p-8 text-center shadow-2xl border border-slate-200 dark:border-slate-700/50 animate-in zoom-in-95 duration-200">
-            <div className="w-14 h-14 bg-rose-100 text-rose-600 dark:bg-rose-900/30 rounded-2xl flex items-center justify-center mx-auto mb-5 shadow-inner"><AlertTriangle size={28} /></div>
-            <h2 className="text-[15px] font-black text-slate-900 dark:text-white mb-1.5 uppercase tracking-tight">Remove Record?</h2>
-            <p className="text-[12px] text-slate-500 dark:text-slate-400 mb-8 font-bold tracking-tight">This will permanently delete the selected leave record and restore balance for {selectedYear}.</p>
-            <div className="flex gap-3">
-              <button onClick={confirmDelete} className="flex-1 py-3 bg-rose-600 text-white rounded-xl text-[12px] font-black uppercase hover:bg-rose-700 transition-colors">Delete</button>
-              <button onClick={() => { setIsDeleteConfirmOpen(false); setRecordToDelete(null); }} className="flex-1 py-3 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-xl text-[12px] font-black uppercase hover:bg-slate-200 transition-colors">Back</button>
+        <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-md animate-in fade-in duration-300">
+          <div className="bg-white dark:bg-[#1e293b] w-full max-w-[300px] rounded-[24px] p-8 text-center shadow-2xl border border-slate-200 dark:border-slate-800 animate-in zoom-in-95 duration-200">
+            <div className="w-16 h-16 bg-rose-100 text-rose-600 dark:bg-rose-900/30 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-inner">
+              <AlertTriangle size={32} />
+            </div>
+            <h2 className="text-[16px] font-black text-slate-900 dark:text-white mb-2 uppercase tracking-tight">Confirm Removal?</h2>
+            <p className="text-[12px] text-slate-500 dark:text-slate-400 mb-8 font-bold tracking-tight">This entry will be permanently deleted and your leave balance will be restored.</p>
+            <div className="flex gap-4">
+              <button 
+                onClick={confirmDelete} 
+                className="flex-1 py-3.5 bg-rose-600 text-white rounded-xl text-[12px] font-black uppercase shadow-lg shadow-rose-600/20 hover:bg-rose-700 transition-all active:scale-95"
+              >
+                Delete
+              </button>
+              <button 
+                onClick={() => { setIsDeleteConfirmOpen(false); setRecordToDelete(null); }} 
+                className="flex-1 py-3.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-xl text-[12px] font-black uppercase hover:bg-slate-200 transition-all active:scale-95"
+              >
+                Cancel
+              </button>
             </div>
           </div>
         </div>

@@ -13,7 +13,8 @@ import {
   TrendingUp,
   Calculator,
   Wallet,
-  Filter
+  Filter,
+  Check
 } from 'lucide-react';
 import { SavingsGoal, SavingsRecord, Transaction } from './types';
 
@@ -307,6 +308,13 @@ const SavingsInfoView: React.FC<SavingsInfoViewProps> = ({
     return result.trim();
   };
 
+  // Helper component for the green dashed circle with white tick
+  const VerifiedBadge = () => (
+    <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center justify-center w-5 h-5 bg-emerald-600 rounded-full border border-dashed border-emerald-300 shadow-sm transition-transform hover:scale-110">
+      <Check size={10} strokeWidth={4} className="text-white" />
+    </div>
+  );
+
   return (
     <div className="space-y-8 pb-24 animate-in fade-in duration-500">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -588,64 +596,68 @@ const SavingsInfoView: React.FC<SavingsInfoViewProps> = ({
 
       {isGoalModalOpen && (
         <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-slate-950/40 backdrop-blur-md animate-in fade-in">
-          <div className="bg-white dark:bg-slate-900 w-full max-w-[440px] rounded-[32px] overflow-hidden shadow-2xl border border-slate-200 dark:border-slate-800 animate-in zoom-in-95">
-            <div className="flex items-center justify-between px-8 py-6 border-b border-slate-50 dark:border-slate-800">
-              <h2 className="text-[18px] font-black text-slate-900 dark:text-white uppercase tracking-tight">{editingGoal ? 'Configure Asset' : 'New Asset Account'}</h2>
-              <button onClick={() => setIsGoalModalOpen(false)} className="text-slate-400 hover:text-rose-500 transition-colors"><X size={20} /></button>
+          <div className="bg-white dark:bg-[#1e293b] w-full max-w-[420px] rounded-[24px] overflow-hidden shadow-2xl border border-slate-300 dark:border-slate-700 animate-in zoom-in-95 duration-200">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 dark:border-slate-700/50">
+              <div className="flex items-center gap-2">
+                <Plus size={18} className="text-blue-600" />
+                <h2 className="text-[17px] font-black text-slate-900 dark:text-white tracking-tight uppercase">{editingGoal ? 'Configure Asset' : 'New Asset Account'}</h2>
+              </div>
+              <button onClick={() => setIsGoalModalOpen(false)} className="p-1.5 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors"><X size={20} /></button>
             </div>
-            <div className="p-8 space-y-6">
+            
+            <div className="p-6 space-y-6">
               <div className="grid grid-cols-[1fr_80px] gap-4">
                 <div className="space-y-1.5">
-                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Bank Name</label>
+                  <label className="text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest ml-1">Account/Bank Name</label>
                   <input 
                     type="text" 
                     value={goalForm.name} 
                     onChange={(e) => setGoalForm({...goalForm, name: e.target.value})} 
-                    placeholder="e.g. Dutch Bangla Savings" 
-                    className="w-full h-10 px-4 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl text-[13px] font-medium text-slate-900 dark:text-white outline-none focus:border-indigo-500 transition-all shadow-sm" 
+                    placeholder="e.g. DBBL Savings" 
+                    className="w-full h-10 px-4 bg-slate-50 dark:bg-slate-900 border border-slate-400 dark:border-slate-600 rounded-lg text-[13px] font-semibold text-slate-900 dark:text-white outline-none focus:border-blue-500 transition-all shadow-sm" 
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1 text-center">Color</label>
+                  <label className="text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest ml-1 text-center">Theme</label>
                   <div className="relative h-10">
                     <input type="color" value={goalForm.color} onChange={(e) => setGoalForm({...goalForm, color: e.target.value})} className="absolute inset-0 w-full h-full bg-transparent border-none outline-none cursor-pointer p-0 opacity-0 z-10" />
-                    <div className="w-full h-full rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm transition-transform active:scale-95" style={{ backgroundColor: goalForm.color }} />
+                    <div className="w-full h-full rounded-lg border border-slate-400 dark:border-slate-600 shadow-sm transition-transform active:scale-95" style={{ backgroundColor: goalForm.color }} />
                   </div>
                 </div>
               </div>
 
               <div className="grid grid-cols-[1.5fr_0.8fr_1fr] gap-3">
                 <div className="space-y-1.5">
-                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Monthly Deposit</label>
+                  <label className="text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest ml-1">Monthly Deposit</label>
                   <input 
                     type="number" 
                     value={goalForm.monthlyDeposit} 
                     onChange={(e) => setGoalForm({...goalForm, monthlyDeposit: e.target.value})} 
                     placeholder="0" 
-                    className="w-full h-10 px-4 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl text-[13px] font-medium text-slate-900 dark:text-white outline-none focus:border-indigo-500 transition-all shadow-sm" 
+                    className="w-full h-10 px-4 bg-slate-50 dark:bg-slate-900 border border-slate-400 dark:border-slate-600 rounded-lg text-[13px] font-semibold text-slate-900 dark:text-white outline-none focus:border-blue-500 transition-all shadow-sm" 
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1 text-center">Year</label>
+                  <label className="text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest ml-1 text-center">Period (Y)</label>
                   <input 
                     type="number" 
                     step="1" 
                     value={goalForm.years} 
                     onChange={(e) => setGoalForm({...goalForm, years: e.target.value})} 
                     placeholder="10" 
-                    className="w-full h-10 px-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl text-[13px] font-medium text-slate-900 dark:text-white outline-none focus:border-indigo-500 transition-all shadow-sm" 
+                    className="w-full h-10 px-3 bg-slate-50 dark:bg-slate-900 border border-slate-400 dark:border-slate-600 rounded-lg text-[13px] font-semibold text-slate-900 dark:text-white outline-none focus:border-blue-500 transition-all shadow-sm" 
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1 text-center">Profit %</label>
+                  <label className="text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest ml-1 text-center">Profit %</label>
                   <div className="relative">
                     <input 
                       type="number" 
                       step="0.01" 
                       value={goalForm.profitPercent} 
                       onChange={(e) => setGoalForm({...goalForm, profitPercent: e.target.value})} 
-                      placeholder="9.48" 
-                      className="w-full h-10 pl-4 pr-8 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl text-[13px] font-medium text-slate-900 dark:text-white outline-none focus:border-indigo-500 transition-all shadow-sm" 
+                      placeholder="9.4" 
+                      className="w-full h-10 pl-4 pr-8 bg-slate-50 dark:bg-slate-900 border border-slate-400 dark:border-slate-600 rounded-lg text-[13px] font-semibold text-slate-900 dark:text-white outline-none focus:border-blue-500 transition-all shadow-sm" 
                     />
                     <div className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400"><Percent size={12} /></div>
                   </div>
@@ -654,32 +666,38 @@ const SavingsInfoView: React.FC<SavingsInfoViewProps> = ({
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1.5">
-                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Target Total (৳)</label>
-                  <input 
-                    type="number" 
-                    value={goalForm.targetAmount} 
-                    readOnly
-                    placeholder="-"
-                    className="w-full h-10 px-4 bg-indigo-50/30 dark:bg-indigo-900/10 border border-indigo-100 dark:border-indigo-800/50 rounded-2xl text-[13px] font-medium text-indigo-700 dark:text-indigo-400 outline-none cursor-default shadow-sm" 
-                  />
+                  <label className="text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest ml-1">Target Total (Auto)</label>
+                  <div className="relative">
+                    <input 
+                      type="number" 
+                      value={goalForm.targetAmount} 
+                      readOnly
+                      placeholder="-"
+                      className="w-full h-10 px-4 bg-slate-200 dark:bg-black/40 border border-slate-400 dark:border-slate-600 rounded-lg text-[13px] font-semibold text-slate-900 dark:text-white outline-none cursor-default shadow-sm" 
+                    />
+                    <VerifiedBadge />
+                  </div>
                 </div>
                 <div className="space-y-1.5">
-                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Maturity (Est.)</label>
-                  <input 
-                    type="number" 
-                    value={goalForm.maturityValue} 
-                    readOnly 
-                    placeholder="-" 
-                    className="w-full h-10 px-4 bg-emerald-50/30 dark:bg-emerald-900/10 border border-emerald-100 dark:border-emerald-800/50 rounded-2xl text-[13px] font-medium text-emerald-700 dark:text-emerald-400 outline-none cursor-default shadow-sm" 
-                  />
+                  <label className="text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest ml-1">Maturity (Auto)</label>
+                  <div className="relative">
+                    <input 
+                      type="number" 
+                      value={goalForm.maturityValue} 
+                      readOnly 
+                      placeholder="-" 
+                      className="w-full h-10 px-4 bg-slate-200 dark:bg-black/40 border border-slate-400 dark:border-slate-600 rounded-lg text-[13px] font-semibold text-slate-900 dark:text-white outline-none cursor-default shadow-sm" 
+                    />
+                    <VerifiedBadge />
+                  </div>
                 </div>
               </div>
 
               <button 
                 onClick={handleSaveGoal} 
-                className={`w-full h-12 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl font-black text-[14px] uppercase shadow-xl shadow-indigo-600/30 transition-all active:scale-[0.98] mt-4 flex items-center justify-center gap-2 ${(!goalForm.name || !goalForm.monthlyDeposit) ? 'opacity-50 cursor-not-allowed' : ''}`}
+                className={`w-full h-12 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-black text-[14px] uppercase shadow-lg shadow-blue-600/30 transition-all active:scale-[0.98] mt-4 flex items-center justify-center gap-2 ${(!goalForm.name || !goalForm.monthlyDeposit) ? 'opacity-50 cursor-not-allowed' : ''}`}
               >
-                <Save size={18} /> {editingGoal ? 'Confirm Update' : 'Initialize Asset'}
+                <Save size={18} /> {editingGoal ? 'Update Asset' : 'Initialize Asset'}
               </button>
             </div>
           </div>
@@ -688,34 +706,38 @@ const SavingsInfoView: React.FC<SavingsInfoViewProps> = ({
 
       {isRecordModalOpen && (
         <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-slate-950/40 backdrop-blur-md animate-in fade-in">
-          <div className="bg-white dark:bg-slate-900 w-full max-w-[380px] rounded-[32px] overflow-hidden shadow-2xl border border-slate-200 dark:border-slate-800 animate-in zoom-in-95">
-            <div className="flex items-center justify-between px-8 py-6 border-b border-slate-50 dark:border-slate-800">
-              <h2 className="text-[18px] font-black text-slate-900 dark:text-white uppercase tracking-tight">{editingRecord ? 'Update Record' : 'Record Deposit'}</h2>
-              <button onClick={() => { setIsRecordModalOpen(false); setEditingRecord(null); }} className="text-slate-400 hover:text-rose-500 transition-colors"><X size={20} /></button>
+          <div className="bg-white dark:bg-[#1e293b] w-full max-w-[420px] rounded-[24px] overflow-hidden shadow-2xl border border-slate-300 dark:border-slate-700 animate-in zoom-in-95 duration-200">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 dark:border-slate-700/50">
+              <div className="flex items-center gap-2">
+                <Plus size={18} className="text-emerald-600" />
+                <h2 className="text-[17px] font-black text-slate-900 dark:text-white tracking-tight uppercase">{editingRecord ? 'Update Record' : 'Record Deposit'}</h2>
+              </div>
+              <button onClick={() => { setIsRecordModalOpen(false); setEditingRecord(null); }} className="p-1.5 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors"><X size={20} /></button>
             </div>
-            <div className="p-8 space-y-5">
+            
+            <div className="p-6 space-y-5">
               <div className="space-y-1.5">
-                <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Destination Account</label>
-                <select value={recordForm.goalId} onChange={(e) => setRecordForm({...recordForm, goalId: e.target.value})} className="w-full h-10 px-4 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl text-[13px] font-bold text-slate-900 dark:text-white outline-none cursor-pointer">
+                <label className="text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest ml-1">Destination Asset Account</label>
+                <select value={recordForm.goalId} onChange={(e) => setRecordForm({...recordForm, goalId: e.target.value})} className="w-full h-10 px-4 bg-slate-50 dark:bg-slate-900 border border-slate-400 dark:border-slate-600 rounded-lg text-[13px] font-semibold text-slate-900 dark:text-white outline-none cursor-pointer shadow-sm">
                   <option value="">Select Account</option>
                   {goals.map(g => <option key={g.id} value={g.id}>{g.name}</option>)}
                 </select>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1.5">
-                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Deposit (৳)</label>
-                  <input type="number" value={recordForm.amount} onChange={(e) => setRecordForm({...recordForm, amount: e.target.value})} placeholder="5,000" className="w-full h-10 px-4 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl text-[13px] font-black text-slate-900 dark:text-white outline-none focus:border-indigo-500 transition-all" />
+                  <label className="text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest ml-1">Deposit Amount (৳)</label>
+                  <input type="number" value={recordForm.amount} onChange={(e) => setRecordForm({...recordForm, amount: e.target.value})} placeholder="5,000" className="w-full h-10 px-4 bg-emerald-50 dark:bg-emerald-900/10 border border-emerald-400 dark:border-emerald-600 rounded-lg text-[13px] font-semibold text-emerald-800 dark:text-emerald-400 outline-none focus:border-emerald-500 transition-all shadow-sm" />
                 </div>
                 <div className="space-y-1.5">
-                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Date Paid</label>
-                  <input type="date" value={recordForm.date} onChange={(e) => setRecordForm({...recordForm, date: e.target.value})} className="w-full h-10 px-4 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl text-[12px] font-bold text-slate-900 dark:text-white outline-none focus:border-indigo-500 transition-all [color-scheme:light] dark:[color-scheme:dark]" />
+                  <label className="text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest ml-1">Payment Date</label>
+                  <input type="date" value={recordForm.date} onChange={(e) => setRecordForm({...recordForm, date: e.target.value})} className="w-full h-10 px-4 bg-slate-50 dark:bg-slate-900 border border-slate-400 dark:border-slate-600 rounded-lg text-[12px] font-semibold text-slate-900 dark:text-white outline-none focus:border-blue-500 transition-all shadow-sm [color-scheme:light] dark:[color-scheme:dark]" />
                 </div>
               </div>
               <div className="space-y-1.5">
-                <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Transaction Note</label>
-                <input type="text" value={recordForm.note} onChange={(e) => setRecordForm({...recordForm, note: e.target.value})} placeholder="e.g. Feb installment" className="w-full h-10 px-4 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl text-[13px] font-bold text-slate-900 dark:text-white outline-none focus:border-indigo-500 transition-all" />
+                <label className="text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest ml-1">Short Description/Note</label>
+                <input type="text" value={recordForm.note} onChange={(e) => setRecordForm({...recordForm, note: e.target.value})} placeholder="e.g. Month: Feb 2026" className="w-full h-10 px-4 bg-slate-50 dark:bg-slate-900 border border-slate-400 dark:border-slate-600 rounded-lg text-[13px] font-semibold text-slate-900 dark:text-white outline-none focus:border-blue-500 transition-all shadow-sm" />
               </div>
-              <button onClick={handleSaveRecord} className="w-full h-12 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl font-black text-[14px] uppercase shadow-xl shadow-emerald-600/20 transition-all active:scale-[0.98] mt-4 flex items-center justify-center gap-2">
+              <button onClick={handleSaveRecord} className="w-full h-12 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-black text-[14px] uppercase shadow-lg shadow-emerald-600/20 transition-all active:scale-[0.98] mt-4 flex items-center justify-center gap-2">
                 {editingRecord ? <Save size={18} /> : <Plus size={18} />} 
                 {editingRecord ? 'Update Transaction' : 'Record Deposit'}
               </button>

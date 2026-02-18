@@ -9,7 +9,8 @@ import {
   Save, 
   Trash2, 
   Pencil,
-  AlertTriangle 
+  AlertTriangle,
+  Check
 } from 'lucide-react';
 import { BillRecord, Transaction } from './types';
 
@@ -263,34 +264,57 @@ const BillInfoView: React.FC<BillInfoViewProps> = ({
 
       {isModalOpen && (
         <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-slate-950/40 backdrop-blur-md animate-in fade-in">
-          <div className="bg-white dark:bg-slate-900 w-full max-w-[380px] rounded-[32px] overflow-hidden shadow-2xl border border-slate-200 dark:border-slate-800 animate-in zoom-in-95">
-            <div className="flex items-center justify-between px-8 py-6 border-b border-slate-50 dark:border-slate-800">
-              <h2 className="text-[18px] font-black text-slate-900 dark:text-white uppercase tracking-tight">{editingBill ? 'Edit Bill Payment' : 'Record Bill Payment'}</h2>
-              <button onClick={() => { setIsModalOpen(false); setEditingBill(null); }} className="text-slate-400 hover:text-rose-500 transition-colors"><X size={20} /></button>
+          <div className="bg-white dark:bg-[#1e293b] w-full max-w-[400px] rounded-[24px] overflow-hidden shadow-2xl border border-slate-300 dark:border-slate-700 animate-in zoom-in-95 duration-200">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 dark:border-slate-700/50">
+              <div className="flex items-center gap-2">
+                <Plus size={18} className="text-blue-600" />
+                <h2 className="text-[17px] font-black text-slate-900 dark:text-white tracking-tight uppercase">{editingBill ? 'Edit Bill Payment' : 'Record Bill Payment'}</h2>
+              </div>
+              <button onClick={() => { setIsModalOpen(false); setEditingBill(null); }} className="p-1.5 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors"><X size={20} /></button>
             </div>
-            <div className="p-8 space-y-5">
+            <div className="p-6 space-y-5">
               <div className="space-y-1.5">
-                <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Bill Category</label>
-                <div className="grid grid-cols-2 gap-2 bg-slate-50 dark:bg-slate-950 p-1 rounded-xl">
-                  <button onClick={() => setFormData({...formData, type: 'Electric'})} className={`py-2 text-[11px] font-black uppercase rounded-lg transition-all ${formData.type === 'Electric' ? 'bg-amber-500 text-white shadow-lg shadow-amber-500/30' : 'text-slate-500 hover:text-slate-700'}`}>Electric</button>
-                  <button onClick={() => setFormData({...formData, type: 'Wifi'})} className={`py-2 text-[11px] font-black uppercase rounded-lg transition-all ${formData.type === 'Wifi' ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/30' : 'text-slate-500 hover:text-slate-700'}`}>Wifi</button>
+                <label className="text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest ml-1">Bill Category</label>
+                <div className="grid grid-cols-2 gap-2 bg-slate-50 dark:bg-slate-950 p-1 rounded-xl shadow-inner border border-slate-200 dark:border-slate-800">
+                  <button onClick={() => setFormData({...formData, type: 'Electric'})} className={`py-1.5 text-[10px] font-black uppercase rounded-lg transition-all ${formData.type === 'Electric' ? 'bg-amber-500 text-white shadow-lg shadow-amber-500/30' : 'text-slate-500 hover:text-slate-700'}`}>Electric</button>
+                  <button onClick={() => setFormData({...formData, type: 'Wifi'})} className={`py-1.5 text-[10px] font-black uppercase rounded-lg transition-all ${formData.type === 'Wifi' ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/30' : 'text-slate-500 hover:text-slate-700'}`}>Wifi</button>
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1.5">
-                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Amount (৳)</label>
-                  <input type="number" value={formData.amount} onChange={(e) => setFormData({...formData, amount: e.target.value})} placeholder="0" className="w-full h-11 px-4 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl text-[14px] font-black text-slate-900 dark:text-white outline-none focus:border-indigo-500 transition-all" />
+                  <label className="text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest ml-1">Amount (৳)</label>
+                  <input 
+                    type="number" 
+                    value={formData.amount} 
+                    onChange={(e) => setFormData({...formData, amount: e.target.value})} 
+                    placeholder="0" 
+                    className="w-full h-10 px-4 bg-slate-50 dark:bg-slate-900 border border-slate-400 dark:border-slate-600 rounded-lg text-[13px] font-semibold text-slate-900 dark:text-white outline-none focus:border-indigo-500 transition-all shadow-sm" 
+                  />
                 </div>
                 <div className="space-y-1.5">
-                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Payment Date</label>
-                  <input type="date" value={formData.date} onChange={(e) => setFormData({...formData, date: e.target.value})} className="w-full h-11 px-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl text-[12px] font-bold text-slate-900 dark:text-white outline-none focus:border-indigo-500 transition-all [color-scheme:light] dark:[color-scheme:dark]" />
+                  <label className="text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest ml-1">Payment Date</label>
+                  <input 
+                    type="date" 
+                    value={formData.date} 
+                    onChange={(e) => setFormData({...formData, date: e.target.value})} 
+                    className="w-full h-10 px-3 bg-slate-50 dark:bg-slate-900 border border-slate-400 dark:border-slate-600 rounded-lg text-[12px] font-semibold text-slate-900 dark:text-white outline-none focus:border-indigo-500 transition-all shadow-sm [color-scheme:light] dark:[color-scheme:dark]" 
+                  />
                 </div>
               </div>
               <div className="space-y-1.5">
-                <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Transaction Note</label>
-                <input type="text" value={formData.note} onChange={(e) => setFormData({...formData, note: e.target.value})} placeholder="e.g. Month: March" className="w-full h-11 px-4 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl text-[13px] font-bold text-slate-900 dark:text-white outline-none focus:border-indigo-500 transition-all" />
+                <label className="text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest ml-1">Transaction Note</label>
+                <input 
+                  type="text" 
+                  value={formData.note} 
+                  onChange={(e) => setFormData({...formData, note: e.target.value})} 
+                  placeholder="e.g. Month: March" 
+                  className="w-full h-10 px-4 bg-slate-50 dark:bg-slate-900 border border-slate-400 dark:border-slate-600 rounded-lg text-[13px] font-semibold text-slate-900 dark:text-white outline-none focus:border-indigo-500 transition-all shadow-sm" 
+                />
               </div>
-              <button onClick={handleSaveBill} className="w-full h-12 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl font-black text-[14px] uppercase shadow-xl shadow-indigo-600/20 transition-all active:scale-[0.98] mt-4 flex items-center justify-center gap-2">
+              <button 
+                onClick={handleSaveBill} 
+                className="w-full h-12 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-black text-[14px] uppercase shadow-xl shadow-indigo-600/20 transition-all active:scale-[0.98] mt-4 flex items-center justify-center gap-2"
+              >
                 <Save size={18} /> {editingBill ? 'Update Record' : 'Save Record'}
               </button>
             </div>
@@ -314,7 +338,7 @@ const BillInfoView: React.FC<BillInfoViewProps> = ({
 
       <button 
         onClick={() => { setEditingBill(null); setFormData({ type: 'Electric', amount: '', date: new Date().toISOString().split('T')[0], note: '' }); setIsModalOpen(true); }}
-        className="fixed bottom-8 right-8 w-14 h-14 bg-blue-600 hover:bg-blue-700 text-white rounded-full shadow-2xl flex items-center justify-center z-40 transition-all hover:scale-110 active:scale-95 group shadow-blue-600/40"
+        className="fixed bottom-8 right-8 w-14 h-14 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl shadow-xl flex items-center justify-center z-40 transition-all hover:scale-110 active:scale-95 group shadow-indigo-600/30"
       >
         <Plus size={32} className="group-hover:rotate-90 transition-transform duration-300" />
       </button>

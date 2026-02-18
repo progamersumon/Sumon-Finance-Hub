@@ -379,70 +379,73 @@ const RemindersView: React.FC<RemindersViewProps> = ({ language, reminders, setR
 
       {isModalOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-950/40 backdrop-blur-md animate-in fade-in duration-300">
-          <div className="bg-white dark:bg-slate-900 w-full max-w-[400px] rounded-[40px] p-8 shadow-2xl border border-slate-200 dark:border-slate-800 animate-in zoom-in-95 duration-200">
-            <div className="flex items-center justify-between mb-8">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 rounded-2xl flex items-center justify-center shadow-inner">
-                  <BellRing size={20} />
-                </div>
-                <h2 className="text-[18px] font-black text-slate-900 dark:text-white uppercase tracking-tight">{editingReminder ? t.save : t.addReminder}</h2>
+          <div className="bg-white dark:bg-[#1e293b] w-full max-w-[420px] rounded-[24px] overflow-hidden shadow-[0_25px_50px_-12px_rgba(0,0,0,0.5)] border border-slate-300 dark:border-slate-700 animate-in zoom-in-95 duration-200">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 dark:border-slate-700/50">
+              <div className="flex items-center gap-2">
+                <Plus size={18} className="text-blue-600" />
+                <h2 className="text-[17px] font-black text-slate-900 dark:text-white tracking-tight uppercase">{editingReminder ? t.save : t.addReminder}</h2>
               </div>
               <button 
                 onClick={() => setIsModalOpen(false)} 
-                className="w-11 h-11 bg-rose-500 text-white hover:bg-rose-600 rounded-2xl flex items-center justify-center transition-all shadow-lg shadow-rose-500/20 active:scale-90 border-2 border-white dark:border-slate-800"
+                className="p-1.5 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors"
               >
-                <X size={24} strokeWidth={3} />
+                <X size={20} />
               </button>
             </div>
-            <div className="space-y-5">
+            <div className="p-6 space-y-6">
               <div className="space-y-1.5">
-                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">{t.title}</label>
+                <label className="text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest ml-1">{t.title}</label>
                 <input 
                   type="text" 
                   value={formData.title}
                   onChange={(e) => setFormData({...formData, title: e.target.value})}
-                  className="w-full h-12 px-5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-[13px] font-bold text-slate-900 dark:text-white outline-none focus:border-purple-600 focus:ring-2 focus:ring-purple-500/10 transition-all shadow-sm"
+                  className="w-full h-10 px-4 bg-slate-50 dark:bg-slate-900 border border-slate-400 dark:border-slate-600 rounded-lg text-[13px] font-semibold text-slate-900 dark:text-white outline-none focus:border-indigo-500 transition-all shadow-sm placeholder:text-slate-300"
                   placeholder="e.g. Salary Payment"
                 />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1.5">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">{t.date}</label>
+                  <label className="text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest ml-1">{t.date}</label>
                   <input 
                     type="date" 
                     value={formData.date}
                     onChange={(e) => setFormData({...formData, date: e.target.value})}
-                    className="w-full h-12 px-4 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-[12px] font-bold text-slate-900 dark:text-white outline-none focus:border-purple-600 transition-all shadow-sm [color-scheme:light] dark:[color-scheme:dark]"
+                    className="w-full h-10 px-4 bg-slate-50 dark:bg-slate-900 border border-slate-400 dark:border-slate-600 rounded-lg text-[12px] font-semibold text-slate-900 dark:text-white outline-none focus:border-indigo-500 transition-all shadow-sm [color-scheme:light] dark:[color-scheme:dark]"
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">{t.priority}</label>
-                  <select 
-                    value={formData.priority}
-                    onChange={(e) => setFormData({...formData, priority: e.target.value as any})}
-                    className="w-full h-12 px-4 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-[12px] font-bold text-slate-900 dark:text-white outline-none focus:border-purple-600 transition-all shadow-sm cursor-pointer appearance-none"
-                  >
-                    <option value="high">{language === 'বাংলা' ? 'উচ্চ' : 'High'}</option>
-                    <option value="medium">{language === 'বাংলা' ? 'মাঝারি' : 'Medium'}</option>
-                    <option value="low">{language === 'বাংলা' ? 'নিম্ন' : 'Low'}</option>
-                  </select>
+                  <label className="text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest ml-1">{t.priority}</label>
+                  <div className="relative">
+                    <select 
+                      value={formData.priority}
+                      onChange={(e) => setFormData({...formData, priority: e.target.value as any})}
+                      className="w-full h-10 px-4 bg-slate-50 dark:bg-slate-900 border border-slate-400 dark:border-slate-600 rounded-lg text-[12px] font-semibold text-slate-900 dark:text-white outline-none focus:border-indigo-500 transition-all shadow-sm appearance-none cursor-pointer"
+                    >
+                      <option value="high">{language === 'বাংলা' ? 'উচ্চ' : 'High'}</option>
+                      <option value="medium">{language === 'বাংলা' ? 'মাঝারি' : 'Medium'}</option>
+                      <option value="low">{language === 'বাংলা' ? 'নিম্ন' : 'Low'}</option>
+                    </select>
+                    <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
+                      <Plus size={14} className="rotate-45" />
+                    </div>
+                  </div>
                 </div>
               </div>
               <div className="space-y-1.5">
-                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">{t.note}</label>
+                <label className="text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest ml-1">{t.note}</label>
                 <textarea 
                   value={formData.note}
                   onChange={(e) => setFormData({...formData, note: e.target.value})}
                   rows={3}
-                  className="w-full px-5 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-[12px] font-bold text-slate-900 dark:text-white outline-none focus:border-purple-600 transition-all shadow-sm resize-none"
+                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900 border border-slate-400 dark:border-slate-600 rounded-lg text-[12px] font-semibold text-slate-900 dark:text-white outline-none focus:border-indigo-500 transition-all shadow-sm resize-none"
                   placeholder="Optional details..."
                 />
               </div>
               <button 
                 onClick={handleSave}
-                className="w-full h-14 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl font-black text-[13px] uppercase tracking-widest shadow-2xl shadow-indigo-600/30 transition-all active:scale-[0.98] mt-4 flex items-center justify-center gap-3"
+                className="w-full h-12 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-black text-[14px] uppercase shadow-lg shadow-indigo-600/20 transition-all active:scale-[0.98] mt-4 flex items-center justify-center gap-3"
               >
-                <Save size={20} /> {t.save}
+                <Save size={18} /> {t.save}
               </button>
             </div>
           </div>
@@ -451,31 +454,33 @@ const RemindersView: React.FC<RemindersViewProps> = ({ language, reminders, setR
 
       {isBulkModalOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-950/40 backdrop-blur-md animate-in fade-in duration-300">
-          <div className="bg-white dark:bg-slate-900 w-full max-w-[550px] rounded-[40px] p-8 shadow-2xl border border-slate-200 dark:border-slate-800 animate-in zoom-in-95 duration-200 max-h-[90vh] overflow-y-auto custom-scrollbar">
-            <div className="flex items-center justify-between mb-6">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 rounded-2xl flex items-center justify-center shadow-inner">
-                  <FileSpreadsheet size={20} />
-                </div>
-                <div>
-                  <h2 className="text-[18px] font-black text-slate-900 dark:text-white uppercase tracking-tight">{t.bulkTitle}</h2>
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none mt-1">Paste rows from Sheet/Excel (Max: 20)</p>
-                </div>
+          <div className="bg-white dark:bg-[#1e293b] w-full max-w-[500px] rounded-[24px] overflow-hidden shadow-2xl border border-slate-300 dark:border-slate-700 animate-in zoom-in-95 duration-200">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 dark:border-slate-700/50">
+              <div className="flex items-center gap-2">
+                <FileSpreadsheet size={18} className="text-emerald-600" />
+                <h2 className="text-[17px] font-black text-slate-900 dark:text-white uppercase tracking-tight tracking-tight">{t.bulkTitle}</h2>
               </div>
-              <button onClick={() => setIsBulkModalOpen(false)} className="w-11 h-11 bg-rose-500 text-white hover:bg-rose-600 rounded-2xl flex items-center justify-center shadow-lg active:scale-90 border-2 border-white dark:border-slate-800"><X size={24} strokeWidth={3} /></button>
+              <button onClick={() => setIsBulkModalOpen(false)} className="p-1.5 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors"><X size={20} /></button>
             </div>
-            <div className="space-y-6">
-              <div className="p-4 bg-indigo-50 dark:bg-indigo-950/20 border border-indigo-100 dark:border-indigo-900/30 rounded-2xl flex items-start gap-3">
-                <AlertCircle size={18} className="text-indigo-600 shrink-0 mt-0.5" />
+            <div className="p-6 space-y-6">
+              <div className="p-3 bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-100 dark:border-indigo-800/30 rounded-xl flex items-start gap-3">
+                <AlertCircle size={16} className="text-indigo-600 shrink-0 mt-0.5" />
                 <div className="space-y-1">
                   <p className="text-[11px] font-black text-indigo-700 dark:text-indigo-300 leading-tight uppercase tracking-tight">
-                    {language === 'English' ? 'Format: Column A = Date, Column B = Title, Column C = Priority' : 'ফরম্যাট: কলাম এ = তারিখ, কলাম বি = টাইটেল, কলাম সি = গুরুত্ব'}
+                    {language === 'English' ? 'Format: Date [Tab] Title [Tab] Priority' : 'ফরম্যাট: ডেট [ট্যাব] টাইটেল [ট্যাব] প্রায়োরিটি'}
                   </p>
-                  <p className="text-[10px] font-bold text-indigo-600 dark:text-indigo-400 opacity-80 uppercase tracking-widest">{t.validPriority}</p>
                 </div>
               </div>
-              <textarea value={bulkInput} onChange={(e) => setBulkInput(e.target.value)} placeholder={t.bulkPlaceholder} className="w-full h-[140px] px-6 py-5 bg-slate-50 dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 rounded-[32px] text-[13px] font-bold text-slate-900 dark:text-white outline-none focus:border-purple-600 transition-all shadow-inner resize-none" />
-              <button onClick={handleBulkImport} disabled={bulkPreview.length === 0} className="w-full h-14 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white rounded-2xl font-black text-[13px] uppercase shadow-2xl transition-all active:scale-[0.98] flex items-center justify-center gap-3"><Upload size={20} /> {t.import} ({bulkPreview.length})</button>
+              <div className="space-y-1.5">
+                <label className="text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest ml-1">Spreadsheet Data Input</label>
+                <textarea 
+                  value={bulkInput} 
+                  onChange={(e) => setBulkInput(e.target.value)} 
+                  placeholder={t.bulkPlaceholder} 
+                  className="w-full h-32 px-4 py-3 bg-slate-50 dark:bg-slate-900 border border-slate-400 dark:border-slate-600 rounded-lg text-[13px] font-semibold text-slate-900 dark:text-white outline-none focus:border-emerald-500 transition-all shadow-sm resize-none" 
+                />
+              </div>
+              <button onClick={handleBulkImport} disabled={bulkPreview.length === 0} className="w-full h-12 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white rounded-xl font-black text-[14px] uppercase shadow-lg shadow-emerald-600/20 transition-all active:scale-[0.98] flex items-center justify-center gap-3"><Upload size={18} /> {t.import} ({bulkPreview.length})</button>
             </div>
           </div>
         </div>
@@ -483,7 +488,7 @@ const RemindersView: React.FC<RemindersViewProps> = ({ language, reminders, setR
 
       {isDeleteModalOpen && (
         <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-md animate-in fade-in duration-300">
-          <div className="bg-white dark:bg-slate-900 w-full max-w-[320px] rounded-[32px] p-8 text-center shadow-2xl border border-slate-200 dark:border-slate-800 animate-in zoom-in-95 duration-200">
+          <div className="bg-white dark:bg-[#1e293b] w-full max-w-[300px] rounded-[32px] p-8 text-center shadow-2xl border border-slate-200 dark:border-slate-800 animate-in zoom-in-95 duration-200">
             <div className="w-16 h-16 bg-rose-100 text-rose-600 dark:bg-rose-900/30 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-inner"><AlertTriangle size={32} /></div>
             <h2 className="text-[18px] font-black text-slate-900 dark:text-white mb-2 uppercase tracking-tight">{t.confirmDelete}</h2>
             <p className="text-[12px] text-slate-500 dark:text-slate-400 mb-8 font-bold leading-relaxed">{t.deleteMsg}</p>
