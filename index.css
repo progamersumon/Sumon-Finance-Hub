@@ -39,8 +39,8 @@
 input[type="date"]::-webkit-calendar-picker-indicator,
 input[type="time"]::-webkit-calendar-picker-indicator {
   @apply cursor-pointer transition-transform duration-200 hover:scale-110 active:scale-90;
-  width: 18px;
-  height: 18px;
+  width: 14px;
+  height: 14px;
   margin-left: 5px;
 }
 
