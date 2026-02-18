@@ -262,22 +262,22 @@ const PaySlipSection: React.FC<PaySlipProps> = ({ profileData, setProfileData })
                   <div className="flex-1 grid grid-cols-2 gap-3">
                     <div className="space-y-1">
                       <label className="text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest ml-1">Full Name</label>
-                      <input type="text" value={tempData.name} onChange={(e) => setTempData({...tempData, name: e.target.value})} className="w-full h-10 px-4 bg-slate-50 dark:bg-slate-900 border border-slate-400 dark:border-slate-600 rounded-lg text-[13px] font-semibold text-slate-900 dark:text-white outline-none focus:border-blue-500 transition-all shadow-sm" />
+                      <input type="text" value={tempData.name} onChange={(e) => setTempData({...tempData, name: e.target.value})} className="w-full h-10 px-4 bg-slate-50 dark:bg-slate-900 border border-slate-400 dark:border-slate-600 rounded-xl text-[13px] font-semibold text-slate-900 dark:text-white outline-none focus:border-blue-500 transition-all shadow-sm" />
                     </div>
                     <div className="space-y-1">
                       <label className="text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest ml-1">Designation</label>
-                      <input type="text" value={tempData.role} onChange={(e) => setTempData({...tempData, role: e.target.value})} className="w-full h-10 px-4 bg-slate-50 dark:bg-slate-900 border border-slate-400 dark:border-slate-600 rounded-lg text-[13px] font-semibold text-slate-900 dark:text-white outline-none focus:border-blue-500 transition-all shadow-sm" />
+                      <input type="text" value={tempData.role} onChange={(e) => setTempData({...tempData, role: e.target.value})} className="w-full h-10 px-4 bg-slate-50 dark:bg-slate-900 border border-slate-400 dark:border-slate-600 rounded-xl text-[13px] font-semibold text-slate-900 dark:text-white outline-none focus:border-blue-500 transition-all shadow-sm" />
                     </div>
                   </div>
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-1">
                     <label className="text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest ml-1">Department</label>
-                    <input type="text" value={tempData.department} onChange={(e) => setTempData({...tempData, department: e.target.value})} className="w-full h-10 px-4 bg-slate-50 dark:bg-slate-900 border border-slate-400 dark:border-slate-600 rounded-lg text-[13px] font-semibold text-slate-900 dark:text-white outline-none focus:border-blue-500 transition-all shadow-sm" />
+                    <input type="text" value={tempData.department} onChange={(e) => setTempData({...tempData, department: e.target.value})} className="w-full h-10 px-4 bg-slate-50 dark:bg-slate-900 border border-slate-400 dark:border-slate-600 rounded-xl text-[13px] font-semibold text-slate-900 dark:text-white outline-none focus:border-blue-500 transition-all shadow-sm" />
                   </div>
                   <div className="space-y-1">
                     <label className="text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest ml-1">Employee ID</label>
-                    <input type="text" value={tempData.employeeId} onChange={(e) => setTempData({...tempData, employeeId: e.target.value})} className="w-full h-10 px-4 bg-slate-50 dark:bg-slate-900 border border-slate-400 dark:border-slate-600 rounded-lg text-[13px] font-semibold text-slate-900 dark:text-white outline-none focus:border-blue-500 transition-all shadow-sm" />
+                    <input type="text" value={tempData.employeeId} onChange={(e) => setTempData({...tempData, employeeId: e.target.value})} className="w-full h-10 px-4 bg-slate-50 dark:bg-slate-900 border border-slate-400 dark:border-slate-600 rounded-xl text-[13px] font-semibold text-slate-900 dark:text-white outline-none focus:border-blue-500 transition-all shadow-sm" />
                   </div>
                 </div>
               </div>
@@ -289,41 +289,41 @@ const PaySlipSection: React.FC<PaySlipProps> = ({ profileData, setProfileData })
                 <div className="grid grid-cols-2 gap-x-4 gap-y-3">
                   <div className="space-y-1">
                     <label className="text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest ml-1">Gross Salary (৳)</label>
-                    <input type="number" value={tempData.grossSalary} onChange={(e) => handleNumericChange('grossSalary', e.target.value)} className="w-full h-10 px-4 bg-blue-50 dark:bg-blue-900/10 border border-blue-400 dark:border-blue-600 rounded-lg text-[13px] font-semibold text-blue-800 dark:text-blue-400 outline-none focus:border-blue-500 transition-all shadow-sm" />
+                    <input type="number" value={tempData.grossSalary} onChange={(e) => handleNumericChange('grossSalary', e.target.value)} className="w-full h-10 px-4 bg-blue-50 dark:bg-blue-900/10 border border-blue-400 dark:border-blue-600 rounded-xl text-[13px] font-semibold text-blue-800 dark:text-blue-400 outline-none focus:border-blue-500 transition-all shadow-sm" />
                   </div>
                   <div className="space-y-1">
                     <label className="text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest ml-1">Base Deduction (৳)</label>
-                    <input type="number" value={tempData.baseDeduction} onChange={(e) => handleNumericChange('baseDeduction', e.target.value)} className="w-full h-10 px-4 bg-slate-50 dark:bg-slate-900 border border-slate-400 dark:border-slate-600 rounded-lg text-[13px] font-semibold text-slate-900 dark:text-white outline-none focus:border-blue-500 transition-all shadow-sm" />
+                    <input type="number" value={tempData.baseDeduction} onChange={(e) => handleNumericChange('baseDeduction', e.target.value)} className="w-full h-10 px-4 bg-slate-50 dark:bg-slate-900 border border-slate-400 dark:border-slate-600 rounded-xl text-[13px] font-semibold text-slate-900 dark:text-white outline-none focus:border-blue-500 transition-all shadow-sm" />
                   </div>
                   <div className="space-y-1">
                     <label className="text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest ml-1">Basic Salary (Auto)</label>
                     <div className="relative">
-                      <input type="number" value={tempData.basicSalary} readOnly className="w-full h-10 px-4 pr-10 bg-slate-200 dark:bg-black/40 border border-slate-400 dark:border-slate-600 rounded-lg text-[13px] font-semibold text-slate-900 dark:text-white outline-none cursor-default shadow-sm" />
+                      <input type="number" value={tempData.basicSalary} readOnly className="w-full h-10 px-4 pr-10 bg-slate-200 dark:bg-black/40 border border-slate-400 dark:border-slate-600 rounded-xl text-[13px] font-semibold text-slate-900 dark:text-white outline-none cursor-default shadow-sm" />
                       <VerifiedBadge />
                     </div>
                   </div>
                   <div className="space-y-1">
                     <label className="text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest ml-1">House Rent (Auto)</label>
                     <div className="relative">
-                      <input type="number" value={tempData.basicSalary ? Math.round(tempData.basicSalary / 2) : 0} readOnly className="w-full h-10 px-4 pr-10 bg-slate-200 dark:bg-black/40 border border-slate-400 dark:border-slate-600 rounded-lg text-[13px] font-semibold text-slate-900 dark:text-white outline-none cursor-default shadow-sm" />
+                      <input type="number" value={tempData.basicSalary ? Math.round(tempData.basicSalary / 2) : 0} readOnly className="w-full h-10 px-4 pr-10 bg-slate-200 dark:bg-black/40 border border-slate-400 dark:border-slate-600 rounded-xl text-[13px] font-semibold text-slate-900 dark:text-white outline-none cursor-default shadow-sm" />
                       <VerifiedBadge />
                     </div>
                   </div>
                   <div className="space-y-1">
                     <label className="text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest ml-1">Medical (৳)</label>
-                    <input type="number" value={tempData.medical} onChange={(e) => handleNumericChange('medical', e.target.value)} className="w-full h-10 px-4 bg-slate-50 dark:bg-slate-900 border border-slate-400 dark:border-slate-600 rounded-lg text-[13px] font-semibold text-slate-900 dark:text-white outline-none focus:border-blue-500 transition-all shadow-sm" />
+                    <input type="number" value={tempData.medical} onChange={(e) => handleNumericChange('medical', e.target.value)} className="w-full h-10 px-4 bg-slate-50 dark:bg-slate-900 border border-slate-400 dark:border-slate-600 rounded-xl text-[13px] font-semibold text-slate-900 dark:text-white outline-none focus:border-blue-500 transition-all shadow-sm" />
                   </div>
                   <div className="space-y-1">
                     <label className="text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest ml-1">Conveyance (৳)</label>
-                    <input type="number" value={tempData.conveyance} onChange={(e) => handleNumericChange('conveyance', e.target.value)} className="w-full h-10 px-4 bg-slate-50 dark:bg-slate-900 border border-slate-400 dark:border-slate-600 rounded-lg text-[13px] font-semibold text-slate-900 dark:text-white outline-none focus:border-blue-500 transition-all shadow-sm" />
+                    <input type="number" value={tempData.conveyance} onChange={(e) => handleNumericChange('conveyance', e.target.value)} className="w-full h-10 px-4 bg-slate-50 dark:bg-slate-900 border border-slate-400 dark:border-slate-600 rounded-xl text-[13px] font-semibold text-slate-900 dark:text-white outline-none focus:border-blue-500 transition-all shadow-sm" />
                   </div>
                   <div className="space-y-1">
                     <label className="text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest ml-1">Food (৳)</label>
-                    <input type="number" value={tempData.food} onChange={(e) => handleNumericChange('food', e.target.value)} className="w-full h-10 px-4 bg-slate-50 dark:bg-slate-900 border border-slate-400 dark:border-slate-600 rounded-lg text-[13px] font-semibold text-slate-900 dark:text-white outline-none focus:border-blue-500 transition-all shadow-sm" />
+                    <input type="number" value={tempData.food} onChange={(e) => handleNumericChange('food', e.target.value)} className="w-full h-10 px-4 bg-slate-50 dark:bg-slate-900 border border-slate-400 dark:border-slate-600 rounded-xl text-[13px] font-semibold text-slate-900 dark:text-white outline-none focus:border-blue-500 transition-all shadow-sm" />
                   </div>
                   <div className="space-y-1">
                     <label className="text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest ml-1">Attendance Bonus (৳)</label>
-                    <input type="number" value={tempData.attendanceBonus} onChange={(e) => handleNumericChange('attendanceBonus', e.target.value)} className="w-full h-10 px-4 bg-slate-50 dark:bg-slate-900 border border-slate-400 dark:border-slate-600 rounded-lg text-[13px] font-semibold text-slate-900 dark:text-white outline-none focus:border-blue-500 transition-all shadow-sm" />
+                    <input type="number" value={tempData.attendanceBonus} onChange={(e) => handleNumericChange('attendanceBonus', e.target.value)} className="w-full h-10 px-4 bg-slate-50 dark:bg-slate-900 border border-slate-400 dark:border-slate-600 rounded-xl text-[13px] font-semibold text-slate-900 dark:text-white outline-none focus:border-blue-500 transition-all shadow-sm" />
                   </div>
                   <div className="space-y-1 col-span-2">
                     <div className="flex justify-between items-center mb-1">
@@ -333,11 +333,11 @@ const PaySlipSection: React.FC<PaySlipProps> = ({ profileData, setProfileData })
                     <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-1">
                         <label className="text-[8px] font-black text-slate-400 uppercase tracking-widest ml-1">Days</label>
-                        <input type="number" value={tempData.tiffinBillDays} placeholder="Days" onChange={(e) => handleNumericChange('tiffinBillDays', e.target.value)} className="w-full h-10 px-4 bg-slate-50 dark:bg-slate-900 border border-slate-400 dark:border-slate-600 rounded-lg text-[13px] font-semibold text-slate-900 dark:text-white outline-none focus:border-blue-500 transition-all shadow-sm" />
+                        <input type="number" value={tempData.tiffinBillDays} placeholder="Days" onChange={(e) => handleNumericChange('tiffinBillDays', e.target.value)} className="w-full h-10 px-4 bg-slate-50 dark:bg-slate-900 border border-slate-400 dark:border-slate-600 rounded-xl text-[13px] font-semibold text-slate-900 dark:text-white outline-none focus:border-blue-500 transition-all shadow-sm" />
                       </div>
                       <div className="space-y-1">
                         <label className="text-[8px] font-black text-slate-400 uppercase tracking-widest ml-1">Rate (৳)</label>
-                        <input type="number" value={tempData.tiffinRate} placeholder="Rate (৳)" onChange={(e) => handleNumericChange('tiffinRate', e.target.value)} className="w-full h-10 px-4 bg-slate-50 dark:bg-slate-900 border border-slate-400 dark:border-slate-600 rounded-lg text-[13px] font-semibold text-slate-900 dark:text-white outline-none focus:border-blue-500 transition-all shadow-sm" />
+                        <input type="number" value={tempData.tiffinRate} placeholder="Rate (৳)" onChange={(e) => handleNumericChange('tiffinRate', e.target.value)} className="w-full h-10 px-4 bg-slate-50 dark:bg-slate-900 border border-slate-400 dark:border-slate-600 rounded-xl text-[13px] font-semibold text-slate-900 dark:text-white outline-none focus:border-blue-500 transition-all shadow-sm" />
                       </div>
                     </div>
                   </div>
@@ -349,14 +349,14 @@ const PaySlipSection: React.FC<PaySlipProps> = ({ profileData, setProfileData })
                   <div className="space-y-1">
                     <label className="text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest ml-1">Yearly Bonus</label>
                     <div className="relative">
-                      <input type="number" value={tempData.yearlyBonus} readOnly className="w-full h-10 px-4 pr-10 bg-slate-200 dark:bg-black/40 border border-slate-400 dark:border-slate-600 rounded-lg text-[13px] font-semibold text-slate-900 dark:text-white outline-none cursor-default shadow-sm" />
+                      <input type="number" value={tempData.yearlyBonus} readOnly className="w-full h-10 px-4 pr-10 bg-slate-200 dark:bg-black/40 border border-slate-400 dark:border-slate-600 rounded-xl text-[13px] font-semibold text-slate-900 dark:text-white outline-none cursor-default shadow-sm" />
                       <VerifiedBadge />
                     </div>
                   </div>
                   <div className="space-y-1">
                     <label className="text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest ml-1">Eid Bonus</label>
                     <div className="relative">
-                      <input type="number" value={tempData.eidBonus} readOnly className="w-full h-10 px-4 pr-10 bg-slate-200 dark:bg-black/40 border border-slate-400 dark:border-slate-600 rounded-lg text-[13px] font-semibold text-slate-900 dark:text-white outline-none cursor-default shadow-sm" />
+                      <input type="number" value={tempData.eidBonus} readOnly className="w-full h-10 px-4 pr-10 bg-slate-200 dark:bg-black/40 border border-slate-400 dark:border-slate-600 rounded-xl text-[13px] font-semibold text-slate-900 dark:text-white outline-none cursor-default shadow-sm" />
                       <VerifiedBadge />
                     </div>
                   </div>
@@ -392,26 +392,21 @@ const SalarySection: React.FC<SalaryProps> = ({ profileBaseDeduction, history, s
 
   const sortedHistory = useMemo(() => {
     return [...history].sort((a, b) => {
-      // Primary sort: Year descending
       if (b.year !== a.year) return b.year - a.year;
-      // Secondary sort: ID ascending (to match the 1, 2, 3... sequence in code/images)
       return Number(a.id) - Number(b.id);
     });
   }, [history]);
 
   const joinSalary = useMemo(() => {
     if (history.length === 0) return 0;
-    // Oldest is the highest ID with the smallest year
     return [...history].sort((a, b) => a.year - b.year || Number(b.id) - Number(a.id))[0].total;
   }, [history]);
 
   const currentSalary = sortedHistory.length > 0 ? sortedHistory[0].total : 0;
 
   const calculations = useMemo(() => {
-    // Calc list must be in chronological order (Oldest to Newest)
     const listForCalc = [...history].sort((a, b) => {
       if (a.year !== b.year) return a.year - b.year;
-      // In chronological order, higher ID (like 4) comes before lower ID (like 3) in same year if 3 is newer
       return Number(b.id) - Number(a.id);
     });
     
@@ -427,7 +422,6 @@ const SalarySection: React.FC<SalaryProps> = ({ profileBaseDeduction, history, s
       const candidates = listForCalc.filter(h => h.year < yearVal);
       if (candidates.length > 0) previousTotal = candidates[candidates.length - 1].total;
       else if (listForCalc.length > 0) {
-        // Handle case for adding entry within existing years but newer than some
         const sameYearCandidates = listForCalc.filter(h => h.year === yearVal);
         if (sameYearCandidates.length > 0) previousTotal = sameYearCandidates[sameYearCandidates.length - 1].total;
       }
@@ -528,7 +522,7 @@ const SalarySection: React.FC<SalaryProps> = ({ profileBaseDeduction, history, s
                 <th className="px-6 py-2 text-[10px] font-black text-orange-800 dark:text-orange-400 uppercase tracking-wider">% Increase</th>
                 <th className="px-6 py-2 text-[10px] font-black text-orange-800 dark:text-orange-400 uppercase tracking-wider">Amount +</th>
                 <th className="px-6 py-2 text-[10px] font-black text-orange-800 dark:text-orange-400 uppercase tracking-wider">G.Total</th>
-                <th className="px-6 py-2 text-[10px) font-black text-orange-800 dark:text-orange-400 uppercase tracking-wider text-right">Actions</th>
+                <th className="px-6 py-2 text-[10px] font-black text-orange-800 dark:text-orange-400 uppercase tracking-wider text-right">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
@@ -566,7 +560,7 @@ const SalarySection: React.FC<SalaryProps> = ({ profileBaseDeduction, history, s
               <div className="space-y-1">
                 <label className="text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest ml-1">Previous Total (Auto)</label>
                 <div className="relative">
-                  <div className="w-full h-10 px-4 pr-10 bg-slate-200 dark:bg-black/30 border border-slate-400 dark:border-slate-600 rounded-lg text-[13px] font-semibold text-slate-900 dark:text-white flex items-center cursor-default shadow-sm">
+                  <div className="w-full h-10 px-4 pr-10 bg-slate-200 dark:bg-black/30 border border-slate-400 dark:border-slate-600 rounded-xl text-[13px] font-semibold text-slate-900 dark:text-white flex items-center cursor-default shadow-sm">
                     ৳ {calculations.previousTotal.toLocaleString()}
                   </div>
                   <VerifiedBadge />
@@ -576,7 +570,7 @@ const SalarySection: React.FC<SalaryProps> = ({ profileBaseDeduction, history, s
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1">
                   <label className="text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest ml-1">Effective Year</label>
-                  <input type="number" value={formData.year} onChange={(e) => setFormData({...formData, year: e.target.value})} className="w-full h-10 px-4 bg-slate-50 dark:bg-slate-900 border border-slate-400 dark:border-slate-600 rounded-lg text-[13px] font-semibold text-slate-900 dark:text-white outline-none focus:border-blue-500 transition-all shadow-sm" />
+                  <input type="number" value={formData.year} onChange={(e) => setFormData({...formData, year: e.target.value})} className="w-full h-10 px-4 bg-slate-50 dark:bg-slate-900 border border-slate-400 dark:border-slate-600 rounded-xl text-[13px] font-semibold text-slate-900 dark:text-white outline-none focus:border-blue-500 transition-all shadow-sm" />
                 </div>
                 <div className="space-y-1 group relative">
                   <div className="flex justify-between items-center mb-0.5">
@@ -587,7 +581,7 @@ const SalarySection: React.FC<SalaryProps> = ({ profileBaseDeduction, history, s
                       type="number" 
                       value={profileBaseDeduction} 
                       readOnly 
-                      className="w-full h-10 px-4 pr-10 bg-slate-200 dark:bg-black/40 border border-slate-400 dark:border-slate-600 rounded-lg text-[13px] font-semibold text-slate-900 dark:text-white outline-none cursor-default shadow-sm" 
+                      className="w-full h-10 px-4 pr-10 bg-slate-200 dark:bg-black/40 border border-slate-400 dark:border-slate-600 rounded-xl text-[13px] font-semibold text-slate-900 dark:text-white outline-none cursor-default shadow-sm" 
                     />
                     <VerifiedBadge />
                     <div className="absolute inset-0 bg-transparent" title="Value synced from Profile Settings" />
@@ -598,12 +592,12 @@ const SalarySection: React.FC<SalaryProps> = ({ profileBaseDeduction, history, s
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1">
                   <label className="text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest ml-1">% Increase</label>
-                  <input type="number" step="0.1" value={formData.inc} onChange={(e) => setFormData({...formData, inc: e.target.value})} className="w-full h-10 px-4 bg-emerald-50 dark:bg-emerald-900/10 border border-emerald-400 dark:border-emerald-600 rounded-lg text-[13px] font-semibold text-emerald-600 dark:text-emerald-400 outline-none focus:border-emerald-500 transition-all shadow-sm" />
+                  <input type="number" step="0.1" value={formData.inc} onChange={(e) => setFormData({...formData, inc: e.target.value})} className="w-full h-10 px-4 bg-emerald-50 dark:bg-emerald-900/10 border border-emerald-400 dark:border-emerald-600 rounded-xl text-[13px] font-semibold text-emerald-600 dark:text-emerald-400 outline-none focus:border-emerald-500 transition-all shadow-sm" />
                 </div>
                 <div className="space-y-1">
                   <label className="text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest ml-1">Amount + (Auto)</label>
                   <div className="relative">
-                    <div className="w-full h-10 px-4 pr-10 bg-slate-200 dark:bg-black/40 border border-slate-400 dark:border-slate-600 rounded-lg text-[13px] font-semibold text-emerald-600 flex items-center cursor-default shadow-sm">
+                    <div className="w-full h-10 px-4 pr-10 bg-slate-200 dark:bg-black/40 border border-slate-400 dark:border-slate-600 rounded-xl text-[13px] font-semibold text-emerald-600 flex items-center cursor-default shadow-sm">
                       ৳ {calculations.amt.toLocaleString()}
                     </div>
                     <VerifiedBadge />
@@ -614,7 +608,7 @@ const SalarySection: React.FC<SalaryProps> = ({ profileBaseDeduction, history, s
               <div className="space-y-1 pt-1">
                 <label className="text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest ml-1">Gross Total (Auto)</label>
                 <div className="relative">
-                  <div className="w-full h-12 px-4 pr-12 bg-blue-50 dark:bg-blue-900/20 border-2 border-blue-400 dark:border-blue-600 rounded-lg text-[18px] font-black text-blue-600 dark:text-blue-400 flex items-center shadow-sm">
+                  <div className="w-full h-12 px-4 pr-12 bg-blue-50 dark:bg-blue-900/20 border-2 border-blue-400 dark:border-blue-600 rounded-xl text-[18px] font-black text-blue-600 dark:text-blue-400 flex items-center shadow-sm">
                     ৳ {calculations.total.toLocaleString()}
                   </div>
                   <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center justify-center w-6 h-6 bg-emerald-600 rounded-full border-2 border-dashed border-white/50 shadow-sm">
@@ -646,7 +640,7 @@ const SalarySection: React.FC<SalaryProps> = ({ profileBaseDeduction, history, s
               </button>
               <button 
                 onClick={() => setIsDeleteModalOpen(false)} 
-                className="flex-1 py-3.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-xl text-[12px] font-black uppercase hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors active:scale-95"
+                className="flex-1 py-3.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-xl text-[12px] font-black uppercase hover:bg-slate-200 transition-all active:scale-95"
               >
                 Cancel
               </button>

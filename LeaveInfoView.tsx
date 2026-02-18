@@ -242,8 +242,8 @@ const LeaveInfoView: React.FC<LeaveInfoViewProps> = ({
                 </td>
                 <td className="px-4 py-3 text-right">
                   <div className="flex items-center justify-end gap-1.5">
-                    <button onClick={() => openEditHistory(record)} className="p-1.5 text-purple-600 bg-purple-50 dark:bg-purple-900/30 dark:text-purple-400 rounded-lg transition-all hover:bg-purple-600 hover:text-white border border-purple-100 dark:border-purple-800/50"><Pencil size={12} /></button>
-                    <button onClick={() => { setRecordToDelete(record.id); setIsDeleteConfirmOpen(true); }} className="p-1.5 text-rose-600 bg-rose-50 dark:bg-rose-900/30 dark:text-rose-400 rounded-lg transition-all hover:bg-rose-600 hover:text-white border border-rose-100 dark:border-rose-800/50"><Trash2 size={12} /></button>
+                    <button onClick={() => openEditHistory(record)} className="p-1.5 text-purple-600 bg-purple-50 dark:bg-purple-900/30 dark:text-purple-400 rounded-xl transition-all hover:bg-purple-600 hover:text-white border border-purple-100 dark:border-purple-800/50"><Pencil size={12} /></button>
+                    <button onClick={() => { setRecordToDelete(record.id); setIsDeleteConfirmOpen(true); }} className="p-1.5 text-rose-600 bg-rose-50 dark:bg-rose-900/30 dark:text-rose-400 rounded-xl transition-all hover:bg-rose-600 hover:text-white border border-rose-100 dark:border-rose-800/50"><Trash2 size={12} /></button>
                   </div>
                 </td>
               </tr>
@@ -269,12 +269,12 @@ const LeaveInfoView: React.FC<LeaveInfoViewProps> = ({
             <span className="text-[11px] font-black text-slate-500 uppercase tracking-tight">Data Period</span>
           </div>
           <div className="flex items-center gap-2">
-            <select value={selectedYear} onChange={(e) => setSelectedYear(e.target.value)} className="bg-slate-50 dark:bg-slate-800 rounded-lg px-2 py-1 text-[11px] font-bold text-slate-700 dark:text-white outline-none border border-slate-200 dark:border-slate-700 hover:border-purple-300 transition-colors min-w-[80px]">
+            <select value={selectedYear} onChange={(e) => setSelectedYear(e.target.value)} className="bg-slate-50 dark:bg-slate-800 rounded-xl px-3 py-1.5 text-[11px] font-bold text-slate-700 dark:text-white outline-none border border-slate-200 dark:border-slate-700 hover:border-purple-300 transition-colors min-w-[80px]">
               {availableYears.map(year => <option key={year} value={year}>{year}</option>)}
             </select>
             <button 
               onClick={() => setIsSummaryModalOpen(true)}
-              className="p-1.5 text-indigo-600 bg-indigo-50 dark:bg-indigo-900/30 dark:text-indigo-400 rounded-lg hover:bg-indigo-600 hover:text-white transition-all border border-indigo-100 dark:border-indigo-800/50 shadow-sm active:scale-95"
+              className="p-1.5 text-indigo-600 bg-indigo-50 dark:bg-indigo-900/30 dark:text-indigo-400 rounded-xl hover:bg-indigo-600 hover:text-white transition-all border border-indigo-100 dark:border-indigo-800/50 shadow-sm active:scale-95"
               title="Annual Summary"
             >
               <TrendingUp size={14} />
@@ -282,7 +282,7 @@ const LeaveInfoView: React.FC<LeaveInfoViewProps> = ({
           </div>
         </div>
         <div className="flex items-center">
-          <button onClick={handleOpenEditQuotas} className="flex items-center gap-2 px-4 py-1.5 bg-purple-50 dark:bg-purple-900/20 text-purple-600 dark:text-purple-400 border border-purple-200 dark:border-purple-800/50 rounded-lg text-[10px] font-black uppercase tracking-widest hover:bg-purple-600 hover:text-white transition-all active:scale-95 shadow-sm">
+          <button onClick={handleOpenEditQuotas} className="flex items-center gap-2 px-4 py-1.5 bg-purple-50 dark:bg-purple-900/20 text-purple-600 dark:text-purple-400 border border-purple-200 dark:border-purple-800/50 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-purple-600 hover:text-white transition-all active:scale-95 shadow-sm">
             <Pencil size={12} /> Edit Quotas
           </button>
         </div>
@@ -423,7 +423,7 @@ const LeaveInfoView: React.FC<LeaveInfoViewProps> = ({
                     type="number" 
                     value={(editFormData as any)[type]} 
                     onChange={(e) => setEditFormData({...editFormData, [type]: parseInt(e.target.value) || 0})} 
-                    className="w-full h-10 px-4 bg-slate-50 dark:bg-slate-900 border border-slate-400 dark:border-slate-600 rounded-lg text-[13px] font-semibold text-slate-900 dark:text-white outline-none focus:border-blue-500 transition-all shadow-sm" 
+                    className="w-full h-10 px-4 bg-slate-50 dark:bg-slate-900 border border-slate-400 dark:border-slate-600 rounded-xl text-[13px] font-semibold text-slate-900 dark:text-white outline-none focus:border-blue-500 transition-all shadow-sm" 
                   />
                 </div>
               ))}
@@ -453,7 +453,7 @@ const LeaveInfoView: React.FC<LeaveInfoViewProps> = ({
                   <select 
                     value={applyFormData.typeId} 
                     onChange={(e) => setApplyFormData({...applyFormData, typeId: e.target.value})} 
-                    className="w-full h-10 px-4 bg-slate-50 dark:bg-slate-900 border border-slate-400 dark:border-slate-600 rounded-lg text-[13px] font-semibold text-slate-900 dark:text-white outline-none focus:border-blue-500 transition-all shadow-sm appearance-none cursor-pointer"
+                    className="w-full h-10 px-4 bg-slate-50 dark:bg-slate-900 border border-slate-400 dark:border-slate-600 rounded-xl text-[13px] font-semibold text-slate-900 dark:text-white outline-none focus:border-blue-500 transition-all shadow-sm appearance-none cursor-pointer"
                   >
                     <option value="casual">Casual Leave</option>
                     <option value="medical">Medical Leave</option>
@@ -465,7 +465,7 @@ const LeaveInfoView: React.FC<LeaveInfoViewProps> = ({
                   <select 
                     value={applyFormData.status} 
                     onChange={(e) => setApplyFormData({...applyFormData, status: e.target.value as any})} 
-                    className="w-full h-10 px-4 bg-slate-50 dark:bg-slate-900 border border-slate-400 dark:border-slate-600 rounded-lg text-[13px] font-semibold text-slate-900 dark:text-white outline-none focus:border-blue-500 transition-all shadow-sm appearance-none cursor-pointer"
+                    className="w-full h-10 px-4 bg-slate-50 dark:bg-slate-900 border border-slate-400 dark:border-slate-600 rounded-xl text-[13px] font-semibold text-slate-900 dark:text-white outline-none focus:border-blue-500 transition-all shadow-sm appearance-none cursor-pointer"
                   >
                     <option value="Approved">Approved</option>
                     <option value="Pending">Pending</option>
@@ -479,7 +479,7 @@ const LeaveInfoView: React.FC<LeaveInfoViewProps> = ({
                     type="date" 
                     value={applyFormData.startDate} 
                     onChange={(e) => setApplyFormData({...applyFormData, startDate: e.target.value})} 
-                    className="w-full h-10 px-4 bg-slate-50 dark:bg-slate-900 border border-slate-400 dark:border-slate-600 rounded-lg text-[12px] font-semibold text-slate-900 dark:text-white outline-none focus:border-blue-500 transition-all shadow-sm [color-scheme:light] dark:[color-scheme:dark]" 
+                    className="w-full h-10 px-4 bg-slate-50 dark:bg-slate-900 border border-slate-400 dark:border-slate-600 rounded-xl text-[12px] font-semibold text-slate-900 dark:text-white outline-none focus:border-blue-500 transition-all shadow-sm [color-scheme:light] dark:[color-scheme:dark]" 
                   />
                 </div>
                 <div className="space-y-1.5">
@@ -488,7 +488,7 @@ const LeaveInfoView: React.FC<LeaveInfoViewProps> = ({
                     type="date" 
                     value={applyFormData.endDate} 
                     onChange={(e) => setApplyFormData({...applyFormData, endDate: e.target.value})} 
-                    className="w-full h-10 px-4 bg-slate-50 dark:bg-slate-900 border border-slate-400 dark:border-slate-600 rounded-lg text-[12px] font-semibold text-slate-900 dark:text-white outline-none focus:border-blue-500 transition-all shadow-sm [color-scheme:light] dark:[color-scheme:dark]" 
+                    className="w-full h-10 px-4 bg-slate-50 dark:bg-slate-900 border border-slate-400 dark:border-slate-600 rounded-xl text-[12px] font-semibold text-slate-900 dark:text-white outline-none focus:border-blue-500 transition-all shadow-sm [color-scheme:light] dark:[color-scheme:dark]" 
                   />
                 </div>
               </div>
@@ -499,7 +499,7 @@ const LeaveInfoView: React.FC<LeaveInfoViewProps> = ({
                   onChange={(e) => setApplyFormData({...applyFormData, reason: e.target.value})} 
                   rows={3} 
                   placeholder="Briefly explain the purpose..." 
-                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900 border border-slate-400 dark:border-slate-600 rounded-lg text-[13px] font-semibold text-slate-900 dark:text-white outline-none focus:border-blue-500 transition-all shadow-sm resize-none" 
+                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900 border border-slate-400 dark:border-slate-600 rounded-xl text-[13px] font-semibold text-slate-900 dark:text-white outline-none focus:border-blue-500 transition-all shadow-sm resize-none" 
                 />
               </div>
 

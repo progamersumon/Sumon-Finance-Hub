@@ -367,7 +367,7 @@ const AttendanceView: React.FC<AttendanceViewProps> = ({ activitiesList, setActi
           <select 
             value={selectedMonth} 
             onChange={(e) => setSelectedMonth(e.target.value)} 
-            className="bg-slate-50 dark:bg-slate-800 rounded-lg px-2 py-1 text-[11px] font-bold text-slate-700 dark:text-white outline-none border border-slate-200 dark:border-slate-700 hover:border-purple-300 transition-colors min-w-[100px]"
+            className="bg-slate-50 dark:bg-slate-800 rounded-xl px-3 py-1.5 text-[11px] font-bold text-slate-700 dark:text-white outline-none border border-slate-200 dark:border-slate-700 hover:border-purple-300 transition-colors min-w-[100px]"
           >
             <option value="all">All Months</option>
             {MONTH_OPTIONS.map(m => <option key={m.value} value={m.value}>{m.label}</option>)}
@@ -375,7 +375,7 @@ const AttendanceView: React.FC<AttendanceViewProps> = ({ activitiesList, setActi
           <select 
             value={selectedYear} 
             onChange={(e) => setSelectedYear(e.target.value)} 
-            className="bg-slate-50 dark:bg-slate-800 rounded-lg px-2 py-1 text-[11px] font-bold text-slate-700 dark:text-white outline-none border border-slate-200 dark:border-slate-700 hover:border-purple-300 transition-colors"
+            className="bg-slate-50 dark:bg-slate-800 rounded-xl px-3 py-1.5 text-[11px] font-bold text-slate-700 dark:text-white outline-none border border-slate-200 dark:border-slate-700 hover:border-purple-300 transition-colors"
           >
             {availableYears.map(year => <option key={year} value={year}>{year}</option>)}
           </select>
@@ -421,7 +421,7 @@ const AttendanceView: React.FC<AttendanceViewProps> = ({ activitiesList, setActi
             <div className="relative" ref={filterRef}>
               <button 
                 onClick={() => setIsFilterOpen(!isFilterOpen)}
-                className={`p-1.5 rounded-lg transition-all shadow-sm border ${
+                className={`p-1.5 rounded-xl transition-all shadow-sm border ${
                   statusFilter !== 'All' 
                   ? 'bg-indigo-600 text-white border-indigo-700' 
                   : 'bg-white dark:bg-slate-800 border-indigo-100 dark:border-indigo-900/30 text-indigo-500 hover:bg-indigo-600 hover:text-white'
@@ -439,7 +439,7 @@ const AttendanceView: React.FC<AttendanceViewProps> = ({ activitiesList, setActi
                         setStatusFilter(status);
                         setIsFilterOpen(false);
                       }}
-                      className={`w-full text-left px-3 py-1.5 text-[10px] font-black uppercase tracking-tight rounded-lg transition-colors ${
+                      className={`w-full text-left px-3 py-1.5 text-[10px] font-black uppercase tracking-tight rounded-xl transition-colors ${
                         statusFilter === status 
                         ? 'bg-indigo-600 text-white' 
                         : 'text-slate-600 dark:text-slate-400 hover:bg-indigo-50 dark:hover:bg-indigo-950/20'
@@ -453,7 +453,7 @@ const AttendanceView: React.FC<AttendanceViewProps> = ({ activitiesList, setActi
             </div>
             <button 
               onClick={handleOpenAdd}
-              className="p-1.5 bg-indigo-600 text-white rounded-lg shadow-sm hover:bg-indigo-700 transition-all flex items-center gap-1.5 px-2.5"
+              className="p-1.5 bg-indigo-600 text-white rounded-xl shadow-sm hover:bg-indigo-700 transition-all flex items-center gap-1.5 px-2.5"
             >
               <Plus size={14} />
               <span className="text-[9px] font-black uppercase">Add Log</span>
@@ -501,7 +501,7 @@ const AttendanceView: React.FC<AttendanceViewProps> = ({ activitiesList, setActi
                           {item.checkOut}
                         </div>
                         {isTiffinTime(item.checkOut) && (
-                          <div className="ml-1.5 flex items-center gap-0.5 px-1.5 py-0.5 bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400 text-[8px] font-black uppercase rounded shadow-sm border border-amber-100 dark:border-amber-800/50 transition-transform group-hover:scale-105">
+                          <div className="ml-1.5 flex items-center gap-0.5 px-1.5 py-0.5 bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400 text-[8px] font-black uppercase rounded-xl shadow-sm border border-amber-100 dark:border-amber-800/50 transition-transform group-hover:scale-105">
                             <UtensilsCrossed size={8} />
                             Tiffin
                           </div>
@@ -537,13 +537,13 @@ const AttendanceView: React.FC<AttendanceViewProps> = ({ activitiesList, setActi
                     <div className="flex items-center justify-end gap-2">
                       <button 
                         onClick={() => handleOpenEdit(item)}
-                        className="p-1.5 text-indigo-500 hover:bg-indigo-50 dark:hover:bg-indigo-950/20 rounded-lg transition-all border border-transparent hover:border-indigo-100"
+                        className="p-1.5 text-indigo-500 hover:bg-indigo-50 dark:hover:bg-indigo-950/20 rounded-xl transition-all border border-transparent hover:border-indigo-100"
                       >
                         <Pencil size={12} />
                       </button>
                       <button 
                         onClick={() => { setRecordToDelete(item.id); setIsDeleteModalOpen(true); }}
-                        className="p-1.5 text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-900/30 rounded-lg transition-all border border-transparent hover:border-rose-100"
+                        className="p-1.5 text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-900/30 rounded-xl transition-all border border-transparent hover:border-rose-100"
                       >
                         <Trash2 size={12} />
                       </button>
@@ -608,7 +608,7 @@ const AttendanceView: React.FC<AttendanceViewProps> = ({ activitiesList, setActi
                     type="date" 
                     value={formData.date} 
                     onChange={(e) => setFormData({...formData, date: e.target.value})}
-                    className="w-full h-10 px-4 bg-slate-50 dark:bg-slate-900 border border-slate-400 dark:border-slate-600 rounded-lg text-[13px] font-semibold text-slate-900 dark:text-white outline-none focus:border-indigo-500 transition-all shadow-sm [color-scheme:light] dark:[color-scheme:dark]"
+                    className="w-full h-10 px-4 bg-slate-50 dark:bg-slate-900 border border-slate-400 dark:border-slate-600 rounded-xl text-[13px] font-semibold text-slate-900 dark:text-white outline-none focus:border-indigo-500 transition-all shadow-sm [color-scheme:light] dark:[color-scheme:dark]"
                   />
                 </div>
               ) : (
@@ -644,7 +644,7 @@ const AttendanceView: React.FC<AttendanceViewProps> = ({ activitiesList, setActi
                           <button
                             key={i}
                             onClick={() => toggleMultiDate(dateStr)}
-                            className={`w-7 h-7 rounded-lg text-[11px] font-bold transition-all flex items-center justify-center ${
+                            className={`w-7 h-7 rounded-xl text-[11px] font-bold transition-all flex items-center justify-center ${
                               isSelected 
                               ? 'bg-blue-600 text-white shadow-md' 
                               : 'text-slate-600 dark:text-slate-400 hover:bg-white dark:hover:bg-slate-800'
@@ -668,7 +668,7 @@ const AttendanceView: React.FC<AttendanceViewProps> = ({ activitiesList, setActi
                       value={convert12to24(formData.checkIn)} 
                       onChange={(e) => setFormData({...formData, checkIn: convert24to12(e.target.value)})}
                       disabled={formData.type !== 'STANDARD' && !editingRecord}
-                      className={`w-full h-10 px-4 bg-slate-50 dark:bg-slate-900 border border-slate-400 dark:border-slate-600 rounded-lg text-[13px] font-semibold text-slate-900 dark:text-white outline-none focus:border-blue-500 transition-all ${(formData.type !== 'STANDARD' && !editingRecord) ? 'opacity-50 cursor-not-allowed' : ''} [color-scheme:light] dark:[color-scheme:dark]`}
+                      className={`w-full h-10 px-4 bg-slate-50 dark:bg-slate-900 border border-slate-400 dark:border-slate-600 rounded-xl text-[13px] font-semibold text-slate-900 dark:text-white outline-none focus:border-blue-500 transition-all ${(formData.type !== 'STANDARD' && !editingRecord) ? 'opacity-50 cursor-not-allowed' : ''} [color-scheme:light] dark:[color-scheme:dark]`}
                     />
                   </div>
                   <div className="space-y-1.5">
@@ -678,7 +678,7 @@ const AttendanceView: React.FC<AttendanceViewProps> = ({ activitiesList, setActi
                       value={convert12to24(formData.checkOut)} 
                       onChange={(e) => setFormData({...formData, checkOut: convert24to12(e.target.value)})}
                       disabled={formData.type !== 'STANDARD' && !editingRecord}
-                      className={`w-full h-10 px-4 bg-slate-50 dark:bg-slate-900 border border-slate-400 dark:border-slate-600 rounded-lg text-[13px] font-semibold text-slate-900 dark:text-white outline-none focus:border-blue-500 transition-all ${(formData.type !== 'STANDARD' && !editingRecord) ? 'opacity-50 cursor-not-allowed' : ''} [color-scheme:light] dark:[color-scheme:dark]`}
+                      className={`w-full h-10 px-4 bg-slate-50 dark:bg-slate-900 border border-slate-400 dark:border-slate-600 rounded-xl text-[13px] font-semibold text-slate-900 dark:text-white outline-none focus:border-blue-500 transition-all ${(formData.type !== 'STANDARD' && !editingRecord) ? 'opacity-50 cursor-not-allowed' : ''} [color-scheme:light] dark:[color-scheme:dark]`}
                     />
                   </div>
                 </div>

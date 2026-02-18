@@ -399,7 +399,7 @@ const RemindersView: React.FC<RemindersViewProps> = ({ language, reminders, setR
                   type="text" 
                   value={formData.title}
                   onChange={(e) => setFormData({...formData, title: e.target.value})}
-                  className="w-full h-10 px-4 bg-slate-50 dark:bg-slate-900 border border-slate-400 dark:border-slate-600 rounded-lg text-[13px] font-semibold text-slate-900 dark:text-white outline-none focus:border-indigo-500 transition-all shadow-sm placeholder:text-slate-300"
+                  className="w-full h-10 px-4 bg-slate-50 dark:bg-slate-900 border border-slate-400 dark:border-slate-600 rounded-xl text-[13px] font-semibold text-slate-900 dark:text-white outline-none focus:border-indigo-500 transition-all shadow-sm placeholder:text-slate-300"
                   placeholder="e.g. Salary Payment"
                 />
               </div>
@@ -410,7 +410,7 @@ const RemindersView: React.FC<RemindersViewProps> = ({ language, reminders, setR
                     type="date" 
                     value={formData.date}
                     onChange={(e) => setFormData({...formData, date: e.target.value})}
-                    className="w-full h-10 px-4 bg-slate-50 dark:bg-slate-900 border border-slate-400 dark:border-slate-600 rounded-lg text-[12px] font-semibold text-slate-900 dark:text-white outline-none focus:border-indigo-500 transition-all shadow-sm [color-scheme:light] dark:[color-scheme:dark]"
+                    className="w-full h-10 px-4 bg-slate-50 dark:bg-slate-900 border border-slate-400 dark:border-slate-600 rounded-xl text-[12px] font-semibold text-slate-900 dark:text-white outline-none focus:border-indigo-500 transition-all shadow-sm [color-scheme:light] dark:[color-scheme:dark]"
                   />
                 </div>
                 <div className="space-y-1.5">
@@ -419,7 +419,7 @@ const RemindersView: React.FC<RemindersViewProps> = ({ language, reminders, setR
                     <select 
                       value={formData.priority}
                       onChange={(e) => setFormData({...formData, priority: e.target.value as any})}
-                      className="w-full h-10 px-4 bg-slate-50 dark:bg-slate-900 border border-slate-400 dark:border-slate-600 rounded-lg text-[12px] font-semibold text-slate-900 dark:text-white outline-none focus:border-indigo-500 transition-all shadow-sm appearance-none cursor-pointer"
+                      className="w-full h-10 px-4 bg-slate-50 dark:bg-slate-900 border border-slate-400 dark:border-slate-600 rounded-xl text-[12px] font-semibold text-slate-900 dark:text-white outline-none focus:border-indigo-500 transition-all shadow-sm appearance-none cursor-pointer"
                     >
                       <option value="high">{language === 'বাংলা' ? 'উচ্চ' : 'High'}</option>
                       <option value="medium">{language === 'বাংলা' ? 'মাঝারি' : 'Medium'}</option>
@@ -437,7 +437,7 @@ const RemindersView: React.FC<RemindersViewProps> = ({ language, reminders, setR
                   value={formData.note}
                   onChange={(e) => setFormData({...formData, note: e.target.value})}
                   rows={3}
-                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900 border border-slate-400 dark:border-slate-600 rounded-lg text-[12px] font-semibold text-slate-900 dark:text-white outline-none focus:border-indigo-500 transition-all shadow-sm resize-none"
+                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900 border border-slate-400 dark:border-slate-600 rounded-xl text-[12px] font-semibold text-slate-900 dark:text-white outline-none focus:border-indigo-500 transition-all shadow-sm resize-none"
                   placeholder="Optional details..."
                 />
               </div>
@@ -458,7 +458,7 @@ const RemindersView: React.FC<RemindersViewProps> = ({ language, reminders, setR
             <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 dark:border-slate-700/50">
               <div className="flex items-center gap-2">
                 <FileSpreadsheet size={18} className="text-emerald-600" />
-                <h2 className="text-[17px] font-black text-slate-900 dark:text-white uppercase tracking-tight tracking-tight">{t.bulkTitle}</h2>
+                <h2 className="text-[17px] font-black text-slate-900 dark:text-white uppercase tracking-tight">{t.bulkTitle}</h2>
               </div>
               <button onClick={() => setIsBulkModalOpen(false)} className="p-1.5 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors"><X size={20} /></button>
             </div>
@@ -477,7 +477,7 @@ const RemindersView: React.FC<RemindersViewProps> = ({ language, reminders, setR
                   value={bulkInput} 
                   onChange={(e) => setBulkInput(e.target.value)} 
                   placeholder={t.bulkPlaceholder} 
-                  className="w-full h-32 px-4 py-3 bg-slate-50 dark:bg-slate-900 border border-slate-400 dark:border-slate-600 rounded-lg text-[13px] font-semibold text-slate-900 dark:text-white outline-none focus:border-emerald-500 transition-all shadow-sm resize-none" 
+                  className="w-full h-32 px-4 py-3 bg-slate-50 dark:bg-slate-900 border border-slate-400 dark:border-slate-600 rounded-xl text-[13px] font-semibold text-slate-900 dark:text-white outline-none focus:border-emerald-500 transition-all shadow-sm resize-none" 
                 />
               </div>
               <button onClick={handleBulkImport} disabled={bulkPreview.length === 0} className="w-full h-12 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white rounded-xl font-black text-[14px] uppercase shadow-lg shadow-emerald-600/20 transition-all active:scale-[0.98] flex items-center justify-center gap-3"><Upload size={18} /> {t.import} ({bulkPreview.length})</button>

@@ -12,7 +12,8 @@ import {
   AlertTriangle,
   TrendingUp,
   PieChart as PieIcon,
-  Check
+  Check,
+  History
 } from 'lucide-react';
 import { 
   PieChart, Pie, Cell, ResponsiveContainer, Tooltip
@@ -245,7 +246,7 @@ const BettingInfoView: React.FC<BettingInfoViewProps> = ({
           <select 
             value={selectedYear} 
             onChange={(e) => setSelectedYear(e.target.value)}
-            className="bg-slate-50 dark:bg-slate-800 border border-indigo-100 dark:border-indigo-900/30 rounded-lg px-3 py-1 text-[13px] font-black text-indigo-600 dark:text-indigo-400 outline-none focus:ring-2 focus:ring-indigo-500/20"
+            className="bg-slate-50 dark:bg-slate-800 border border-indigo-100 dark:border-indigo-900/30 rounded-xl px-3 py-1.5 text-[13px] font-black text-indigo-600 dark:text-indigo-400 outline-none focus:ring-2 focus:ring-indigo-500/20"
           >
             {availableYears.map(year => <option key={year} value={year}>{year}</option>)}
           </select>
@@ -306,73 +307,51 @@ const BettingInfoView: React.FC<BettingInfoViewProps> = ({
                     ))}
                   </Pie>
                   <Tooltip 
-                    contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 25px rgba(0,0,0,0.1)', fontSize: '11px', fontWeight: 'bold' }}
-                    formatter={(value: number) => `৳${value.toLocaleString()}`}
+                    contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 25px rgba(0,0,0,0.1)' }} 
                   />
                 </PieChart>
               </ResponsiveContainer>
             ) : (
-              <div className="text-[11px] font-black text-slate-300 dark:text-slate-700 uppercase tracking-widest text-center">
-                No data found
+              <div className="flex flex-col items-center justify-center opacity-30 italic">
+                <PieIcon size={48} className="mb-2" />
+                <p className="text-[11px] font-black uppercase tracking-widest">No distribution data</p>
               </div>
             )}
           </div>
         </div>
 
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm overflow-hidden flex flex-col h-[450px]">
-          <div className="px-5 py-4 border-b border-slate-50 dark:border-slate-800 bg-rose-50/40 dark:bg-rose-900/20">
-            <h3 className="text-[13px] font-black text-slate-800 dark:text-white tracking-tight flex items-center gap-2">
-              <ArrowDownCircle size={14} className="text-rose-600" /> Deposit History
+        <div className="lg:col-span-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm h-[450px] flex flex-col overflow-hidden">
+          <div className="px-5 py-4 border-b border-slate-50 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/50 flex justify-between items-center">
+            <h3 className="text-[13px] font-black text-slate-800 dark:text-white uppercase tracking-wider flex items-center gap-2">
+              <History size={16} className="text-indigo-600" /> Betting Log History
             </h3>
           </div>
-          <div className="p-4 space-y-2.5 overflow-y-auto flex-1 custom-scrollbar">
-            {stats.deposits.length > 0 ? (
-              stats.deposits.sort((a,b) => b.date.localeCompare(a.date)).map(record => (
-                <div key={record.id} className="p-3 bg-rose-50/60 dark:bg-rose-900/30 border border-rose-200/50 dark:border-rose-800/50 rounded-xl flex items-center justify-between group hover:bg-rose-100/80 dark:hover:bg-rose-900/40 transition-all shadow-sm">
-                  <div className="flex flex-col min-w-0 pr-2">
-                    <span className="text-[11px] font-black text-slate-900 dark:text-white leading-tight truncate">{formatDate(record.date)}</span>
-                    <span className="text-[9px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mt-0.5 truncate">{record.note || 'No Note'}</span>
+          <div className="flex-1 overflow-y-auto p-4 space-y-3 custom-scrollbar">
+            {records.length > 0 ? (
+              records.filter(r => r.date.startsWith(selectedYear)).sort((a,b) => b.date.localeCompare(a.date)).map(record => (
+                <div key={record.id} className="p-3 bg-slate-50 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-800 rounded-xl flex items-center justify-between group hover:border-indigo-200 transition-all">
+                  <div className="flex items-center gap-4">
+                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${record.type === 'deposit' ? 'bg-rose-100 text-rose-600' : 'bg-emerald-100 text-emerald-600'}`}>
+                      {record.type === 'deposit' ? <ArrowDownCircle size={20} /> : <ArrowUpCircle size={20} />}
+                    </div>
+                    <div>
+                      <p className="text-[11px] font-black text-slate-800 dark:text-white uppercase tracking-tight leading-none">{formatDate(record.date)}</p>
+                      <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-1.5">{record.note || 'No description'}</p>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-2 shrink-0">
-                    <span className="text-[12px] font-black text-rose-700 dark:text-rose-400 tracking-tight">৳{record.amount.toLocaleString()}</span>
+                  <div className="flex items-center gap-4">
+                    <span className={`text-[14px] font-black ${record.type === 'deposit' ? 'text-rose-600' : 'text-emerald-600'}`}>
+                      {record.type === 'deposit' ? '-' : '+'}৳{record.amount.toLocaleString()}
+                    </span>
                     <div className="flex items-center gap-1">
-                      <button onClick={() => handleOpenEdit(record)} className="p-1.5 text-indigo-600 bg-white/80 dark:bg-slate-800 hover:bg-white rounded-lg shadow-sm border border-indigo-100/50 dark:border-slate-700 active:scale-95"><Pencil size={11} /></button>
-                      <button onClick={() => { setRecordToDelete(record); setIsDeleteModalOpen(true); }} className="p-1.5 text-rose-600 bg-white/80 dark:bg-slate-800 hover:bg-white rounded-lg shadow-sm border border-rose-100/50 dark:border-slate-700 active:scale-95"><Trash2 size={11} /></button>
+                      <button onClick={() => handleOpenEdit(record)} className="p-1.5 text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 rounded-lg"><Pencil size={14} /></button>
+                      <button onClick={() => { setRecordToDelete(record); setIsDeleteModalOpen(true); }} className="p-1.5 text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/30 rounded-lg"><Trash2 size={14} /></button>
                     </div>
                   </div>
                 </div>
               ))
             ) : (
-              <div className="flex h-full items-center justify-center p-12 text-center opacity-30 italic">No deposits</div>
-            )}
-          </div>
-        </div>
-
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm overflow-hidden flex flex-col h-[450px]">
-          <div className="px-5 py-4 border-b border-slate-50 dark:border-slate-800 bg-emerald-50/40 dark:bg-emerald-900/20">
-            <h3 className="text-[13px] font-black text-slate-800 dark:text-white tracking-tight flex items-center gap-2">
-              <ArrowUpCircle size={14} className="text-emerald-600" /> Withdraw History
-            </h3>
-          </div>
-          <div className="p-4 space-y-2.5 overflow-y-auto flex-1 custom-scrollbar">
-            {stats.withdraws.length > 0 ? (
-              stats.withdraws.sort((a,b) => b.date.localeCompare(a.date)).map(record => (
-                <div key={record.id} className="p-3 bg-emerald-50/60 dark:bg-emerald-900/30 border border-emerald-200/50 dark:border-emerald-800/50 rounded-xl flex items-center justify-between group hover:bg-emerald-100/80 dark:hover:bg-emerald-900/40 transition-all shadow-sm">
-                  <div className="flex flex-col min-w-0 pr-2">
-                    <span className="text-[11px] font-black text-slate-900 dark:text-white leading-tight truncate">{formatDate(record.date)}</span>
-                    <span className="text-[9px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mt-0.5 truncate">{record.note || 'No Note'}</span>
-                  </div>
-                  <div className="flex items-center gap-2 shrink-0">
-                    <span className="text-[12px] font-black text-emerald-700 dark:text-emerald-400 tracking-tight">৳{record.amount.toLocaleString()}</span>
-                    <div className="flex items-center gap-1">
-                      <button onClick={() => handleOpenEdit(record)} className="p-1.5 text-indigo-600 bg-white/80 dark:bg-slate-800 hover:bg-white rounded-lg shadow-sm border border-indigo-100/50 dark:border-slate-700 active:scale-95"><Pencil size={11} /></button>
-                      <button onClick={() => { setRecordToDelete(record); setIsDeleteModalOpen(true); }} className="p-1.5 text-rose-600 bg-white/80 dark:bg-slate-800 hover:bg-white rounded-lg shadow-sm border border-rose-100/50 dark:border-slate-700 active:scale-95"><Trash2 size={11} /></button>
-                    </div>
-                  </div>
-                </div>
-              ))
-            ) : (
-              <div className="flex h-full items-center justify-center p-12 text-center opacity-30 italic">No withdrawals</div>
+              <div className="flex h-full items-center justify-center opacity-30 italic">Log is empty</div>
             )}
           </div>
         </div>
@@ -380,18 +359,18 @@ const BettingInfoView: React.FC<BettingInfoViewProps> = ({
 
       {isModalOpen && (
         <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-slate-950/40 backdrop-blur-md animate-in fade-in">
-          <div className="bg-white dark:bg-[#1e293b] w-full max-w-[400px] rounded-[24px] overflow-hidden shadow-2xl border border-slate-300 dark:border-slate-700 animate-in zoom-in-95 duration-200">
+          <div className="bg-white dark:bg-[#1e293b] w-full max-w-[420px] rounded-[24px] overflow-hidden shadow-2xl border border-slate-300 dark:border-slate-700 animate-in zoom-in-95 duration-200">
             <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 dark:border-slate-700/50">
               <div className="flex items-center gap-2">
                 <Plus size={18} className="text-blue-600" />
-                <h2 className="text-[17px] font-black text-slate-900 dark:text-white tracking-tight uppercase">{editingRecord ? 'Edit Record' : 'Add Record'}</h2>
+                <h2 className="text-[17px] font-black text-slate-900 dark:text-white uppercase tracking-tight">{editingRecord ? 'Edit Record' : 'Add Record'}</h2>
               </div>
-              <button onClick={() => { setIsModalOpen(false); setEditingRecord(null); }} className="p-1.5 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors"><X size={20} /></button>
+              <button onClick={() => setIsModalOpen(false)}><X size={20} className="text-slate-400" /></button>
             </div>
             <div className="p-6 space-y-5">
               <div className="space-y-1.5">
-                <label className="text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest ml-1">Type</label>
-                <div className="grid grid-cols-2 gap-2 bg-slate-50 dark:bg-slate-950 p-1 rounded-xl shadow-inner border border-slate-200 dark:border-slate-800">
+                <label className="text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest ml-1">Record Type</label>
+                <div className="grid grid-cols-2 gap-2 p-1 bg-slate-50 dark:bg-slate-950 rounded-xl shadow-inner border border-slate-200 dark:border-slate-800">
                   <button onClick={() => setFormData({...formData, type: 'deposit'})} className={`py-1.5 text-[10px] font-black uppercase rounded-lg transition-all ${formData.type === 'deposit' ? 'bg-rose-600 text-white shadow-lg shadow-rose-600/30' : 'text-slate-500 hover:text-slate-700'}`}>Deposit</button>
                   <button onClick={() => setFormData({...formData, type: 'withdraw'})} className={`py-1.5 text-[10px] font-black uppercase rounded-lg transition-all ${formData.type === 'withdraw' ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-600/30' : 'text-slate-500 hover:text-slate-700'}`}>Withdraw</button>
                 </div>
@@ -403,33 +382,32 @@ const BettingInfoView: React.FC<BettingInfoViewProps> = ({
                     type="number" 
                     value={formData.amount} 
                     onChange={(e) => setFormData({...formData, amount: e.target.value})} 
-                    placeholder="0" 
-                    className="w-full h-10 px-4 bg-slate-50 dark:bg-slate-900 border border-slate-400 dark:border-slate-600 rounded-lg text-[13px] font-semibold text-slate-900 dark:text-white outline-none focus:border-indigo-500 transition-all shadow-sm" 
+                    className="w-full h-10 px-4 bg-slate-50 dark:bg-slate-900 border border-slate-400 dark:border-slate-600 rounded-xl text-[13px] font-semibold text-slate-900 dark:text-white outline-none focus:border-indigo-500 transition-all shadow-sm" 
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <label className="text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest ml-1">Date</label>
+                  <label className="text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest ml-1">Record Date</label>
                   <input 
                     type="date" 
                     value={formData.date} 
                     onChange={(e) => setFormData({...formData, date: e.target.value})} 
-                    className="w-full h-10 px-3 bg-slate-50 dark:bg-slate-900 border border-slate-400 dark:border-slate-600 rounded-lg text-[12px] font-semibold text-slate-900 dark:text-white outline-none focus:border-indigo-500 transition-all shadow-sm [color-scheme:light] dark:[color-scheme:dark]" 
+                    className="w-full h-10 px-4 bg-slate-50 dark:bg-slate-900 border border-slate-400 dark:border-slate-600 rounded-xl text-[12px] font-semibold text-slate-900 dark:text-white outline-none focus:border-indigo-500 transition-all shadow-sm [color-scheme:light] dark:[color-scheme:dark]" 
                   />
                 </div>
               </div>
               <div className="space-y-1.5">
-                <label className="text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest ml-1">Note (Optional)</label>
+                <label className="text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest ml-1">Note / Reference</label>
                 <input 
                   type="text" 
                   value={formData.note} 
                   onChange={(e) => setFormData({...formData, note: e.target.value})} 
-                  placeholder="e.g. Lineup: High" 
-                  className="w-full h-10 px-4 bg-slate-50 dark:bg-slate-900 border border-slate-400 dark:border-slate-600 rounded-lg text-[13px] font-semibold text-slate-900 dark:text-white outline-none focus:border-indigo-500 transition-all shadow-sm" 
+                  placeholder="Optional details..."
+                  className="w-full h-10 px-4 bg-slate-50 dark:bg-slate-900 border border-slate-400 dark:border-slate-600 rounded-xl text-[13px] font-semibold text-slate-900 dark:text-white outline-none focus:border-indigo-500 transition-all shadow-sm" 
                 />
               </div>
               <button 
                 onClick={handleSave} 
-                className="w-full h-12 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-black text-[14px] uppercase shadow-xl shadow-indigo-600/20 transition-all active:scale-[0.98] mt-4 flex items-center justify-center gap-2"
+                className="w-full h-12 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-black text-[14px] uppercase shadow-lg shadow-indigo-600/20 transition-all active:scale-[0.98] mt-2 flex items-center justify-center gap-2"
               >
                 <Save size={18} /> {editingRecord ? 'Update Record' : 'Save Record'}
               </button>
@@ -440,13 +418,13 @@ const BettingInfoView: React.FC<BettingInfoViewProps> = ({
 
       {isDeleteModalOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-md animate-in fade-in duration-300">
-          <div className="bg-white dark:bg-[#1e293b] w-full max-w-[300px] rounded-[32px] p-8 text-center shadow-2xl border border-slate-200 dark:border-slate-700 animate-in zoom-in-95 duration-200">
+          <div className="bg-white dark:bg-[#1e293b] w-full max-w-[320px] rounded-[32px] p-8 text-center shadow-2xl border border-slate-200 dark:border-slate-700 animate-in zoom-in-95 duration-200">
             <div className="w-16 h-16 bg-rose-100 text-rose-600 dark:bg-rose-900/30 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-inner"><AlertTriangle size={32} /></div>
             <h2 className="text-[16px] font-black text-slate-900 dark:text-white mb-2 uppercase tracking-tight">Remove Record?</h2>
-            <p className="text-[12px] text-slate-500 dark:text-slate-400 mb-8 font-bold tracking-tight">This will permanently delete this record and its associated expense entry (if it was a deposit).</p>
+            <p className="text-[12px] text-slate-500 dark:text-slate-400 mb-8 font-bold tracking-tight">The record and its associated transaction will be removed.</p>
             <div className="flex gap-4">
-              <button onClick={handleDelete} className="flex-1 py-3.5 bg-rose-600 text-white rounded-xl text-[12px] font-black uppercase hover:bg-rose-700 transition-colors">Delete</button>
-              <button onClick={() => setIsDeleteModalOpen(false)} className="flex-1 py-3.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-xl text-[12px] font-black uppercase hover:bg-slate-200 transition-colors">Cancel</button>
+              <button onClick={handleDelete} className="flex-1 py-3.5 bg-rose-600 text-white rounded-xl text-[12px] font-black uppercase shadow-lg shadow-rose-600/20 hover:bg-rose-700 transition-all">Delete</button>
+              <button onClick={() => setIsDeleteModalOpen(false)} className="flex-1 py-3.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-xl text-[12px] font-black uppercase hover:bg-slate-200 transition-all">Cancel</button>
             </div>
           </div>
         </div>
@@ -458,7 +436,6 @@ const BettingInfoView: React.FC<BettingInfoViewProps> = ({
       >
         <Plus size={32} className="group-hover:rotate-90 transition-transform duration-300" />
       </button>
-
     </div>
   );
 };

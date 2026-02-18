@@ -157,7 +157,7 @@ const BillInfoView: React.FC<BillInfoViewProps> = ({
           <select 
             value={selectedYear} 
             onChange={(e) => setSelectedYear(e.target.value)}
-            className="bg-slate-50 dark:bg-slate-800 border border-indigo-100 dark:border-indigo-900/30 rounded-lg px-3 py-1 text-[13px] font-black text-indigo-600 dark:text-indigo-400 outline-none focus:ring-2 focus:ring-indigo-500/20"
+            className="bg-slate-50 dark:bg-slate-800 border border-indigo-100 dark:border-indigo-900/30 rounded-xl px-3 py-1.5 text-[13px] font-black text-indigo-600 dark:text-indigo-400 outline-none focus:ring-2 focus:ring-indigo-500/20"
           >
             {availableYears.map(year => <option key={year} value={year}>{year}</option>)}
           </select>
@@ -220,8 +220,8 @@ const BillInfoView: React.FC<BillInfoViewProps> = ({
                   <div className="flex items-center gap-3">
                     <span className="text-[13px] font-black text-amber-700 dark:text-amber-400 tracking-tight">৳{bill.amount.toLocaleString()}</span>
                     <div className="flex items-center gap-1.5 transition-all">
-                      <button onClick={() => handleOpenEdit(bill)} className="p-1.5 text-indigo-600 bg-white/80 dark:bg-slate-800 hover:bg-white dark:hover:bg-slate-700 rounded-lg shadow-sm border border-indigo-100/50 dark:border-slate-700 transition-all active:scale-95"><Pencil size={12} /></button>
-                      <button onClick={() => { setRecordToDelete(bill); setIsDeleteModalOpen(true); }} className="p-1.5 text-rose-600 bg-white/80 dark:bg-slate-800 hover:bg-white dark:hover:bg-slate-700 rounded-lg shadow-sm border border-rose-100/50 dark:border-slate-700 transition-all active:scale-95"><Trash2 size={12} /></button>
+                      <button onClick={() => handleOpenEdit(bill)} className="p-1.5 text-indigo-600 bg-white/80 dark:bg-slate-800 hover:bg-white dark:hover:bg-slate-700 rounded-xl shadow-sm border border-indigo-100/50 dark:border-slate-700 transition-all active:scale-95"><Pencil size={12} /></button>
+                      <button onClick={() => { setRecordToDelete(bill); setIsDeleteModalOpen(true); }} className="p-1.5 text-rose-600 bg-white/80 dark:bg-slate-800 hover:bg-white dark:hover:bg-slate-700 rounded-xl shadow-sm border border-rose-100/50 dark:border-slate-700 transition-all active:scale-95"><Trash2 size={12} /></button>
                     </div>
                   </div>
                 </div>
@@ -249,8 +249,8 @@ const BillInfoView: React.FC<BillInfoViewProps> = ({
                   <div className="flex items-center gap-3">
                     <span className="text-[13px] font-black text-blue-700 dark:text-blue-400 tracking-tight">৳{bill.amount.toLocaleString()}</span>
                     <div className="flex items-center gap-1.5 transition-all">
-                      <button onClick={() => handleOpenEdit(bill)} className="p-1.5 text-indigo-600 bg-white/80 dark:bg-slate-800 hover:bg-white dark:hover:bg-slate-700 rounded-lg shadow-sm border border-indigo-100/50 dark:border-slate-700 transition-all active:scale-95"><Pencil size={12} /></button>
-                      <button onClick={() => { setRecordToDelete(bill); setIsDeleteModalOpen(true); }} className="p-1.5 text-rose-600 bg-white/80 dark:bg-slate-800 hover:bg-white dark:hover:bg-slate-700 rounded-lg shadow-sm border border-rose-100/50 dark:border-slate-700 transition-all active:scale-95"><Trash2 size={12} /></button>
+                      <button onClick={() => handleOpenEdit(bill)} className="p-1.5 text-indigo-600 bg-white/80 dark:bg-slate-800 hover:bg-white dark:hover:bg-slate-700 rounded-xl shadow-sm border border-indigo-100/50 dark:border-slate-700 transition-all active:scale-95"><Pencil size={12} /></button>
+                      <button onClick={() => { setRecordToDelete(bill); setIsDeleteModalOpen(true); }} className="p-1.5 text-rose-600 bg-white/80 dark:bg-slate-800 hover:bg-white dark:hover:bg-slate-700 rounded-xl shadow-sm border border-rose-100/50 dark:border-slate-700 transition-all active:scale-95"><Trash2 size={12} /></button>
                     </div>
                   </div>
                 </div>
@@ -276,8 +276,8 @@ const BillInfoView: React.FC<BillInfoViewProps> = ({
               <div className="space-y-1.5">
                 <label className="text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest ml-1">Bill Category</label>
                 <div className="grid grid-cols-2 gap-2 bg-slate-50 dark:bg-slate-950 p-1 rounded-xl shadow-inner border border-slate-200 dark:border-slate-800">
-                  <button onClick={() => setFormData({...formData, type: 'Electric'})} className={`py-1.5 text-[10px] font-black uppercase rounded-lg transition-all ${formData.type === 'Electric' ? 'bg-amber-500 text-white shadow-lg shadow-amber-500/30' : 'text-slate-500 hover:text-slate-700'}`}>Electric</button>
-                  <button onClick={() => setFormData({...formData, type: 'Wifi'})} className={`py-1.5 text-[10px] font-black uppercase rounded-lg transition-all ${formData.type === 'Wifi' ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/30' : 'text-slate-500 hover:text-slate-700'}`}>Wifi</button>
+                  <button onClick={() => setFormData({...formData, type: 'Electric'})} className={`py-1.5 text-[10px] font-black uppercase rounded-xl transition-all ${formData.type === 'Electric' ? 'bg-amber-500 text-white shadow-lg shadow-amber-500/30' : 'text-slate-500 hover:text-slate-700'}`}>Electric</button>
+                  <button onClick={() => setFormData({...formData, type: 'Wifi'})} className={`py-1.5 text-[10px] font-black uppercase rounded-xl transition-all ${formData.type === 'Wifi' ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/30' : 'text-slate-500 hover:text-slate-700'}`}>Wifi</button>
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-4">
@@ -288,7 +288,7 @@ const BillInfoView: React.FC<BillInfoViewProps> = ({
                     value={formData.amount} 
                     onChange={(e) => setFormData({...formData, amount: e.target.value})} 
                     placeholder="0" 
-                    className="w-full h-10 px-4 bg-slate-50 dark:bg-slate-900 border border-slate-400 dark:border-slate-600 rounded-lg text-[13px] font-semibold text-slate-900 dark:text-white outline-none focus:border-indigo-500 transition-all shadow-sm" 
+                    className="w-full h-10 px-4 bg-slate-50 dark:bg-slate-900 border border-slate-400 dark:border-slate-600 rounded-xl text-[13px] font-semibold text-slate-900 dark:text-white outline-none focus:border-indigo-500 transition-all shadow-sm" 
                   />
                 </div>
                 <div className="space-y-1.5">
@@ -297,7 +297,7 @@ const BillInfoView: React.FC<BillInfoViewProps> = ({
                     type="date" 
                     value={formData.date} 
                     onChange={(e) => setFormData({...formData, date: e.target.value})} 
-                    className="w-full h-10 px-3 bg-slate-50 dark:bg-slate-900 border border-slate-400 dark:border-slate-600 rounded-lg text-[12px] font-semibold text-slate-900 dark:text-white outline-none focus:border-indigo-500 transition-all shadow-sm [color-scheme:light] dark:[color-scheme:dark]" 
+                    className="w-full h-10 px-3 bg-slate-50 dark:bg-slate-900 border border-slate-400 dark:border-slate-600 rounded-xl text-[12px] font-semibold text-slate-900 dark:text-white outline-none focus:border-indigo-500 transition-all shadow-sm [color-scheme:light] dark:[color-scheme:dark]" 
                   />
                 </div>
               </div>
@@ -308,7 +308,7 @@ const BillInfoView: React.FC<BillInfoViewProps> = ({
                   value={formData.note} 
                   onChange={(e) => setFormData({...formData, note: e.target.value})} 
                   placeholder="e.g. Month: March" 
-                  className="w-full h-10 px-4 bg-slate-50 dark:bg-slate-900 border border-slate-400 dark:border-slate-600 rounded-lg text-[13px] font-semibold text-slate-900 dark:text-white outline-none focus:border-indigo-500 transition-all shadow-sm" 
+                  className="w-full h-10 px-4 bg-slate-50 dark:bg-slate-900 border border-slate-400 dark:border-slate-600 rounded-xl text-[13px] font-semibold text-slate-900 dark:text-white outline-none focus:border-indigo-500 transition-all shadow-sm" 
                 />
               </div>
               <button 
