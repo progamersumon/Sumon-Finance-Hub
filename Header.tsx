@@ -1,6 +1,6 @@
 
-import React from 'react';
-import { Menu, Search, Sun, Moon, ChevronDown } from 'lucide-react';
+import React, { useState } from 'react';
+import { Menu, Search, Sun, Moon, ChevronDown, X, Maximize2 } from 'lucide-react';
 import { AppTab, ThemeType } from './types';
 
 interface HeaderProps {
@@ -27,6 +27,7 @@ const Header: React.FC<HeaderProps> = ({
   setTheme
 }) => {
   const isDarkMode = theme === 'dark';
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
 
   const toggleDarkMode = () => {
     setTheme(isDarkMode ? 'light' : 'dark');
@@ -45,7 +46,8 @@ const Header: React.FC<HeaderProps> = ({
       [AppTab.REMINDERS]: 'Reminders',
       [AppTab.SETTINGS]: 'Settings',
       search: 'Search resources...',
-      plan: 'Premium Plan'
+      plan: 'Premium Plan',
+      close: 'Close Preview'
     },
     'বাংলা': {
       [AppTab.DASHBOARD]: 'ড্যাশবোর্ড',
@@ -59,7 +61,8 @@ const Header: React.FC<HeaderProps> = ({
       [AppTab.REMINDERS]: 'অনুস্মারক',
       [AppTab.SETTINGS]: 'সেটিংস',
       search: 'অনুসন্ধান করুন...',
-      plan: 'প্রিমিয়াম প্ল্যান'
+      plan: 'প্রিমিয়াম প্ল্যান',
+      close: 'বন্ধ করুন'
     }
   };
 
@@ -113,14 +116,45 @@ const Header: React.FC<HeaderProps> = ({
             <p className="text-xs font-bold text-gray-900 dark:text-gray-100">{profile.name}</p>
             <p className="text-[10px] text-gray-400 dark:text-gray-500 font-bold uppercase tracking-wider">{t.plan}</p>
           </div>
-          <img 
-            src={profile.imageUrl} 
-            alt="Profile" 
-            className="w-8 h-8 rounded-lg object-cover ring-2 ring-gray-100 dark:ring-slate-800 group-hover:scale-105 transition-transform"
-          />
+          <div className="relative" onClick={() => setIsPreviewOpen(true)}>
+            <img 
+              src={profile.imageUrl} 
+              alt="Profile" 
+              className="w-8 h-8 rounded-lg object-cover ring-2 ring-gray-100 dark:ring-slate-800 group-hover:scale-105 transition-transform"
+            />
+            <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 flex items-center justify-center rounded-lg transition-opacity">
+              <Maximize2 size={12} className="text-white" />
+            </div>
+          </div>
           <ChevronDown size={14} className="text-gray-400 hidden xs:block" />
         </div>
       </div>
+
+      {/* Image Preview Modal */}
+      {isPreviewOpen && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md animate-in fade-in duration-300">
+          <div className="relative max-w-lg w-full flex flex-col items-center animate-in zoom-in-95 duration-300">
+            <button 
+              onClick={() => setIsPreviewOpen(false)}
+              className="absolute -top-12 right-0 p-2 text-white/70 hover:text-white transition-colors bg-white/10 rounded-full border border-white/20 backdrop-blur-md"
+            >
+              <X size={24} />
+            </button>
+            <div className="bg-white dark:bg-slate-800 p-2 rounded-[32px] shadow-2xl ring-4 ring-white/10 overflow-hidden">
+              <img 
+                src={profile.imageUrl} 
+                alt="Profile Large" 
+                className="w-full h-auto max-h-[70vh] rounded-[24px] object-cover shadow-inner"
+              />
+            </div>
+            <div className="mt-6 text-center">
+              <h2 className="text-xl font-black text-white uppercase tracking-tight">{profile.name}</h2>
+              <p className="text-[11px] font-bold text-indigo-400 uppercase tracking-widest mt-1">{profile.role}</p>
+            </div>
+          </div>
+          <div className="absolute inset-0 -z-10" onClick={() => setIsPreviewOpen(false)} />
+        </div>
+      )}
     </header>
   );
 };
