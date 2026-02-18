@@ -20,7 +20,7 @@ import AttendanceView from './AttendanceView';
 import LeaveInfoView from './LeaveInfoView';
 import { t } from './translations';
 import { supabase } from './supabaseClient';
-import { Mail, Lock, ChevronRight, ArrowLeft, KeyRound, Smartphone, Layers } from 'lucide-react';
+import { Mail, Lock, ChevronRight, ArrowLeft, KeyRound, Smartphone, Layers, User } from 'lucide-react';
 
 const INITIAL_LEAVE_QUOTAS: LeaveType[] = [
   { id: 'casual', type: 'Casual Leave', total: 10, color: 'bg-amber-500' },
@@ -70,7 +70,7 @@ const LoginView: React.FC<{ onLogin: (user: any) => void, language: LanguageType
   };
 
   const handleForgotStep1 = async () => {
-    if (!formData.email.trim() || !formData.password.trim()) {
+    if (!formData.email.trim()) {
       setErrorMessage(t('fillAllFields', language));
       return;
     }
@@ -88,21 +88,19 @@ const LoginView: React.FC<{ onLogin: (user: any) => void, language: LanguageType
   };
 
   const handleForgotVerify = async () => {
-    if (!formData.otp.trim()) {
-      setErrorMessage(language === 'bn' ? "ওটিপি দিন" : "Enter OTP");
+    if (!formData.otp.trim() || !formData.password.trim()) {
+      setErrorMessage(language === 'bn' ? "ওটিপি ও নতুন পাসওয়ার্ড দিন" : "Enter OTP and New Password");
       return;
     }
     setLoading(true);
     try {
-      // Step A: Verify the OTP
-      const { data, error: verifyError } = await supabase.auth.verifyOtp({
+      const { error: verifyError } = await supabase.auth.verifyOtp({
         email: formData.email,
         token: formData.otp,
         type: 'recovery'
       });
       if (verifyError) throw verifyError;
 
-      // Step B: Update the password now that we have a session
       const { error: updateError } = await supabase.auth.updateUser({
         password: formData.password
       });
@@ -137,12 +135,10 @@ const LoginView: React.FC<{ onLogin: (user: any) => void, language: LanguageType
           <div className="w-20 h-20 bg-white/20 backdrop-blur-xl rounded-[28px] flex items-center justify-center mb-1 border border-white/30 shadow-2xl animate-float">
             <Layers size={42} className="text-white drop-shadow-md" strokeWidth={2.5} />
           </div>
-          
           <h1 className="text-6xl font-black tracking-tight leading-none drop-shadow-sm mb-4">Welcome Back!</h1>
           <p className="text-[14px] font-medium text-blue-50/90 leading-relaxed mx-auto whitespace-nowrap">
             Keep your data organized using our AI-powered<br />management dashboard and tracking system.
           </p>
-          
           <div className="pt-6 flex items-center justify-center gap-2">
             <div className="w-12 h-1 bg-blue-300/40 rounded-full" />
             <div className="w-2 h-2 bg-white rounded-full animate-pulse" />
@@ -185,50 +181,48 @@ const LoginView: React.FC<{ onLogin: (user: any) => void, language: LanguageType
               </div>
             )}
 
-            {mode !== 'forgot_p2' && (
-              <>
-                <div className="relative">
-                  <label className="absolute -top-2.5 left-6 px-2 bg-white text-[#0088ff] text-[10px] font-black uppercase tracking-widest z-10">
-                    {mode === 'forgot_p1' ? 'Enter Account Email' : 'Email Id'}
-                  </label>
-                  <div className="flex items-center bg-white border border-blue-200 rounded-full px-6 py-3.5 focus-within:border-[#0088ff] focus-within:ring-4 focus-within:ring-blue-50 transition-all group">
-                    <Mail className="text-blue-300 mr-3 shrink-0 group-focus-within:text-[#0088ff] transition-colors" size={18} />
-                    <input 
-                      type="email" 
-                      placeholder="user@example.com" 
-                      value={formData.email} 
-                      onChange={e => setFormData({...formData, email: e.target.value})} 
-                      className="w-full bg-white text-slate-700 font-bold outline-none text-sm placeholder:text-slate-300" 
-                    />
-                  </div>
-                </div>
+            <div className="relative">
+              <label className="absolute -top-2.5 left-6 px-2 bg-white text-[#0088ff] text-[10px] font-black uppercase tracking-widest z-10">
+                Email Id
+              </label>
+              <div className="flex items-center bg-white border border-blue-200 rounded-full px-6 py-3.5 focus-within:border-[#0088ff] focus-within:ring-4 focus-within:ring-blue-50 transition-all group">
+                <Mail className="text-blue-300 mr-3 shrink-0 group-focus-within:text-[#0088ff] transition-colors" size={18} />
+                <input 
+                  type="email" 
+                  placeholder="user@example.com" 
+                  value={formData.email} 
+                  onChange={e => setFormData({...formData, email: e.target.value})} 
+                  className="w-full bg-white text-slate-700 font-bold outline-none text-sm placeholder:text-slate-300" 
+                />
+              </div>
+            </div>
 
-                <div className="relative">
-                  <label className="absolute -top-2.5 left-6 px-2 bg-white text-[#0088ff] text-[10px] font-black uppercase tracking-widest z-10">
-                    {mode === 'forgot_p1' ? 'Enter New Password' : 'Password'}
-                  </label>
-                  <div className="flex items-center bg-white border border-blue-200 rounded-full px-6 py-3.5 focus-within:border-[#0088ff] focus-within:ring-4 focus-within:ring-blue-50 transition-all group">
-                    <Lock className="text-blue-300 mr-3 shrink-0 group-focus-within:text-[#0088ff] transition-colors" size={18} />
-                    <input 
-                      type="password" 
-                      placeholder="••••••••••••••••" 
-                      value={formData.password} 
-                      onChange={e => setFormData({...formData, password: e.target.value})} 
-                      className="w-full bg-white text-slate-700 font-bold outline-none text-sm placeholder:text-slate-300" 
-                    />
-                  </div>
-                  {mode === 'login' && (
-                    <div className="flex justify-end mt-1.5">
-                      <button 
-                        onClick={() => setMode('forgot_p1')}
-                        className="text-[10px] font-bold text-slate-400 italic hover:text-[#0088ff] transition-colors"
-                      >
-                        {t('forgotPassword', language)}
-                      </button>
-                    </div>
-                  )}
+            {mode !== 'forgot_p1' && (
+              <div className="relative">
+                <label className="absolute -top-2.5 left-6 px-2 bg-white text-[#0088ff] text-[10px] font-black uppercase tracking-widest z-10">
+                  {mode === 'forgot_p2' ? 'New Password' : 'Password'}
+                </label>
+                <div className="flex items-center bg-white border border-blue-200 rounded-full px-6 py-3.5 focus-within:border-[#0088ff] focus-within:ring-4 focus-within:ring-blue-50 transition-all group">
+                  <Lock className="text-blue-300 mr-3 shrink-0 group-focus-within:text-[#0088ff] transition-colors" size={18} />
+                  <input 
+                    type="password" 
+                    placeholder="••••••••••••••••" 
+                    value={formData.password} 
+                    onChange={e => setFormData({...formData, password: e.target.value})} 
+                    className="w-full bg-white text-slate-700 font-bold outline-none text-sm placeholder:text-slate-300" 
+                  />
                 </div>
-              </>
+                {mode === 'login' && (
+                  <div className="flex justify-end mt-1.5">
+                    <button 
+                      onClick={() => setMode('forgot_p1')}
+                      className="text-[10px] font-bold text-slate-400 italic hover:text-[#0088ff] transition-colors"
+                    >
+                      {t('forgotPassword', language)}
+                    </button>
+                  </div>
+                )}
+              </div>
             )}
 
             {mode === 'forgot_p2' && (
@@ -238,13 +232,12 @@ const LoginView: React.FC<{ onLogin: (user: any) => void, language: LanguageType
                   <KeyRound className="text-blue-300 mr-3 shrink-0 group-focus-within:text-[#0088ff] transition-colors" size={18} />
                   <input 
                     type="text" 
-                    placeholder="Enter 6-digit OTP" 
+                    placeholder="Enter OTP" 
                     value={formData.otp} 
                     onChange={e => setFormData({...formData, otp: e.target.value})} 
-                    className="w-full bg-white text-slate-700 font-bold outline-none text-sm placeholder:text-slate-300 text-center tracking-[1em] pl-4" 
+                    className="w-full bg-white text-slate-700 font-bold outline-none text-sm placeholder:text-slate-300 text-center tracking-[0.5em] pl-4" 
                   />
                 </div>
-                <p className="text-[10px] text-slate-400 font-bold text-center mt-4">OTP sent to: <span className="text-[#0088ff]">{formData.email}</span></p>
               </div>
             )}
 
@@ -294,23 +287,6 @@ const LoginView: React.FC<{ onLogin: (user: any) => void, language: LanguageType
   );
 };
 
-const User = ({ className, size }: { className?: string, size?: number }) => (
-  <svg 
-    xmlns="http://www.w3.org/2000/svg" 
-    width={size || 24} 
-    height={size || 24} 
-    viewBox="0 0 24 24" 
-    fill="none" 
-    stroke="currentColor" 
-    strokeWidth="2" 
-    strokeLinecap="round" 
-    strokeLinejoin="round" 
-    className={className}
-  >
-    <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
-  </svg>
-);
-
 const AppContent: React.FC = () => {
   const [language, setLanguage] = useState<LanguageType>('en');
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -318,13 +294,14 @@ const AppContent: React.FC = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [theme, setTheme] = useState<ThemeType>('light');
   const [isSyncing, setIsSyncing] = useState(false);
+  const [isInitialLoadComplete, setIsInitialLoadComplete] = useState(false);
 
   const mainContentRef = useRef<HTMLDivElement>(null);
 
   const [userProfile, setUserProfile] = useState<UserProfile>({ name: 'User', email: '', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Sumon' });
-  const [transactions, setTransactions] = useState<Transaction[]>(MOCK_TRANSACTIONS);
-  const [reminders, setReminders] = useState<Reminder[]>(MOCK_REMINDERS);
-  const [savingsGoals, setSavingsGoals] = useState<SavingsGoal[]>(MOCK_SAVINGS);
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [reminders, setReminders] = useState<Reminder[]>([]);
+  const [savingsGoals, setSavingsGoals] = useState<SavingsGoal[]>([]);
   const [savingsRecords, setSavingsRecords] = useState<SavingsRecord[]>([]);
   const [billRecords, setBillRecords] = useState<BillRecord[]>([]);
   const [bettingRecords, setBettingRecords] = useState<BettingRecord[]>([]);
@@ -350,41 +327,13 @@ const AppContent: React.FC = () => {
     baseDeduction: 2450,
     imageUrl: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Sumon'
   });
-  const [salaryHistory, setSalaryHistory] = useState<SalaryHistoryItem[]>([
-    { id: '1', year: 2024, inc: 7, amt: 886, total: 15386 },
-    { id: '2', year: 2023, inc: 0, amt: 0, total: 14500 }
-  ]);
+  const [salaryHistory, setSalaryHistory] = useState<SalaryHistoryItem[]>([]);
 
   useEffect(() => {
     if (mainContentRef.current) {
       mainContentRef.current.scrollTo({ top: 0, behavior: 'smooth' });
     }
   }, [activeView]);
-
-  const loadDataFromCache = useCallback(() => {
-    const cached = localStorage.getItem(CACHE_KEY);
-    if (cached) {
-      try {
-        const c = JSON.parse(cached);
-        if (c.userProfile) setUserProfile(c.userProfile);
-        if (c.transactions) setTransactions(c.transactions);
-        if (c.reminders) setReminders(c.reminders);
-        if (c.savingsGoals) setSavingsGoals(c.savingsGoals);
-        if (c.savingsRecords) setSavingsRecords(c.savingsRecords);
-        if (c.billRecords) setBillRecords(c.billRecords);
-        if (c.bettingRecords) setBettingRecords(c.bettingRecords);
-        if (c.attendanceList) setAttendanceList(c.attendanceList);
-        if (c.leaveQuotas) setLeaveQuotas(c.leaveQuotas);
-        if (c.leaveHistory) setLeaveHistory(c.leaveHistory);
-        if (c.payrollProfile) setPayrollProfile(c.payrollProfile);
-        if (c.salaryHistory) setSalaryHistory(c.salaryHistory);
-        if (c.theme) setTheme(c.theme);
-        if (c.language) setLanguage(c.language);
-      } catch (e) {
-        console.error("Cache parsing error", e);
-      }
-    }
-  }, []);
 
   const syncToSupabase = useCallback(async (data: any) => {
     const { data: { session } } = await supabase.auth.getSession();
@@ -397,7 +346,7 @@ const AppContent: React.FC = () => {
         id: session.user.id, 
         content: data,
         updated_at: new Date().toISOString()
-      });
+      }, { onConflict: 'id' });
     
     if (error) console.error("Database Sync Fail:", error.message);
     
@@ -405,54 +354,48 @@ const AppContent: React.FC = () => {
     setIsSyncing(false);
   }, []);
 
+  // Fetch initial data
   useEffect(() => {
-    loadDataFromCache();
-
     const initData = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (session) {
         setIsAuthenticated(true);
-        setActiveView(AppTab.DASHBOARD);
         setIsSyncing(true);
-        const { data } = await supabase
+        
+        const { data, error } = await supabase
           .from('user_data')
           .select('content')
           .eq('id', session.user.id)
           .single();
 
-        let loadedUserProfile = null;
-
-        if (data && data.content) {
+        if (!error && data && data.content) {
           const c = data.content;
-          if (c.userProfile) loadedUserProfile = c.userProfile;
-          setTransactions(c.transactions || []);
-          setReminders(c.reminders || []);
-          setSavingsGoals(c.savingsGoals || []);
-          setSavingsRecords(c.savingsRecords || []);
-          setBillRecords(c.billRecords || []);
-          setBettingRecords(c.bettingRecords || []);
-          setAttendanceList(c.attendanceList || []);
-          setLeaveQuotas(c.leaveQuotas || INITIAL_LEAVE_QUOTAS);
-          setLeaveHistory(c.leaveHistory || []);
-          setPayrollProfile(c.payrollProfile || payrollProfile);
-          setSalaryHistory(c.salaryHistory || []);
+          if (c.userProfile) setUserProfile(c.userProfile);
+          if (c.transactions) setTransactions(c.transactions);
+          if (c.reminders) setReminders(c.reminders);
+          if (c.savingsGoals) setSavingsGoals(c.savingsGoals);
+          if (c.savingsRecords) setSavingsRecords(c.savingsRecords);
+          if (c.billRecords) setBillRecords(c.billRecords);
+          if (c.bettingRecords) setBettingRecords(c.bettingRecords);
+          if (c.attendanceList) setAttendanceList(c.attendanceList);
+          if (c.leaveQuotas) setLeaveQuotas(c.leaveQuotas);
+          if (c.leaveHistory) setLeaveHistory(c.leaveHistory);
+          if (c.payrollProfile) setPayrollProfile(c.payrollProfile);
+          if (c.salaryHistory) setSalaryHistory(c.salaryHistory);
           if (c.theme) setTheme(c.theme);
           if (c.language) setLanguage(c.language);
-          
           localStorage.setItem(CACHE_KEY, JSON.stringify(c));
-        }
-        
-        if (loadedUserProfile) {
-          setUserProfile(loadedUserProfile);
         } else {
+          // New user setup
           const name = session.user.user_metadata?.full_name || 'Finance User';
-          setUserProfile({ 
+          setUserProfile(prev => ({ 
+            ...prev,
             name, 
             email: session.user.email || '', 
             avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${session.user.id}` 
-          });
+          }));
         }
-
+        setIsInitialLoadComplete(true);
         setIsSyncing(false);
       }
     };
@@ -462,36 +405,37 @@ const AppContent: React.FC = () => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (session) {
         setIsAuthenticated(true);
-        // Explicitly set dashboard view on sign in events
         if (event === 'SIGNED_IN' || event === 'INITIAL_SESSION') {
           setActiveView(AppTab.DASHBOARD);
         }
       } else {
         setIsAuthenticated(false);
+        setIsInitialLoadComplete(false);
         localStorage.removeItem(CACHE_KEY);
       }
     });
 
     return () => subscription.unsubscribe();
-  }, [loadDataFromCache]);
+  }, []);
 
+  // Sync effect with debounce and initial load check
   useEffect(() => {
-    if (!isAuthenticated) return;
+    if (!isAuthenticated || !isInitialLoadComplete) return;
     
     const timeout = setTimeout(() => {
-      syncToSupabase({
+      const dataToSync = {
         userProfile, 
         transactions, reminders, savingsGoals, savingsRecords, billRecords, bettingRecords,
         attendanceList, leaveQuotas, leaveHistory, payrollProfile, salaryHistory, theme, language
-      });
-    }, 1000); 
+      };
+      syncToSupabase(dataToSync);
+    }, 1500); 
 
     return () => clearTimeout(timeout);
   }, [
-    userProfile, 
-    transactions, reminders, savingsGoals, savingsRecords, billRecords, bettingRecords,
-    attendanceList, leaveQuotas, leaveHistory, payrollProfile, salaryHistory, theme, language, 
-    isAuthenticated, syncToSupabase
+    userProfile, transactions, reminders, savingsGoals, savingsRecords, billRecords, 
+    bettingRecords, attendanceList, leaveQuotas, leaveHistory, payrollProfile, 
+    salaryHistory, theme, language, isAuthenticated, isInitialLoadComplete, syncToSupabase
   ]);
 
   useEffect(() => {
@@ -502,6 +446,7 @@ const AppContent: React.FC = () => {
   const handleLogout = async () => {
     await supabase.auth.signOut();
     setIsAuthenticated(false);
+    setIsInitialLoadComplete(false);
     localStorage.removeItem(CACHE_KEY);
   };
 
@@ -569,7 +514,6 @@ const AppContent: React.FC = () => {
         <Sidebar activeTab={activeView} onSelectTab={(tab) => setActiveView(tab)} language={language === 'bn' ? 'বাংলা' : 'English'} onLogout={handleLogout} />
       </aside>
       
-      {/* Mobile Sidebar with improved overlay and transition */}
       {isSidebarOpen && (
         <div className="fixed inset-0 z-[60] lg:hidden animate-in fade-in duration-300">
           <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity" onClick={() => setIsSidebarOpen(false)} />
