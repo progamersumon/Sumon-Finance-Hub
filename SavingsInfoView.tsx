@@ -52,8 +52,8 @@ const SavingsInfoView: React.FC<SavingsInfoViewProps> = ({
   const [goalForm, setGoalForm] = useState({
     name: '',
     monthlyDeposit: '', 
-    years: '10',
-    profitPercent: '9.48', 
+    years: '',
+    profitPercent: '', 
     targetAmount: '', 
     maturityValue: '', 
     color: '#6366f1'
@@ -71,7 +71,7 @@ const SavingsInfoView: React.FC<SavingsInfoViewProps> = ({
     const annualRate = parseFloat(goalForm.profitPercent);
     const yrs = parseFloat(goalForm.years);
     
-    if (!isNaN(P) && !isNaN(annualRate) && !isNaN(yrs) && P > 0) {
+    if (!isNaN(P) && !isNaN(annualRate) && !isNaN(yrs) && P > 0 && yrs > 0) {
       const totalMonths = yrs * 12;
       const monthlyRate = (annualRate / 100) / 12;
       
@@ -337,7 +337,7 @@ const SavingsInfoView: React.FC<SavingsInfoViewProps> = ({
                 <button 
                   onClick={() => { 
                     setEditingGoal(null); 
-                    setGoalForm({ name: '', monthlyDeposit: '', years: '10', targetAmount: '', profitPercent: '9.48', maturityValue: '', color: '#6366f1' }); 
+                    setGoalForm({ name: '', monthlyDeposit: '', years: '', targetAmount: '', profitPercent: '', maturityValue: '', color: '#6366f1' }); 
                     setIsGoalModalOpen(true); 
                   }}
                   className="flex items-center gap-1.5 px-3 py-1.5 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 rounded-lg text-[10px] font-black uppercase tracking-widest hover:bg-indigo-600 hover:text-white transition-all shadow-sm border border-indigo-100 dark:border-indigo-800"
@@ -383,9 +383,9 @@ const SavingsInfoView: React.FC<SavingsInfoViewProps> = ({
                                 setGoalForm({ 
                                   name: goal.name, 
                                   monthlyDeposit: goal.monthlyDeposit ? goal.monthlyDeposit.toString() : goal.plan.replace('৳', '').replace('/Mo', ''), 
-                                  years: goal.years ? goal.years.toString() : '10', 
+                                  years: goal.years ? goal.years.toString() : '', 
                                   targetAmount: goal.targetAmount.toString(), 
-                                  profitPercent: goal.profitPercent ? goal.profitPercent.toString() : '9.48', 
+                                  profitPercent: goal.profitPercent ? goal.profitPercent.toString() : '', 
                                   maturityValue: goal.maturityValue.toString(), 
                                   color: goal.color 
                                 }); 
@@ -560,7 +560,7 @@ const SavingsInfoView: React.FC<SavingsInfoViewProps> = ({
                               </button>
                               <button 
                                 onClick={() => { setRecordToDelete(record); setIsDeleteRecordConfirmOpen(true); }} 
-                                className="p-1.5 text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/30 rounded-lg transition-all border border-transparent hover:border-rose-100"
+                                className="p-1.5 text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-900/30 rounded-lg transition-all border border-transparent hover:border-rose-100"
                               >
                                 <Trash2 size={14} />
                               </button>
@@ -602,7 +602,7 @@ const SavingsInfoView: React.FC<SavingsInfoViewProps> = ({
                     value={goalForm.name} 
                     onChange={(e) => setGoalForm({...goalForm, name: e.target.value})} 
                     placeholder="e.g. Dutch Bangla Savings" 
-                    className="w-full h-10 px-4 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl text-[13px] font-black text-slate-900 dark:text-white outline-none focus:border-indigo-500 transition-all shadow-sm" 
+                    className="w-full h-10 px-4 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl text-[13px] font-medium text-slate-900 dark:text-white outline-none focus:border-indigo-500 transition-all shadow-sm" 
                   />
                 </div>
                 <div className="space-y-1.5">
@@ -622,7 +622,7 @@ const SavingsInfoView: React.FC<SavingsInfoViewProps> = ({
                     value={goalForm.monthlyDeposit} 
                     onChange={(e) => setGoalForm({...goalForm, monthlyDeposit: e.target.value})} 
                     placeholder="0" 
-                    className="w-full h-10 px-4 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl text-[13px] font-black text-slate-900 dark:text-white outline-none focus:border-indigo-500 transition-all shadow-sm" 
+                    className="w-full h-10 px-4 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl text-[13px] font-medium text-slate-900 dark:text-white outline-none focus:border-indigo-500 transition-all shadow-sm" 
                   />
                 </div>
                 <div className="space-y-1.5">
@@ -633,7 +633,7 @@ const SavingsInfoView: React.FC<SavingsInfoViewProps> = ({
                     value={goalForm.years} 
                     onChange={(e) => setGoalForm({...goalForm, years: e.target.value})} 
                     placeholder="10" 
-                    className="w-full h-10 px-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl text-[13px] font-black text-slate-900 dark:text-white outline-none focus:border-indigo-500 transition-all shadow-sm" 
+                    className="w-full h-10 px-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl text-[13px] font-medium text-slate-900 dark:text-white outline-none focus:border-indigo-500 transition-all shadow-sm" 
                   />
                 </div>
                 <div className="space-y-1.5">
@@ -645,7 +645,7 @@ const SavingsInfoView: React.FC<SavingsInfoViewProps> = ({
                       value={goalForm.profitPercent} 
                       onChange={(e) => setGoalForm({...goalForm, profitPercent: e.target.value})} 
                       placeholder="9.48" 
-                      className="w-full h-10 pl-4 pr-8 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl text-[13px] font-black text-slate-900 dark:text-white outline-none focus:border-indigo-500 transition-all shadow-sm" 
+                      className="w-full h-10 pl-4 pr-8 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl text-[13px] font-medium text-slate-900 dark:text-white outline-none focus:border-indigo-500 transition-all shadow-sm" 
                     />
                     <div className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400"><Percent size={12} /></div>
                   </div>
@@ -660,7 +660,7 @@ const SavingsInfoView: React.FC<SavingsInfoViewProps> = ({
                     value={goalForm.targetAmount} 
                     readOnly
                     placeholder="-"
-                    className="w-full h-10 px-4 bg-indigo-50/30 dark:bg-indigo-900/10 border border-indigo-100 dark:border-indigo-800/50 rounded-2xl text-[13px] font-black text-indigo-700 dark:text-indigo-400 outline-none cursor-default shadow-sm" 
+                    className="w-full h-10 px-4 bg-indigo-50/30 dark:bg-indigo-900/10 border border-indigo-100 dark:border-indigo-800/50 rounded-2xl text-[13px] font-medium text-indigo-700 dark:text-indigo-400 outline-none cursor-default shadow-sm" 
                   />
                 </div>
                 <div className="space-y-1.5">
@@ -670,7 +670,7 @@ const SavingsInfoView: React.FC<SavingsInfoViewProps> = ({
                     value={goalForm.maturityValue} 
                     readOnly 
                     placeholder="-" 
-                    className="w-full h-10 px-4 bg-emerald-50/30 dark:bg-emerald-900/10 border border-emerald-100 dark:border-emerald-800/50 rounded-2xl text-[13px] font-black text-emerald-700 dark:text-emerald-400 outline-none cursor-default shadow-sm" 
+                    className="w-full h-10 px-4 bg-emerald-50/30 dark:bg-emerald-900/10 border border-emerald-100 dark:border-emerald-800/50 rounded-2xl text-[13px] font-medium text-emerald-700 dark:text-emerald-400 outline-none cursor-default shadow-sm" 
                   />
                 </div>
               </div>
