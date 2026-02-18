@@ -85,7 +85,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, onSelectTab, isMobile, lan
         </div>
       )}
 
-      <nav className="flex-1 overflow-y-auto px-2 py-3 space-y-1.5">
+      <nav className="flex-1 overflow-y-auto px-2 py-3 space-y-1.5 custom-scrollbar">
         {menuItems.map((item) => (
           <button
             key={item.id}

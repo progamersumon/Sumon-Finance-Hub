@@ -20,7 +20,7 @@ import AttendanceView from './AttendanceView';
 import LeaveInfoView from './LeaveInfoView';
 import { t } from './translations';
 import { supabase } from './supabaseClient';
-import { Mail, Lock, ChevronRight } from 'lucide-react';
+import { Mail, Lock, ChevronRight, ArrowLeft, KeyRound, Smartphone } from 'lucide-react';
 
 const INITIAL_LEAVE_QUOTAS: LeaveType[] = [
   { id: 'annual', type: 'Annual Leave', total: 20, color: 'bg-blue-600' },
@@ -31,8 +31,8 @@ const INITIAL_LEAVE_QUOTAS: LeaveType[] = [
 const CACHE_KEY = 'finance_hub_data_cache';
 
 const LoginView: React.FC<{ onLogin: (user: any) => void, language: LanguageType }> = ({ onLogin, language }) => {
-  const [mode, setMode] = useState<'login' | 'signup'>('login');
-  const [formData, setFormData] = useState({ name: '', email: '', password: '' });
+  const [mode, setMode] = useState<'login' | 'signup' | 'forgot_p1' | 'forgot_p2'>('login');
+  const [formData, setFormData] = useState({ name: '', email: '', password: '', otp: '' });
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
@@ -69,9 +69,57 @@ const LoginView: React.FC<{ onLogin: (user: any) => void, language: LanguageType
     }
   };
 
+  const handleForgotStep1 = async () => {
+    if (!formData.email.trim() || !formData.password.trim()) {
+      setErrorMessage(t('fillAllFields', language));
+      return;
+    }
+    setLoading(true);
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(formData.email);
+      if (error) throw error;
+      setMode('forgot_p2');
+      alert(t('otpSent', language));
+    } catch (err: any) {
+      setErrorMessage(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleForgotVerify = async () => {
+    if (!formData.otp.trim()) {
+      setErrorMessage(language === 'bn' ? "ওটিপি দিন" : "Enter OTP");
+      return;
+    }
+    setLoading(true);
+    try {
+      // Step A: Verify the OTP
+      const { data, error: verifyError } = await supabase.auth.verifyOtp({
+        email: formData.email,
+        token: formData.otp,
+        type: 'recovery'
+      });
+      if (verifyError) throw verifyError;
+
+      // Step B: Update the password now that we have a session
+      const { error: updateError } = await supabase.auth.updateUser({
+        password: formData.password
+      });
+      if (updateError) throw updateError;
+
+      alert(t('passwordResetSuccess', language));
+      setMode('login');
+      setFormData({ ...formData, password: '', otp: '' });
+    } catch (err: any) {
+      setErrorMessage(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="h-screen w-full flex overflow-hidden font-sans bg-white selection:bg-blue-100">
-      {/* Autofill CSS Reset to prevent black/yellow background in inputs */}
       <style>{`
         input:-webkit-autofill,
         input:-webkit-autofill:hover, 
@@ -83,33 +131,35 @@ const LoginView: React.FC<{ onLogin: (user: any) => void, language: LanguageType
         }
       `}</style>
 
-      {/* Left Column: Branding (Image Reference) */}
-      <div className="hidden md:flex flex-1 bg-gradient-to-br from-[#0088ff] to-[#0077ee] flex-col items-center justify-center p-12 text-center text-white relative">
-        <div className="max-w-xl space-y-4">
+      <div className="hidden md:flex flex-1 bg-gradient-to-br from-[#0088ff] to-[#0077ee] flex-col items-center justify-center p-12 text-center text-white relative overflow-hidden">
+        <div className="absolute inset-0 opacity-10 bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:20px_20px]" />
+        <div className="max-w-xl space-y-4 relative z-10">
           <h1 className="text-6xl font-black tracking-tight leading-none drop-shadow-sm mb-6">Welcome Back!</h1>
           <p className="text-[14px] font-medium text-blue-50/90 leading-relaxed mx-auto whitespace-nowrap">
-            Keep your data organized and your business running<br />smoothly with our advanced management system.
+            Keep your data organized using our AI-powered<br />management dashboard and tracking system.
           </p>
           
-          {/* Pagination Indicators - spacing further reduced to pt-1 */}
           <div className="pt-1 flex items-center justify-center gap-2">
             <div className="w-12 h-1 bg-blue-300/40 rounded-full" />
-            <div className="w-2 h-2 bg-white rounded-full" />
+            <div className="w-2 h-2 bg-white rounded-full animate-pulse" />
             <div className="w-12 h-1 bg-blue-300/40 rounded-full" />
           </div>
         </div>
       </div>
 
-      {/* Right Column: Form (Image Reference) */}
-      <div className="flex-1 flex flex-col items-center justify-center p-6 bg-white">
+      <div className="flex-1 flex flex-col items-center justify-center p-6 bg-white animate-in fade-in duration-500">
         <div className="w-full max-w-sm">
           <div className="text-center mb-10">
-            <h2 className="text-[42px] font-black text-[#0088ff] uppercase tracking-tight leading-none mb-3">User Login</h2>
+            <h2 className="text-[42px] font-black text-[#0088ff] uppercase tracking-tight leading-none mb-3">
+              {mode === 'login' && 'User Login'}
+              {mode === 'signup' && 'Sign Up'}
+              {(mode === 'forgot_p1' || mode === 'forgot_p2') && 'Reset Access'}
+            </h2>
             <div className="w-16 h-1.5 bg-[#0088ff] mx-auto rounded-full" />
           </div>
 
           {errorMessage && (
-            <div className="mb-6 p-4 bg-rose-50 text-rose-600 text-xs rounded-2xl font-bold border border-rose-100 animate-in fade-in slide-in-from-top-2">
+            <div className="mb-6 p-4 bg-rose-50 text-rose-600 text-xs rounded-2xl font-bold border border-rose-100 animate-in shake duration-300">
               {errorMessage}
             </div>
           )}
@@ -131,40 +181,75 @@ const LoginView: React.FC<{ onLogin: (user: any) => void, language: LanguageType
               </div>
             )}
 
-            <div className="relative">
-              <label className="absolute -top-2.5 left-6 px-2 bg-white text-[#0088ff] text-[10px] font-black uppercase tracking-widest z-10">Email Id</label>
-              <div className="flex items-center bg-white border border-blue-200 rounded-full px-6 py-3.5 focus-within:border-[#0088ff] focus-within:ring-4 focus-within:ring-blue-50 transition-all group">
-                <Mail className="text-blue-300 mr-3 shrink-0 group-focus-within:text-[#0088ff] transition-colors" size={18} />
-                <input 
-                  type="email" 
-                  placeholder="user@example.com" 
-                  value={formData.email} 
-                  onChange={e => setFormData({...formData, email: e.target.value})} 
-                  className="w-full bg-white text-slate-700 font-bold outline-none text-sm placeholder:text-slate-300" 
-                />
-              </div>
-            </div>
+            {mode !== 'forgot_p2' && (
+              <>
+                <div className="relative">
+                  <label className="absolute -top-2.5 left-6 px-2 bg-white text-[#0088ff] text-[10px] font-black uppercase tracking-widest z-10">
+                    {mode === 'forgot_p1' ? 'Enter Account Email' : 'Email Id'}
+                  </label>
+                  <div className="flex items-center bg-white border border-blue-200 rounded-full px-6 py-3.5 focus-within:border-[#0088ff] focus-within:ring-4 focus-within:ring-blue-50 transition-all group">
+                    <Mail className="text-blue-300 mr-3 shrink-0 group-focus-within:text-[#0088ff] transition-colors" size={18} />
+                    <input 
+                      type="email" 
+                      placeholder="user@example.com" 
+                      value={formData.email} 
+                      onChange={e => setFormData({...formData, email: e.target.value})} 
+                      className="w-full bg-white text-slate-700 font-bold outline-none text-sm placeholder:text-slate-300" 
+                    />
+                  </div>
+                </div>
 
-            <div className="relative">
-              <label className="absolute -top-2.5 left-6 px-2 bg-white text-[#0088ff] text-[10px] font-black uppercase tracking-widest z-10">Password</label>
-              <div className="flex items-center bg-white border border-blue-200 rounded-full px-6 py-3.5 focus-within:border-[#0088ff] focus-within:ring-4 focus-within:ring-blue-50 transition-all group">
-                <Lock className="text-blue-300 mr-3 shrink-0 group-focus-within:text-[#0088ff] transition-colors" size={18} />
-                <input 
-                  type="password" 
-                  placeholder="••••••••••••••••" 
-                  value={formData.password} 
-                  onChange={e => setFormData({...formData, password: e.target.value})} 
-                  className="w-full bg-white text-slate-700 font-bold outline-none text-sm placeholder:text-slate-300" 
-                />
+                <div className="relative">
+                  <label className="absolute -top-2.5 left-6 px-2 bg-white text-[#0088ff] text-[10px] font-black uppercase tracking-widest z-10">
+                    {mode === 'forgot_p1' ? 'Enter New Password' : 'Password'}
+                  </label>
+                  <div className="flex items-center bg-white border border-blue-200 rounded-full px-6 py-3.5 focus-within:border-[#0088ff] focus-within:ring-4 focus-within:ring-blue-50 transition-all group">
+                    <Lock className="text-blue-300 mr-3 shrink-0 group-focus-within:text-[#0088ff] transition-colors" size={18} />
+                    <input 
+                      type="password" 
+                      placeholder="••••••••••••••••" 
+                      value={formData.password} 
+                      onChange={e => setFormData({...formData, password: e.target.value})} 
+                      className="w-full bg-white text-slate-700 font-bold outline-none text-sm placeholder:text-slate-300" 
+                    />
+                  </div>
+                  {mode === 'login' && (
+                    <div className="flex justify-end mt-1.5">
+                      <button 
+                        onClick={() => setMode('forgot_p1')}
+                        className="text-[10px] font-bold text-slate-400 italic hover:text-[#0088ff] transition-colors"
+                      >
+                        {t('forgotPassword', language)}
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </>
+            )}
+
+            {mode === 'forgot_p2' && (
+              <div className="relative animate-in slide-in-from-right duration-300">
+                <label className="absolute -top-2.5 left-6 px-2 bg-white text-[#0088ff] text-[10px] font-black uppercase tracking-widest z-10">Verification Code</label>
+                <div className="flex items-center bg-white border border-blue-200 rounded-full px-6 py-3.5 focus-within:border-[#0088ff] focus-within:ring-4 focus-within:ring-blue-50 transition-all group">
+                  <KeyRound className="text-blue-300 mr-3 shrink-0 group-focus-within:text-[#0088ff] transition-colors" size={18} />
+                  <input 
+                    type="text" 
+                    placeholder="Enter 6-digit OTP" 
+                    value={formData.otp} 
+                    onChange={e => setFormData({...formData, otp: e.target.value})} 
+                    className="w-full bg-white text-slate-700 font-bold outline-none text-sm placeholder:text-slate-300 text-center tracking-[1em] pl-4" 
+                  />
+                </div>
+                <p className="text-[10px] text-slate-400 font-bold text-center mt-4">OTP sent to: <span className="text-[#0088ff]">{formData.email}</span></p>
               </div>
-              <div className="flex justify-end mt-1.5">
-                <button className="text-[10px] font-bold text-slate-400 italic hover:text-[#0088ff] transition-colors">Forgot your password?</button>
-              </div>
-            </div>
+            )}
 
             <div className="pt-2">
               <button 
-                onClick={handleAuthSubmit} 
+                onClick={
+                  mode === 'login' || mode === 'signup' ? handleAuthSubmit : 
+                  mode === 'forgot_p1' ? handleForgotStep1 : handleForgotVerify
+                } 
                 disabled={loading} 
                 className="w-full bg-[#0099ff] hover:bg-[#0088ff] text-white font-black py-4 rounded-full shadow-xl shadow-blue-500/20 transition-all flex items-center justify-center gap-2 active:scale-[0.98] group"
               >
@@ -172,20 +257,31 @@ const LoginView: React.FC<{ onLogin: (user: any) => void, language: LanguageType
                   <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
                 ) : (
                   <>
-                    <span className="text-sm uppercase tracking-widest">Login</span>
+                    <span className="text-sm uppercase tracking-widest">
+                      {mode === 'login' ? 'Login' : mode === 'signup' ? 'Create Account' : mode === 'forgot_p1' ? 'Send OTP' : 'Verify & Reset'}
+                    </span>
                     <ChevronRight size={18} className="group-hover:translate-x-1 transition-transform" />
                   </>
                 )}
               </button>
             </div>
 
-            <div className="text-center pt-2">
-              <button 
-                onClick={() => setMode(mode === 'login' ? 'signup' : 'login')} 
-                className="text-[12px] font-bold text-slate-600 hover:text-[#0088ff] transition-colors"
-              >
-                {mode === 'login' ? "Don't have an account? Sign up" : "Already have an account? Login"}
-              </button>
+            <div className="text-center pt-2 flex flex-col gap-3">
+              {mode === 'forgot_p1' || mode === 'forgot_p2' ? (
+                <button 
+                  onClick={() => setMode('login')} 
+                  className="text-[12px] font-bold text-slate-400 hover:text-slate-600 transition-colors flex items-center justify-center gap-2 mx-auto"
+                >
+                  <ArrowLeft size={14} /> Back to Login
+                </button>
+              ) : (
+                <button 
+                  onClick={() => setMode(mode === 'login' ? 'signup' : 'login')} 
+                  className="text-[12px] font-bold text-slate-600 hover:text-[#0088ff] transition-colors"
+                >
+                  {mode === 'login' ? "Don't have an account? Sign up" : "Already have an account? Login"}
+                </button>
+              )}
             </div>
           </div>
         </div>
@@ -219,10 +315,8 @@ const AppContent: React.FC = () => {
   const [theme, setTheme] = useState<ThemeType>('light');
   const [isSyncing, setIsSyncing] = useState(false);
 
-  // Ref for the main scrollable container to handle scroll-to-top
   const mainContentRef = useRef<HTMLDivElement>(null);
 
-  // Core Data States
   const [userProfile, setUserProfile] = useState<UserProfile>({ name: 'User', email: '', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Sumon' });
   const [transactions, setTransactions] = useState<Transaction[]>(MOCK_TRANSACTIONS);
   const [reminders, setReminders] = useState<Reminder[]>(MOCK_REMINDERS);
@@ -257,7 +351,6 @@ const AppContent: React.FC = () => {
     { id: '2', year: 2023, inc: 0, amt: 0, total: 14500 }
   ]);
 
-  // Scroll to top effect when activeView changes
   useEffect(() => {
     if (mainContentRef.current) {
       mainContentRef.current.scrollTo({ top: 0, behavior: 'smooth' });
@@ -309,7 +402,7 @@ const AppContent: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    loadDataFromCache(); // Instant load from local storage
+    loadDataFromCache();
 
     const initData = async () => {
       const { data: { session } } = await supabase.auth.getSession();
@@ -344,7 +437,6 @@ const AppContent: React.FC = () => {
           localStorage.setItem(CACHE_KEY, JSON.stringify(c));
         }
         
-        // Finalize userProfile: DB data takes priority over Auth metadata
         if (loadedUserProfile) {
           setUserProfile(loadedUserProfile);
         } else {
@@ -374,7 +466,6 @@ const AppContent: React.FC = () => {
     return () => subscription.unsubscribe();
   }, [loadDataFromCache]);
 
-  // Debounced Syncing
   useEffect(() => {
     if (!isAuthenticated) return;
     
@@ -465,14 +556,23 @@ const AppContent: React.FC = () => {
       <aside className="hidden lg:flex w-56 flex-col bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800">
         <Sidebar activeTab={activeView} onSelectTab={(tab) => setActiveView(tab)} language={language === 'bn' ? 'বাংলা' : 'English'} onLogout={handleLogout} />
       </aside>
+      
+      {/* Mobile Sidebar with improved overlay and transition */}
       {isSidebarOpen && (
-        <div className="fixed inset-0 z-[60] lg:hidden">
-          <div className="absolute inset-0 bg-slate-900/50 backdrop-blur-sm" onClick={() => setIsSidebarOpen(false)} />
-          <div className="absolute left-0 top-0 bottom-0 w-64 bg-white dark:bg-slate-900 animate-in slide-in-from-left duration-300">
+        <div className="fixed inset-0 z-[60] lg:hidden animate-in fade-in duration-300">
+          <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity" onClick={() => setIsSidebarOpen(false)} />
+          <div className="absolute left-0 top-0 bottom-0 w-72 bg-white dark:bg-slate-900 shadow-2xl animate-in slide-in-from-left duration-500 transition-transform">
             <Sidebar activeTab={activeView} onSelectTab={(tab) => { setActiveView(tab); setIsSidebarOpen(false); }} isMobile={true} language={language === 'bn' ? 'বাংলা' : 'English'} onLogout={handleLogout} />
+            <button 
+              onClick={() => setIsSidebarOpen(false)}
+              className="absolute top-4 -right-12 w-10 h-10 bg-white dark:bg-slate-800 rounded-xl flex items-center justify-center text-slate-500 shadow-lg border border-slate-100 dark:border-slate-700"
+            >
+              <ChevronRight size={24} className="rotate-180" />
+            </button>
           </div>
         </div>
       )}
+
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
         <Header 
           activeTab={activeView} 

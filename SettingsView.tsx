@@ -20,6 +20,7 @@ import {
   Database
 } from 'lucide-react';
 import { LanguageType, ThemeType } from './types';
+import { supabase } from './supabaseClient';
 
 interface SettingsViewProps {
   language: LanguageType;
@@ -40,11 +41,11 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ language, setLanguag
   const isDarkMode = theme === 'dark';
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
   const [isEditingProfile, setIsEditingProfile] = useState(false);
+  const [isUpdatingPassword, setIsUpdatingPassword] = useState(false);
   
   const [tempProfile, setTempProfile] = useState(profile);
 
   const [passwordData, setPasswordData] = useState({
-    oldPassword: '',
     newPassword: '',
     confirmPassword: ''
   });
@@ -52,7 +53,6 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ language, setLanguag
   const translations = {
     en: {
       profileSettings: 'Profile Settings',
-      manageIdentity: 'Manage your identity',
       fullName: 'Full Name',
       role: 'Role/Designation',
       saveChanges: 'Save Changes',
@@ -63,10 +63,9 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ language, setLanguag
       darkMode: 'Dark Mode',
       languageLabel: 'Language',
       regionalLocalization: 'Regional localization',
-      securitySettings: 'Security & Access',
+      securitySettings: 'Security & Password',
       changePassword: 'Change Password',
-      updateSecurity: 'Update your security',
-      oldPassword: 'Current Password',
+      updateSecurity: 'Update your login credentials',
       newPassword: 'New Password',
       confirmPassword: 'Confirm Password',
       updatePassword: 'Update Password',
@@ -74,16 +73,14 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ language, setLanguag
       securityControls: 'Security controls',
       signOut: 'Sign Out from Account',
       signOutConfirm: 'Sign Out?',
-      signOutMsg: 'Are you sure you want to end your current session and sign out of the application?',
+      signOutMsg: 'Are you sure you want to end your current session and sign out?',
       confirm: 'Confirm Logout',
       cancel: 'Cancel',
-      version: 'DataFlow Management v2.5.0',
       cloudStatus: 'Cloud Sync Active',
-      backendUrl: 'emfgzqyhareavbkqortr.supabase.co'
+      backendUrl: 'Supabase Cloud Service'
     },
     bn: {
       profileSettings: 'প্রোফাইল সেটিংস',
-      manageIdentity: 'আপনার পরিচয় পরিচালনা করুন',
       fullName: 'পুরো নাম',
       role: 'পদবী',
       saveChanges: 'পরিবর্তন সংরক্ষণ করুন',
@@ -94,27 +91,50 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ language, setLanguag
       darkMode: 'ডার্ক মোড',
       languageLabel: 'ভাষা',
       regionalLocalization: 'আঞ্চলিক ভাষা',
-      securitySettings: 'নিরাপত্তা ও অ্যাক্সেস',
+      securitySettings: 'নিরাপত্তা ও পাসওয়ার্ড',
       changePassword: 'পাসওয়ার্ড পরিবর্তন',
-      updateSecurity: 'নিরাপত্তা আপডেট করুন',
-      oldPassword: 'বর্তমান পাসওয়ার্ড',
+      updateSecurity: 'আপনার লগইন তথ্য আপডেট করুন',
       newPassword: 'নতুন পাসওয়ার্ড',
       confirmPassword: 'পাসওয়ার্ড নিশ্চিত করুন',
       updatePassword: 'পাসওয়ার্ড আপডেট করুন',
       systemAccess: 'সিস্টেম অ্যাক্সেস',
       securityControls: 'নিরাপত্তা নিয়ন্ত্রণ',
-      signOut: 'অ্যাকাউন্ট থেকে লগ আউট করুন',
+      signOut: 'অ্যাকাউন্ট থেকে লগ আউট',
       signOutConfirm: 'লগ আউট করবেন?',
-      signOutMsg: 'আপনি কি নিশ্চিত যে আপনি আপনার বর্তমান সেশন শেষ করে অ্যাপ্লিকেশন থেকে লগ আউট করতে চান?',
+      signOutMsg: 'আপনি কি নিশ্চিত যে আপনি আপনার সেশন শেষ করে লগ আউট করতে চান?',
       confirm: 'লগ আউট নিশ্চিত করুন',
       cancel: 'বাতিল',
-      version: 'ডেটাফ্লো ম্যানেজমেন্ট ভার্সন ২.৫.০',
       cloudStatus: 'ক্লাউড সিঙ্ক সক্রিয়',
-      backendUrl: 'emfgzqyhareavbkqortr.supabase.co'
+      backendUrl: 'সুপাবেস ক্লাউড সার্ভিস'
     }
   };
 
   const t = translations[language];
+
+  const handleUpdatePassword = async () => {
+    if (!passwordData.newPassword || !passwordData.confirmPassword) {
+      alert(language === 'bn' ? "সবগুলো ঘর পূরণ করুন" : "Please fill all fields");
+      return;
+    }
+    if (passwordData.newPassword !== passwordData.confirmPassword) {
+      alert(language === 'bn' ? "পাসওয়ার্ড মিলেনি" : "Passwords do not match");
+      return;
+    }
+
+    setIsUpdatingPassword(true);
+    try {
+      const { error } = await supabase.auth.updateUser({
+        password: passwordData.newPassword
+      });
+      if (error) throw error;
+      alert(language === 'bn' ? "পাসওয়ার্ড সফলভাবে আপডেট হয়েছে!" : "Password updated successfully!");
+      setPasswordData({ newPassword: '', confirmPassword: '' });
+    } catch (err: any) {
+      alert(err.message);
+    } finally {
+      setIsUpdatingPassword(false);
+    }
+  };
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -146,6 +166,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ language, setLanguag
       
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
         
+        {/* Column 1: Profile */}
         <section className="space-y-4">
           <div className="flex items-center gap-2 ml-4">
             <div className="w-1 h-4 bg-purple-600 rounded-full" />
@@ -228,9 +249,9 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ language, setLanguag
           </div>
         </section>
 
+        {/* Column 2: Appearance & Language */}
         <section className="space-y-6">
           <div className="flex flex-col gap-6">
-            {/* Language Section (Moved from Column 3) */}
             <div className="space-y-4">
               <div className="flex items-center gap-2 ml-4">
                 <div className="w-1 h-4 bg-emerald-600 rounded-full" />
@@ -246,7 +267,6 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ language, setLanguag
                     <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest">{t.regionalLocalization}</p>
                   </div>
                 </div>
-
                 <div className="grid grid-cols-1 gap-3">
                   {[
                     { id: 'en', name: 'English', flag: '🇺🇸' },
@@ -279,7 +299,6 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ language, setLanguag
                     <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest">{t.customizeView}</p>
                   </div>
                 </div>
-
                 <div className="grid grid-cols-1 gap-3">
                   <button onClick={() => setTheme('light')} className={`p-3 rounded-2xl border-2 transition-all flex items-center justify-between px-5 ${!isDarkMode ? 'border-blue-500 bg-blue-50/50' : 'border-slate-100 dark:border-slate-800 hover:border-slate-300'}`}>
                     <div className="flex items-center gap-3">
@@ -301,9 +320,9 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ language, setLanguag
           </div>
         </section>
 
+        {/* Column 3: Backend & Security */}
         <section className="space-y-6">
           <div className="flex flex-col gap-6">
-            {/* Backend Info Section (Moved from Column 2) */}
             <div className="space-y-4">
               <div className="flex items-center gap-2 ml-4">
                 <div className="w-1 h-4 bg-indigo-600 rounded-full" />
@@ -318,6 +337,56 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ language, setLanguag
                       <h3 className="text-[14px] font-black text-indigo-800 dark:text-indigo-400 uppercase tracking-tight">{t.cloudStatus}</h3>
                       <p className="text-[9px] font-bold text-indigo-400 uppercase tracking-widest">{t.backendUrl}</p>
                    </div>
+                </div>
+              </div>
+            </div>
+
+            {/* NEW: Password Change Section (Below Backend Info) */}
+            <div className="space-y-4">
+              <div className="flex items-center gap-2 ml-4">
+                <div className="w-1 h-4 bg-orange-600 rounded-full" />
+                <h2 className="text-[11px] font-black text-slate-500 uppercase tracking-[0.2em]">{t.securitySettings}</h2>
+              </div>
+              <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-[32px] p-6 shadow-sm group">
+                <div className="flex items-center gap-4 mb-5">
+                  <div className="w-10 h-10 bg-orange-100 dark:bg-orange-900/30 text-orange-600 rounded-xl flex items-center justify-center shadow-inner">
+                    <KeyRound size={20} />
+                  </div>
+                  <div>
+                    <h3 className="text-[13px] font-black text-slate-800 dark:text-white uppercase tracking-tight">{t.changePassword}</h3>
+                    <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest">{t.updateSecurity}</p>
+                  </div>
+                </div>
+                
+                <div className="space-y-4">
+                  <div className="space-y-1">
+                    <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1">{t.newPassword}</label>
+                    <input 
+                      type="password" 
+                      value={passwordData.newPassword}
+                      onChange={(e) => setPasswordData({...passwordData, newPassword: e.target.value})}
+                      placeholder="••••••••"
+                      className="w-full h-10 px-4 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl text-[12px] font-bold outline-none focus:border-orange-500 transition-all dark:text-white"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1">{t.confirmPassword}</label>
+                    <input 
+                      type="password" 
+                      value={passwordData.confirmPassword}
+                      onChange={(e) => setPasswordData({...passwordData, confirmPassword: e.target.value})}
+                      placeholder="••••••••"
+                      className="w-full h-10 px-4 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl text-[12px] font-bold outline-none focus:border-orange-500 transition-all dark:text-white"
+                    />
+                  </div>
+                  <button 
+                    onClick={handleUpdatePassword}
+                    disabled={isUpdatingPassword}
+                    className="w-full h-10 bg-orange-600 hover:bg-orange-700 text-white rounded-xl font-black text-[11px] uppercase shadow-lg shadow-orange-600/20 transition-all active:scale-95 flex items-center justify-center gap-2"
+                  >
+                    {isUpdatingPassword ? <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> : <ShieldCheck size={16} />}
+                    {t.updatePassword}
+                  </button>
                 </div>
               </div>
             </div>

@@ -18,9 +18,10 @@
   scrollbar-width: none;
 }
 
+/* Custom scrollbar - Thinner and White as requested */
 .custom-scrollbar::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 3px;
+  height: 3px;
 }
 
 .custom-scrollbar::-webkit-scrollbar-track {
@@ -28,7 +29,11 @@
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  @apply bg-slate-200 dark:bg-slate-800 rounded-full hover:bg-slate-300 dark:hover:bg-slate-700 transition-colors;
+  @apply bg-white dark:bg-slate-600 rounded-full border border-slate-200 dark:border-slate-800 transition-colors;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  @apply bg-slate-50 dark:bg-slate-500;
 }
 
 @keyframes float {

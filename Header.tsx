@@ -70,7 +70,8 @@ const Header: React.FC<HeaderProps> = ({
       <div className="flex items-center gap-3 overflow-hidden">
         <button 
           onClick={onOpenMenu}
-          className="p-1.5 text-gray-500 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-md md:hidden shrink-0"
+          className="p-1.5 text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 rounded-lg lg:hidden shrink-0 transition-colors border border-indigo-100 dark:border-indigo-800/50"
+          aria-label="Open Menu"
         >
           <Menu size={20} />
         </button>

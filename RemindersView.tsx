@@ -282,14 +282,14 @@ const RemindersView: React.FC<RemindersViewProps> = ({ language, reminders, setR
           {!reminder.completed && (
             <button 
               onClick={() => { setEditingReminder(reminder); setFormData({...formData, title: reminder.title, date: reminder.date, priority: reminder.priority as any, note: reminder.note || ''}); setIsModalOpen(true); }}
-              className="w-9 h-9 bg-slate-50 dark:bg-slate-800 text-slate-400 dark:text-slate-500 rounded-xl flex items-center justify-center hover:bg-indigo-50 hover:text-indigo-600 dark:hover:bg-indigo-900/30 transition-all border border-transparent hover:border-indigo-100"
+              className="w-9 h-9 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 rounded-xl flex items-center justify-center hover:bg-indigo-600 hover:text-white transition-all border border-indigo-100 dark:border-indigo-800 shadow-sm active:scale-95"
             >
               <Pencil size={15} />
             </button>
           )}
           <button 
             onClick={() => handleTriggerDelete(reminder.id)}
-            className="w-9 h-9 bg-slate-50 dark:bg-slate-800 text-slate-400 dark:text-slate-500 rounded-xl flex items-center justify-center hover:bg-rose-50 hover:text-rose-600 dark:hover:bg-rose-900/30 transition-all border border-transparent hover:border-rose-100"
+            className="w-9 h-9 bg-rose-50 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400 rounded-xl flex items-center justify-center hover:bg-rose-600 hover:text-white transition-all border border-rose-100 dark:border-rose-800 shadow-sm active:scale-95"
           >
             <Trash2 size={15} />
           </button>
