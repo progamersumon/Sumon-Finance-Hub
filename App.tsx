@@ -133,14 +133,13 @@ const LoginView: React.FC<{ onLogin: (user: any) => void, language: LanguageType
 
       <div className="hidden md:flex flex-1 bg-gradient-to-br from-[#0088ff] to-[#0077ee] flex-col items-center justify-center p-12 text-center text-white relative overflow-hidden">
         <div className="absolute inset-0 opacity-10 bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:20px_20px]" />
-        <div className="max-w-xl space-y-0 relative z-10">
-          <h1 className="text-[30px] font-medium text-blue-50/90 leading-relaxed mx-auto whitespace-nowrap">Hello User,</h1>
-          <h1 className="text-6xl font-black tracking-tight leading-none drop-shadow-sm">Welcome Back!</h1>
-          <p className="text-[14px] font-medium text-blue-50/90 leading-relaxed mx-auto whitespace-nowrap pt-6">
+        <div className="max-w-xl space-y-4 relative z-10">
+          <h1 className="text-6xl font-black tracking-tight leading-none drop-shadow-sm mb-6">Welcome Back!</h1>
+          <p className="text-[14px] font-medium text-blue-50/90 leading-relaxed mx-auto whitespace-nowrap">
             Keep your data organized using our AI-powered<br />management dashboard and tracking system.
           </p>
           
-          <div className="pt-8 flex items-center justify-center gap-2">
+          <div className="pt-1 flex items-center justify-center gap-2">
             <div className="w-12 h-1 bg-blue-300/40 rounded-full" />
             <div className="w-2 h-2 bg-white rounded-full animate-pulse" />
             <div className="w-12 h-1 bg-blue-300/40 rounded-full" />
