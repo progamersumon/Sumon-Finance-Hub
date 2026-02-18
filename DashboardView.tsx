@@ -217,14 +217,14 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ language, profile,
 
   return (
     <div className="space-y-6 animate-in fade-in duration-500 pb-20">
-      {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <h2 className="text-3xl font-black text-slate-900 dark:text-white tracking-tight leading-tight">
-            {t.welcome} <span className="text-indigo-600">{profile.name}</span>
-          </h2>
-          <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mt-1">{t.overview}</p>
-        </div>
+      {/* Updated Header Layout: Welcome on Left, Overview on Right */}
+      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-2 px-1">
+        <h2 className="text-2xl md:text-3xl font-black text-slate-900 dark:text-white tracking-tight leading-tight">
+          {t.welcome} <span className="text-indigo-600">{profile.name}</span>
+        </h2>
+        <p className="text-[10px] md:text-[11px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] sm:mb-1">
+          {t.overview}
+        </p>
       </div>
 
       {/* Main Layout Grid */}
