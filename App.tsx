@@ -314,7 +314,14 @@ const User = ({ className, size }: { className?: string, size?: number }) => (
 const AppContent: React.FC = () => {
   const [language, setLanguage] = useState<LanguageType>('en');
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [activeView, setActiveView] = useState<AppTab>(AppTab.DASHBOARD);
+  const [activeView, setActiveView] = useState<AppTab>(() => {
+    const saved = localStorage.getItem('financeHubActiveTab');
+    return (saved as AppTab) || AppTab.DASHBOARD;
+  });
+
+  useEffect(() => {
+    localStorage.setItem('financeHubActiveTab', activeView);
+  }, [activeView]);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [theme, setTheme] = useState<ThemeType>('light');
   const [isSyncing, setIsSyncing] = useState(false);
@@ -412,7 +419,6 @@ const AppContent: React.FC = () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (session) {
         setIsAuthenticated(true);
-        setActiveView(AppTab.DASHBOARD);
         setIsSyncing(true);
         const { data } = await supabase
           .from('user_data')
@@ -462,10 +468,6 @@ const AppContent: React.FC = () => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (session) {
         setIsAuthenticated(true);
-        // Explicitly set dashboard view on sign in events
-        if (event === 'SIGNED_IN' || event === 'INITIAL_SESSION') {
-          setActiveView(AppTab.DASHBOARD);
-        }
       } else {
         setIsAuthenticated(false);
         localStorage.removeItem(CACHE_KEY);
@@ -502,6 +504,8 @@ const AppContent: React.FC = () => {
   const handleLogout = async () => {
     await supabase.auth.signOut();
     setIsAuthenticated(false);
+    setActiveView(AppTab.DASHBOARD);
+    localStorage.removeItem('financeHubActiveTab');
     localStorage.removeItem(CACHE_KEY);
   };
 
