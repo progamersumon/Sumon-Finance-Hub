@@ -20,7 +20,7 @@ import AttendanceView from './AttendanceView';
 import LeaveInfoView from './LeaveInfoView';
 import { t } from './translations';
 import { supabase } from './supabaseClient';
-import { Mail, Lock, ChevronRight, ArrowLeft, KeyRound, Smartphone, Layers } from 'lucide-react';
+import { Mail, Lock, ChevronRight, ArrowLeft, KeyRound, Smartphone, Layers, Eye, EyeOff } from 'lucide-react';
 
 const INITIAL_LEAVE_QUOTAS: LeaveType[] = [
   { id: 'casual', type: 'Casual Leave', total: 10, color: 'bg-amber-500' },
@@ -35,6 +35,7 @@ const LoginView: React.FC<{ onLogin: (user: any) => void, language: LanguageType
   const [formData, setFormData] = useState({ name: '', email: '', password: '', otp: '' });
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleAuthSubmit = async () => {
     setErrorMessage(null);
@@ -210,12 +211,19 @@ const LoginView: React.FC<{ onLogin: (user: any) => void, language: LanguageType
                   <div className="flex items-center bg-white border border-blue-200 rounded-full px-6 py-3.5 focus-within:border-[#0088ff] focus-within:ring-4 focus-within:ring-blue-50 transition-all group">
                     <Lock className="text-blue-300 mr-3 shrink-0 group-focus-within:text-[#0088ff] transition-colors" size={18} />
                     <input 
-                      type="password" 
+                      type={showPassword ? "text" : "password"} 
                       placeholder="••••••••••••••••" 
                       value={formData.password} 
                       onChange={e => setFormData({...formData, password: e.target.value})} 
                       className="w-full bg-white text-slate-700 font-bold outline-none text-sm placeholder:text-slate-300" 
                     />
+                    <button 
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="text-blue-300 hover:text-[#0088ff] transition-colors ml-2 focus:outline-none"
+                    >
+                      {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                    </button>
                   </div>
                   {mode === 'login' && (
                     <div className="flex justify-end mt-1.5">
