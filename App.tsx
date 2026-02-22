@@ -220,7 +220,8 @@ const LoginView: React.FC<{ onLogin: (user: any) => void, language: LanguageType
                     <button 
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="text-blue-300 hover:text-[#0088ff] transition-colors ml-2 focus:outline-none"
+                      className="text-blue-400 hover:text-[#0088ff] transition-colors ml-2 focus:outline-none p-1 rounded-md hover:bg-blue-50 dark:hover:bg-slate-800"
+                      title={showPassword ? "Hide Password" : "Show Password"}
                     >
                       {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                     </button>
