@@ -333,6 +333,7 @@ const AppContent: React.FC = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [theme, setTheme] = useState<ThemeType>('light');
   const [isSyncing, setIsSyncing] = useState(false);
+  const [isInitialLoadComplete, setIsInitialLoadComplete] = useState(false);
 
   const mainContentRef = useRef<HTMLDivElement>(null);
 
@@ -468,6 +469,7 @@ const AppContent: React.FC = () => {
         }
 
         setIsSyncing(false);
+        setIsInitialLoadComplete(true);
       }
     };
 
@@ -478,6 +480,7 @@ const AppContent: React.FC = () => {
         setIsAuthenticated(true);
       } else {
         setIsAuthenticated(false);
+        setIsInitialLoadComplete(false);
         localStorage.removeItem(CACHE_KEY);
       }
     });
@@ -486,7 +489,7 @@ const AppContent: React.FC = () => {
   }, [loadDataFromCache]);
 
   useEffect(() => {
-    if (!isAuthenticated) return;
+    if (!isAuthenticated || !isInitialLoadComplete) return;
     
     const timeout = setTimeout(() => {
       syncToSupabase({
@@ -501,7 +504,7 @@ const AppContent: React.FC = () => {
     userProfile, 
     transactions, reminders, savingsGoals, savingsRecords, billRecords, bettingRecords,
     attendanceList, leaveQuotas, leaveHistory, payrollProfile, salaryHistory, theme, language, 
-    isAuthenticated, syncToSupabase
+    isAuthenticated, isInitialLoadComplete, syncToSupabase
   ]);
 
   useEffect(() => {
@@ -512,6 +515,7 @@ const AppContent: React.FC = () => {
   const handleLogout = async () => {
     await supabase.auth.signOut();
     setIsAuthenticated(false);
+    setIsInitialLoadComplete(false);
     setActiveView(AppTab.DASHBOARD);
     localStorage.removeItem('financeHubActiveTab');
     localStorage.removeItem(CACHE_KEY);
